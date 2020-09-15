@@ -1,0 +1,5 @@
+Dhtxx	KEYWORD1
+getDht	KEYWORD2
+getDhtTemp	KEYWORD3
+getDhtHumid	KEYWORD4
+
