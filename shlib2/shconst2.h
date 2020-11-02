@@ -19,7 +19,8 @@
 #define PORTPERISERVER2  1786    // port du serveur pour périphériques et maintenance
 #define PORTPILOTSERVER2 1788    // port du serveur de remote
 #define PORTUDPSERVER2   8886
-#define HOSTIPADDR2      {192,168,0,36} //#define HOSTIPADDR2 "192.168.0.36"
+//#define HOSTIPADDR2      {192,168,0,36} // pour frontal
+#define HOSTIPADDR2 "192.168.0.36" // pour périph
 //*/
 ///* Concentrateur NRF
 #define PORTTCPCONC      1784
