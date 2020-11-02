@@ -1,7 +1,7 @@
 #ifndef _SHCONST_H_
 #define _SHCONST_H_
 
-#define PERIF
+//#define PERIF
 
 //#define SHDIAGS
 
@@ -19,7 +19,7 @@
 #define PORTPERISERVER2  1786    // port du serveur pour périphériques et maintenance
 #define PORTPILOTSERVER2 1788    // port du serveur de remote
 #define PORTUDPSERVER2   8886
-#define HOSTIPADDR2 "192.168.0.36"
+#define HOSTIPADDR2      {192,168,0,36} //#define HOSTIPADDR2 "192.168.0.36"
 //*/
 ///* Concentrateur NRF
 #define PORTTCPCONC      1784
@@ -33,9 +33,10 @@
  #define LEDOFF HIGH
 #endif  defPERIF
 #ifndef PERIF
- #define PINLED 13
+ #define PINLED 2 // 2 sur redshield // 13 sur proto
  #define LEDON HIGH
  #define LEDOFF LOW
+ #define SDCARD 3       // 4
 #endif ndef PERIF
 
     // protocoles
