@@ -23,6 +23,7 @@ void packDate(char* dateout,char* datein);
 void unpackDate(char* dateout,char* datein);
 int  dateCmp(char* olddate,char* newdate,uint32_t offset,uint8_t skip1,uint8_t skip2);
 void serialPrintDate(char* datein);
+void trigwd();
 void ledblink(uint8_t nbBlk);
 void initLed(uint8_t pin);
 void dumpstr(char* data,uint16_t len);

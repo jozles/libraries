@@ -311,6 +311,12 @@ void serialPrintDate(char* datein)
         Serial.println();
 }
 
+void trigwd()
+{
+    bool ledState=digitalRead(pinLed);
+            digitalWrite(pinLed,!ledState);
+            digitalWrite(pinLed,ledState);
+}
 
 void lb0()
 {
