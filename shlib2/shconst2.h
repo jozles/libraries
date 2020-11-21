@@ -55,7 +55,7 @@
 #define MPOSFONC    0                   // position fonction
 #define MPOSLEN     11                  // position longueur (longueur fonction excluse)
 #define MPOSNUMPER  MPOSLEN+5           // position num périphérique
-#define MPOSMAC     MPOSNUMPER+3        // position adr Mac
+#define MPOSMAC     MPOSNUMPER+3        // position adr
 #define MPOSDH      MPOSMAC+18          // Date/Heure
 #define MPOSPERREFR MPOSDH+15           // période refr
 #define MPOSTEMPPER MPOSPERREFR+6       // période check température

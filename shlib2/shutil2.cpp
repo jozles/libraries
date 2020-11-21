@@ -140,32 +140,39 @@ void dumpstr(char* data,uint16_t len)
 
 void dumpfield(char* fd,uint8_t ll)
 {
-    for(int ff=ll-1;ff>=0;ff--){if((fd[ff]&0xF0)==0){Serial.print("0");}Serial.print(fd[ff],HEX);}
+    byte a;
+    for(int ff=ll-1;ff>=0;ff--){
+            a=((fd[ff]&0xF0)>>4)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
+            a=(fd[ff]&0x0F)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
+            //if((fd[ff]&0xF0)==0){Serial.print("0");}
+            //Serial.print((byte)fd[ff],HEX);
+    }
     Serial.print(" ");
 }
-
+/*
 byte calcBitCrc (byte shiftReg, byte data_bit)
 {
   byte fb;
 
   fb = (shiftReg & 0x01) ^ data_bit;
-   /* exclusive or least sig bit of current shift reg with the data bit */
-   shiftReg = shiftReg >> 1;                  /* shift one place to the right */
-   if (fb==1){shiftReg = shiftReg ^ 0x8C;}    /* CRC ^ binary 1000 1100 */
+   // exclusive or least sig bit of current shift reg with the data bit
+   shiftReg = shiftReg >> 1;                  // shift one place to the right
+   if (fb==1){shiftReg = shiftReg ^ 0x8C;}    // CRC ^ binary 1000 1100
    return(shiftReg);
 }
-
+*/
 uint8_t calcCrc(char* buf,int len)
 {
-  uint8_t crc=0,j,k;
+  uint8_t crc=0,j,k,m;
   uint16_t i;
 
   for(i=0;i<len;i++){
+    m=(uint8_t)buf[i];
     for(j=0;j<8;j++){
-//        k=(crc&0x01)^((buf[i]>>j)&0x01);
-        k=(crc^(buf[i]>>j))&0x01;
+        k=(crc^m)&0x01;
         crc=crc>>1;
         if(k==1){crc=crc^0x8C;}     // 0x8C is 00011001 rigth rotated polynom
+        m=m>>1;
     }
   }
   return crc;
