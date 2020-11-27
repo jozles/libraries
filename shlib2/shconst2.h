@@ -34,10 +34,11 @@
  #define LEDOFF HIGH
 #endif  defPERIF
 #ifndef PERIF
- #define PINLED 2 // 2 sur redshield // 13 sur proto
+ #define STOPREQ 5          // push button pour stop request
+ #define PINLED  2          // 2 sur redshield // 13 sur proto
  #define LEDON HIGH
  #define LEDOFF LOW
- #define SDCARD 4          // toujours 4 pour compatibilité lib.
+ #define SDCARD 4           // toujours 4 pour compatibilité lib.
 #endif ndef PERIF
 
     // protocoles
@@ -140,6 +141,7 @@
 #define BCODEPERICACHEKO 11   // periSave et cache invalide
 #define BCODESYSERR      13   // system error (fdatasave>99 STEPDATASAVE!=talkStep)
 #define BCODENUMPER      15   // tentative de periLoad d'un perif invalide
+#define BCODESHOWLINE    17   // buffer showline overflow
 
 enum {FAUX,VRAI};
 enum {OFF,ON};
