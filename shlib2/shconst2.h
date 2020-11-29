@@ -1,7 +1,7 @@
 #ifndef _SHCONST_H_
 #define _SHCONST_H_
 
-//#define PERIF
+#define PERIF
 
 //#define SHDIAGS
 
@@ -34,7 +34,7 @@
  #define LEDOFF HIGH
 #endif  defPERIF
 #ifndef PERIF
- #define STOPREQ 5          // push button pour stop request
+ #define STOPREQ 3          // push button pour stop request
  #define PINLED  2          // 2 sur redshield // 13 sur proto
  #define LEDON HIGH
  #define LEDOFF LOW
@@ -62,7 +62,8 @@
 #define MPOSTEMPPER MPOSPERREFR+6       // période check température
 #define MPOSPITCH   MPOSTEMPPER+6       // pitch
 #define MPOSSWCDE   MPOSPITCH+5         // MAXSW commandes sw 0/1 + 1sep (periSwVal)
-#define MPOSPULSONE MPOSSWCDE+MAXSW+1   // Timers tOne (4bytes)*4
+#define MPOSANALH   MPOSSWCDE+MAXSW+1   // analogLow,analogHigh 2*(4digits) + 1 sep
+#define MPOSPULSONE MPOSANALH+8+1       // Timers tOne (4bytes)*4
 #define MPOSPULSTWO MPOSPULSONE+NBPULSE*(LENVALPULSE+1)       // Timers tTwo (4bytes+1sep)*4
 #define MPOSPULSCTL MPOSPULSTWO+NBPULSE*(LENVALPULSE+1)       // paramètres timers (4*3 bits=2 bytes)
 #define MPOSPERINPUT MPOSPULSCTL+2*PCTLLEN+1                   // inputs
@@ -122,7 +123,7 @@
 #define PWDSSID2  "JNCJTRONJMGZEEQL"
 
 
-#define TOINCHCLI 2000        // msec max attente car server
+#define TOINCHCLI 4000        // msec max attente car server
 #define TO_HTTPCX 4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000

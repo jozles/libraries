@@ -15,10 +15,10 @@ extern int cstlen;
 #endif // PERIF
 
 #ifndef PERIF
-#include <Ethernet.h> //bibliothèque W5100 Ethernet
+#include <Ethernet.h> //bibliothèque W5100/5500 Ethernet
 
 //extern EthernetClient cli;
-
+/*
 extern int16_t*  periNum;                      // ptr ds buffer : Numéro du périphérique courant
 extern int32_t*  periPerRefr;                  // ptr ds buffer : période maximale accès serveur
 extern uint16_t* periPerTemp;                  // ptr ds buffer : période de lecture tempèrature
@@ -57,8 +57,8 @@ extern byte*     periDetServEn;                // ptr ds buffer ; 1 byte 8*enabl
 
 extern byte      periMacBuf[6];
 extern int8_t    periMess;                     // code diag réception message (voir MESSxxx shconst.h)
-
-#endif // PERIF
+*/
+#endif // ndef PERIF
 
 extern char*  chexa;
 
@@ -169,7 +169,7 @@ int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf)       // a
   long timerTo=millis()+TOINCHCLI;
 
 
-      Serial.print("attente =");Serial.print(ref);Serial.print(" ");Serial.println(lref);
+      Serial.print(" attente =");Serial.print(ref);Serial.print(" ");Serial.print(lref);
       while(!termine){
         if(cli->available()>0){
           timerTo=millis()+TOINCHCLI;
@@ -243,7 +243,7 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction)     
   q=waitRefCli(cli,body,strlen(body),bufServer,0);
   if(q==MESSOK){q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend));}
   if(q==MESSOK){q=checkHttpData(data,fonction);}
-  Serial.println();
+  if(q!=MESSTO){Serial.println();}
   return q;
 }
 
