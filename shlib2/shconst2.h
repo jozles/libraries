@@ -1,7 +1,7 @@
 #ifndef _SHCONST_H_
 #define _SHCONST_H_
 
-#define PERIF
+//#define PERIF
 
 //#define SHDIAGS
 
@@ -151,6 +151,7 @@ enum {OFF,ON};
 
 #define MAXSW   4       // nbre maxi switchs par périphérique
 #define MAXDET  4       // nbre maxi détecteurs physiques par périphérique
+#define NBANST  5       // nbre d'états pour l'entrée analogique
 //#define MAXDSP  4       // nbre maxi détecteurs spéciaux
 //#define MAXDEX  8       // nbre maxi détecteurs externes
 #define MAXSDE  4       // nbre maxi sondes par périphérique
