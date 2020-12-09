@@ -123,7 +123,7 @@
 #define PWDSSID2  "JNCJTRONJMGZEEQL"
 
 
-#define TOINCHCLI 4000        // msec max attente car server
+#define TOINCHCLI 1000        // msec max attente car server
 #define TO_HTTPCX 4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000

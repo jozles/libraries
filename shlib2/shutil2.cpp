@@ -30,6 +30,7 @@ uint8_t pinLed;
 int   int00=0;
 int*  int0=&int00;
 
+
 int convIntToString(char* str,int num)
 {
 
@@ -202,7 +203,8 @@ float convStrToNum(char* str,int* sizeRead)
     if(str[i]!='_' && str[i]!='\0' && str[i]>='0' && str[i]<='9'){
       v0=*(str+i)-48;
       if(pd==1){v=v*10+v0;}
-      else{v+=v0/pd;pd*=10;}
+      else{v+=(float)v0/pd;pd*=10;}
+      //Serial.print("str2num=");Serial.print(pd);Serial.print(" ");Serial.print(v,4);Serial.print(" ");Serial.println((char*)&str[i]);
     }
     else {i=MAXL;}
   }

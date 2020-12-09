@@ -169,7 +169,7 @@ int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf)       // a
   long timerTo=millis()+TOINCHCLI;
 
 
-      Serial.print(" attente =");Serial.print(ref);Serial.print(" ");Serial.print(lref);
+      Serial.print(" attente =");Serial.print(ref);Serial.print(" ");Serial.println(lref);
       while(!termine){
         if(cli->available()>0){
           timerTo=millis()+TOINCHCLI;
