@@ -138,16 +138,16 @@ float Ds1820::readDs(uint8_t pin)
 
       r0=rep[1] & 0x80;
 
-      if(dsmodel==MODEL_B){                                // DS18B20
-      rp=rep[1];
-      rp=(rp<<8) | rep[0];
-      if(r0 != 0){rp=(rp^0xFFFF)+1;}
-      rp1=rp>>4;
-      rp2=rp&0x000F;
-      th0=((float)rp2)*((float)0.0625);
-      th=(float)rp1 + th0;
-    }                                                 // DS1820 - DS18S20
-    else{
+    if(dsmodel==MODEL_B){                                // DS18B20
+        rp=rep[1];                              // msb temp value
+        rp=(rp<<8) | rep[0];                    // 16 bits value
+        if(r0 != 0){rp=(rp^0xFFFF)+1;}          // si neg 2nd complt
+        rp1=rp>>4;                              // 8 bits MSB
+        rp2=rp&0x000F;                          // 4 bits LSB (1/16 d°)
+        th0=((float)rp2)*((float)0.0625);       // decimal value for LSB
+        th=(float)rp1 + th0;                    // global decimal value
+    }
+    else{                                                 // DS1820 - DS18S20
       if(rep[1]!=0){
         th0=-((rep[0]^0xFF)+1);
         th0=(uint8_t)rep[0]>>1;
@@ -157,7 +157,7 @@ float Ds1820::readDs(uint8_t pin)
       th=(float)(th0)-0.25+(float)(rep[7]-rep[6])/rep[7]; // th précision améliorée
     }
 
-    if(r0 != 0){th=-th;}
+    if(r0 != 0){th=-th;}                         // restore sign
     //Serial.print("th=");Serial.print(th);Serial.print(" rep[1,0]=");Serial.print(rep[1],HEX);
     //Serial.print(" ");Serial.println(rep[0],HEX);
   return th;
