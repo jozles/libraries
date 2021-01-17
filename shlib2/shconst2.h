@@ -97,9 +97,9 @@
                                             // + nom fonct+1+longueur+1+crc+1
 /* positions fixées dans strSD (fhisto) */
 
-#define SDPOSNUMPER 9   // position numéro périphérique / ';'
-#define SDPOSMAC    12  // position addr mac    / ';'
-#define SDPOSTEMP   30  // position température / ';'
+#define HISTOPOSNUMPER 9   // position numéro périphérique / ';'
+#define HISTOPOSMAC    12  // position addr mac    / ';'
+#define HISTOPOSTEMP   30  // position température / ';'
 
 /* >>>> mots de passe <<<< */
 
@@ -278,7 +278,7 @@ enum {OFF,ON};
 #define PM_ACTIF    1
 
 
-/* définition table inputs */
+/* définition table règles switchs (ex inputs) */
 
 #define NBPERINPUT 24
 #define PERINPLEN  4
@@ -332,6 +332,7 @@ enum {OFF,ON};
 /* codes et libellés actions */
 
 #define LENTACT 5            // len libellé
+#define NBACT   16           // nbre actions différentes
 
 #define PMDCA_VIDE  0x00     //
 #define ACT0 '_____'
@@ -349,20 +350,20 @@ enum {OFF,ON};
 #define ACT6 'IMP  '
 #define PMDCA_RESET 0x07     // reset
 #define ACT7 'RESET'
-#define PMDCA_LXOR  0x08     // toggle dest
-#define ACT8 'LXOR '
-#define PMDCA_LOR   0x09     // logical or dest
+#define PMDCA_LXOR  0x08     // logical xor
+#define ACT8 'XOR  '
+#define PMDCA_LOR   0x09     // logical or
 #define ACT9 'OR   '
-#define PMDCA_LAND  0x0A     // logical and dest
+#define PMDCA_LAND  0x0A     // logical and
 #define ACT10 'AND  '
-#define PMDCA_LNOR 0x0B     //
-#define ACT11 'N','O','R','_','_'
-#define PMDCA_VIDE  0x0C     //
-#define ACT12 '_____'
-#define PMDCA_VIDE  0x0D     //
-#define ACT13 '_____'
-#define PMDCA_VIDE  0x0E     //
-#define ACT14 '_____'
+#define PMDCA_LNOR  0x0B     // logical nor
+#define ACT11 'NOR  '
+#define PMDCA_LNAND 0x0C     // logical nand
+#define ACT12 'NAND '
+#define PMDCA_0     0x0D     // force value 0
+#define ACT13 '-0-  '
+#define PMDCA_1     0x0E     // force value 1
+#define ACT14 '-1-  '
 #define PMDCA_VIDE  0x0F     //
 #define ACT15 '_____'
 
