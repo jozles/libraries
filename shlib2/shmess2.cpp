@@ -1,6 +1,7 @@
 
 #include "Arduino.h"
 #include "shutil2.h"
+#include "shmess2.h"
 #include "shconst2.h"
 
 #ifdef PERIF
@@ -73,22 +74,26 @@ extern byte memDetServ;  // image mémoire NBDSRV détecteurs (8)
 char*         periText={TEXTMESS};
 
 #ifndef PERIF
-void purgeServer(EthernetClient* cli)
+void purgeServer(EthernetClient* cli){purgeServer(cli,true);}
+void purgeServer(EthernetClient* cli,bool diags)
 #endif // PERIF
 #ifdef PERIF
-void purgeServer(WiFiClient* cli)
+void purgeServer(WiFiClient* cli){purgeServer(cli,true);}
+void purgeServer(WiFiClient* cli,bool diags)
 #endif // PERIF
 {
     if(cli->connected()){
         //Serial.print(" purge ");
-        while (cli->available()){Serial.print(cli->read());}
-        Serial.println();
+        while (cli->available()){if(diags){Serial.print(cli->read());}}
+        if(diags){Serial.println();}
     }
     cli->stop();
 }
 
+int buildMess(char* fonction,char* data,char* sep)
+    {buildMess(fonction,data,sep,true);}
 
-int buildMess(char* fonction,char* data,char* sep)   // concatène un message dans bufServer
+int buildMess(char* fonction,char* data,char* sep,bool diags)   // concatène un message dans bufServer
 {                                                    // retourne la longueur totale dans bufServer ou 0 si ovf
       if((strlen(bufServer)+strlen(data)+11+5+2+1)>LBUFSERVER)
         {return 0;}
@@ -102,7 +107,7 @@ int buildMess(char* fonction,char* data,char* sep)   // concatène un message da
       setcrc(bufServer+sb,d);
       strcat(bufServer,sep);
 //#ifdef SHDIAGS
-      Serial.print("bS=");Serial.println(bufServer);
+      if(diags){Serial.print("bS=");Serial.println(bufServer);}
 //#endif // SHDIAGS
       return strlen(bufServer);
 }
@@ -156,9 +161,13 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
 
 #ifndef PERIF
 int waitRefCli(EthernetClient* cli,char* ref,int lref,char* buf,int lbuf)   // attente d'un chaine spécifique dans le flot
+    {waitRefCli(cli,ref,lref,buf,lbuf,true);}
+int waitRefCli(EthernetClient* cli,char* ref,int lref,char* buf,int lbuf,bool diags)
 #endif PERIF
 #ifdef PERIF
 int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf)       // attente d'un chaine spécifique dans le flot
+    {waitRefCli(cli,ref,lref,buf,lbuf,true);}
+int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf,bool diags)
 #endif PERIF
 // wait for ref,lref    si lbuf<>0 accumule le flot dans buf (ref incluse)
 // sortie MESSTO (0) time out   MESSDEC (-1) décap     MESSOK (1) OK
@@ -169,11 +178,13 @@ int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf)       // a
   long timerTo=millis()+TOINCHCLI;
 
 
-      Serial.print(" attente =");Serial.print(ref);Serial.print(" ");Serial.println(lref);
+      if(diags){
+            Serial.print(" attente =");Serial.print(ref);
+            Serial.print(" ");Serial.print(lref);Serial.print(" ");}
       while(!termine){
         if(cli->available()>0){
           timerTo=millis()+TOINCHCLI;
-          inch=cli->read();Serial.print(inch);
+          inch=cli->read();if(diags){Serial.print(inch);}
           if(lbuf!=0){
             if(ptbuf<lbuf){buf[ptbuf]=inch;ptbuf++;}else {return MESSDEC;}}
           if(inch==ref[ptref]){
@@ -227,10 +238,14 @@ int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de 
 }
 
 #ifndef PERIF
-int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction)  // attend un message d'un serveur ; ctle longueur et crc
+int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction)
+    {getHttpResponse(cli,data,lmax,fonction,true);}
+int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction,bool diags)  // attend un message d'un serveur ; ctle longueur et crc
 #endif  PERIF
 #ifdef PERIF
-int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction)      // attend un message d'un serveur ; ctle longueur et crc
+int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction)
+    {getHttpResponse(cli,data,lmax,fonction,true);}
+int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool diags)      // attend un message d'un serveur ; ctle longueur et crc
 #endif  PERIF
 // format <body>contenu...</body></html>\n\r                        la fonction est décodée et les données sont chargées
 // contenu fonction__=nnnn_datacrc                                  renvoie les codes "MESSxxx"
@@ -240,10 +255,10 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction)     
   int q,v=0;
   uint8_t crc=0;
 
-  q=waitRefCli(cli,body,strlen(body),bufServer,0);
-  if(q==MESSOK){q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend));}
+  q=waitRefCli(cli,body,strlen(body),bufServer,0,diags);
+  if(q==MESSOK){q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);}
   if(q==MESSOK){q=checkHttpData(data,fonction);}
-  if(q!=MESSTO){Serial.println();}
+  if(q!=MESSTO){if(diags){Serial.println();}}
   return q;
 }
 
