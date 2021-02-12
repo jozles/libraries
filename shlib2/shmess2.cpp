@@ -1,8 +1,9 @@
 
 #include "Arduino.h"
-#include "shutil2.h"
-#include "shmess2.h"
-#include "shconst2.h"
+#include <shconst2.h>
+#include <shutil2.h>
+#include <shmess2.h>
+
 
 #ifdef PERIF
 #include <ESP8266WiFi.h>
@@ -198,20 +199,25 @@ int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf,bool diags)
       return MESSOK;
 }
 
+int checkData(char* data)
+{
+    int l;
+    checkData(data,&l);
+}
 
-int checkData(char* data)            // controle la structure des données d'un message (longueur,crc)
-{                                    // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
+int checkData(char* data,int* len)    // controle la structure des données d'un message (longueur,crc)
+{                                          // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
 
   int i=4;
-  int ii=convStrToNum(data,&i);//Serial.print("len=");Serial.print(ii);Serial.print(" strlen=");Serial.println(strlen(data));
+  *len=convStrToNum(data,&i); //Serial.print("len=");Serial.print(ii);Serial.print(" strlen=");Serial.println(strlen(data));
   uint8_t c=0;
-  conv_atoh(data+ii,&c);
+  conv_atoh(data+*len,&c);
 
-  if(ii!=strlen(data)-2){i=MESSLEN;}
+  if(*len!=strlen(data)-2){i=MESSLEN;}
 /*  Serial.print("CRC, c, lenin  =");Serial.print(calcCrc(valf,lenin-2),HEX);Serial.print(", ");
   Serial.print(c,HEX);Serial.print(" , ");Serial.println(lenin);
 */
-  else if(calcCrc(data,ii)!=c){i=MESSCRC;}
+  else if(calcCrc(data,*len)!=c){i=MESSCRC;}
   else i=MESSOK;
 
 /*  Serial.print("\nlen/crc calc ");
