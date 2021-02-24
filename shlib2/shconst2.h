@@ -1,9 +1,9 @@
 #ifndef _SHCONST_H_
 #define _SHCONST_H_
 
-#define PERIF
+//#define PERIF
 
-//#define SHDIAGS
+
 
 #define LENVERSION  4
 #define LENMODEL    6
@@ -123,8 +123,9 @@
 #define PWDSSID2  "JNCJTRONJMGZEEQL"
 
 
-#define TOINCHCLI 1000        // msec max attente car server
-#define TO_HTTPCX 4000        // nbre maxi retry connexion serveur
+#define TOINCHCLI   100         // msec max attente car server
+#define TOFINCHCLI  3000        // msec max attente 1er car server
+#define TO_HTTPCX   4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000
 #define FASTBLINK 500

@@ -95,7 +95,7 @@ int buildMess(char* fonction,char* data,char* sep)
     {buildMess(fonction,data,sep,true);}
 
 int buildMess(char* fonction,char* data,char* sep,bool diags)   // concatène un message dans bufServer
-{                                                    // retourne la longueur totale dans bufServer ou 0 si ovf
+{                                                               // retourne la longueur totale dans bufServer ou 0 si ovf
       if((strlen(bufServer)+strlen(data)+11+5+2+1)>LBUFSERVER)
         {return 0;}
       strcat(bufServer,fonction);
@@ -176,7 +176,7 @@ int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf,bool diags)
   boolean termine=FAUX;
   int ptref=0,ptbuf=0;
   char inch;
-  long timerTo=millis()+TOINCHCLI;
+  long timerTo=millis()+TOFINCHCLI;
 
 
       if(diags){
@@ -223,8 +223,8 @@ int checkData(char* data)    // controle la structure des données d'un message 
 
 /*  Serial.print("\nlen/crc calc ");
     Serial.print(strlen(data));Serial.print("/");Serial.print(calcCrc(data,ii),HEX);
-    Serial.print("\n checkData mess=");Serial.println(mess);
-*/
+ */   Serial.print("\n checkData mess=");Serial.println(mess);
+
   return mess;
 }
 
@@ -240,7 +240,7 @@ int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de 
         //Serial.print("\nnbfonct=");Serial.print(nbfonct);Serial.print(" fonction=");Serial.print((strstr(fonctions,noms)-fonctions));Serial.print("/");Serial.print(*fonction);
         if(*fonction>=nbfonct || *fonction<0){mess=MESSFON;}
     }
-    //Serial.print(" checkHttpData mess=");Serial.println(mess);
+
     return mess;
 }
 
@@ -263,8 +263,15 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
   uint8_t crc=0;
 
   q=waitRefCli(cli,body,strlen(body),bufServer,0,diags);
-  if(q==MESSOK){q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);}
-  if(q==MESSOK){q=checkHttpData(data,fonction);}
+  if(diags){Serial.print("waitRefCli periMess=");Serial.println(q);}
+  if(q==MESSOK){
+        q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);
+        if(diags){Serial.print("waitRefCli periMess=");Serial.println(q);}
+  }
+  if(q==MESSOK){
+        q=checkHttpData(data,fonction);
+        if(diags){Serial.print(" checkHttpData mess=");Serial.println(q);}
+  }
   if(q!=MESSTO){if(diags){Serial.println();}}
   return q;
 }
