@@ -199,48 +199,49 @@ int waitRefCli(WiFiClient* cli,char* ref,int lref,char* buf,int lbuf,bool diags)
       return MESSOK;
 }
 
-int checkData(char* data)
+/*int checkData(char* data)
 {
     int l;
     checkData(data,&l);
 }
+*/
 
-int checkData(char* data,int* len)    // controle la structure des données d'un message (longueur,crc)
-{                                          // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
-
+int checkData(char* data)    // controle la structure des données d'un message (longueur,crc)
+{                                     // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
+  int mess;
   int i=4;
-  *len=convStrToNum(data,&i); //Serial.print("len=");Serial.print(ii);Serial.print(" strlen=");Serial.println(strlen(data));
+  int len=(int)convStrToNum(data,&i); //Serial.print("len=");Serial.print(ii);Serial.print(" strlen=");Serial.println(strlen(data));
   uint8_t c=0;
-  conv_atoh(data+*len,&c);
 
-  if(*len!=strlen(data)-2){i=MESSLEN;}
+  conv_atoh(data+len,&c);
+  if(len!=strlen(data)-2){mess=MESSLEN;}
 /*  Serial.print("CRC, c, lenin  =");Serial.print(calcCrc(valf,lenin-2),HEX);Serial.print(", ");
   Serial.print(c,HEX);Serial.print(" , ");Serial.println(lenin);
 */
-  else if(calcCrc(data,*len)!=c){i=MESSCRC;}
-  else i=MESSOK;
+  else if(calcCrc(data,len)!=c){mess=MESSCRC;}
+  else mess=MESSOK;
 
 /*  Serial.print("\nlen/crc calc ");
-  Serial.print(strlen(data));Serial.print("/");Serial.print(calcCrc(data,ii),HEX);
-  Serial.print(" checkData=");Serial.println(i);
+    Serial.print(strlen(data));Serial.print("/");Serial.print(calcCrc(data,ii),HEX);
+    Serial.print("\n checkData mess=");Serial.println(mess);
 */
-  return i;
+  return mess;
 }
 
 int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de la fonction
 {
     char noms[LENNOM+1];
-    int q=0;
+    int mess=0;
 
     memcpy(noms,data,LENNOM);noms[LENNOM]='\0';
-    q=checkData(data+LENNOM+1);
-    if(q==MESSOK){
+    mess=checkData(data+LENNOM+1);
+    if(mess==MESSOK){
         *fonction=(strstr(fonctions,noms)-fonctions)/LENNOM;
         //Serial.print("\nnbfonct=");Serial.print(nbfonct);Serial.print(" fonction=");Serial.print((strstr(fonctions,noms)-fonctions));Serial.print("/");Serial.print(*fonction);
-        if(*fonction>=nbfonct || *fonction<0){q=MESSFON;}
+        if(*fonction>=nbfonct || *fonction<0){mess=MESSFON;}
     }
-    //Serial.print(" mess=");Serial.println(q);
-    return q;
+    //Serial.print(" checkHttpData mess=");Serial.println(mess);
+    return mess;
 }
 
 #ifndef PERIF
