@@ -111,6 +111,9 @@
 #define LENUSRPASS  8
 #define NBUSR       8
 #define LENUSRNAME  16
+#define LMAILPWD    16
+
+#define LMAILADD    32
 
 /* >>>> WIFI <<<<< */
 

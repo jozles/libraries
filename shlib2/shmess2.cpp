@@ -223,8 +223,8 @@ int checkData(char* data)    // controle la structure des données d'un message 
 
 /*  Serial.print("\nlen/crc calc ");
     Serial.print(strlen(data));Serial.print("/");Serial.print(calcCrc(data,ii),HEX);
- */   Serial.print("\n checkData mess=");Serial.println(mess);
-
+    Serial.print("\n checkData mess=");Serial.println(mess);
+*/
   return mess;
 }
 
