@@ -28,6 +28,7 @@ void ledblink(uint8_t nbBlk);
 void initLed(uint8_t pin);
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
+void memDump(char* loc);
 bool ctlpass(char* data,char* model);
 int  searchusr(char* usrname);
 bool ctlto(unsigned long time,uint16_t to);

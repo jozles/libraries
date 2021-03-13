@@ -150,6 +150,23 @@ void dumpfield(char* fd,uint8_t ll)
     }
     Serial.print(" ");
 }
+
+void memDump(char* loc)
+{
+  void* stackPtr = alloca(4); // This returns a pointer to the current bottom of the stack
+  Serial.print("\n====> ");Serial.print(loc);
+  Serial.print(" StackPtr ");Serial.print((unsigned long)stackPtr);
+  Serial.print(" loc ");Serial.println((unsigned long)loc);
+  delay(10);
+
+  dumpstr((char*)loc,16);
+  Serial.println()  ;
+  dumpstr((char*)stackPtr-64,64);
+  Serial.println();
+  dumpstr((char*)stackPtr,64);
+
+  delay(10); // serial
+}
 /*
 byte calcBitCrc (byte shiftReg, byte data_bit)
 {
