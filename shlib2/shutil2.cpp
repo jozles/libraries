@@ -458,7 +458,7 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
 
 int searchusr(char* usrname)
 {
-    int nbu=-1,k=0;
+    int nbu=-1,k,pt;
     bool ok=FAUX;
 //    Serial.print(usrname);Serial.print(" usernames=");Serial.println(usrnames);
 
@@ -466,9 +466,10 @@ int searchusr(char* usrname)
 //        Serial.print("nbu=");Serial.println(nbu);
         for(k=0;k<LENUSRNAME;k++){
 //                Serial.print(" ");Serial.print(k);Serial.print(" ");Serial.print(usrname[k]);Serial.print(" ");Serial.println(usrnames[k+nbu*(LENUSRNAME+1)]);
-            if(usrname[k]=='\0' && k==0){break;}
-            else if(usrname[k]=='\0'){ok=VRAI;}
-            else if(usrname[k]!=usrnames[k+nbu*(LENUSRNAME+1)]){break;}
+            pt=nbu*(LENUSRNAME+1)+k;
+            if(usrnames[pt]=='\0' && k==0){break;}
+            else if(usrnames[pt]=='\0'){ok=VRAI;}
+            else if(usrnames[pt]!=usrname[k]){break;}
         }
         if(k==LENUSRNAME || ok==VRAI){return nbu;}
     }
