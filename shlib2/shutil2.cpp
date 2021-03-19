@@ -337,6 +337,12 @@ void serialPrintDate(char* datein)
         Serial.println();
 }
 
+void forceWd()
+{
+    digitalWrite(pinLed,LOW);
+    while(1){};
+}
+
 void trigwd()
 {
     bool ledState=digitalRead(pinLed);
