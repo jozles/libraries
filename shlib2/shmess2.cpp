@@ -146,7 +146,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
             case -2:Serial.print("invalid server ");break;
             case -3:Serial.print("truncated ");break;
             case -4:Serial.print("invalid response ");break;
-            default:Serial.print("unknown reason ");break;
+            default:Serial.print("no response ");break;
         }
         delay(100);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
     }

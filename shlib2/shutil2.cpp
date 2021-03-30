@@ -2,6 +2,11 @@
 #include "Arduino.h"
 #include <shconst2.h>
 
+#ifndef PERIF
+#include <MemoryFree.h>
+#include "FreeStack.h"
+#endif // PERIF
+
 extern char  pass[];
 extern char* chexa;
 
@@ -151,6 +156,7 @@ void dumpfield(char* fd,uint8_t ll)
     Serial.print(" ");
 }
 
+#ifdef __arm__
 void memDump(char* loc)
 {
   void* stackPtr = alloca(4); // This returns a pointer to the current bottom of the stack
@@ -167,6 +173,7 @@ void memDump(char* loc)
 
   delay(10); // serial
 }
+#endif // __arm__
 /*
 byte calcBitCrc (byte shiftReg, byte data_bit)
 {
