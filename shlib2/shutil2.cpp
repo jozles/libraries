@@ -42,7 +42,7 @@ int convIntToString(char* str,int num)
   int i=0,t=0,num0=num;
   while(num0!=0){num0/=10;i++;}                 // comptage nbre chiffres partie entière
   t=i;
-  for (i;i>0;i--){num0=num%10;num/=10;str[i-1]=chexa[num0];}
+  for (i=i;i>0;i--){num0=num%10;num/=10;str[i-1]=chexa[num0];}
   str[t]='\0';
   if(str[0]=='\0'){str[0]='0';}
   return t;
@@ -87,7 +87,7 @@ void conv_atobl(char* ascii,uint32_t* bin,uint8_t len)
   for(j=0;j<len;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else{j=len;}}
 }
 
-void sp(char* a,bool ln)
+void sp(const char* a,bool ln)
 {
     Serial.print(a);if(ln!=0){Serial.println();}
 }
@@ -207,6 +207,7 @@ byte setcrc(char* buf,int len)
 {
   byte c=calcCrc(buf,len);
   conv_htoa(buf+len,&c);buf[len+2]='\0';
+  return c;
 }
 
 
@@ -242,9 +243,9 @@ int32_t convStrToInt(char* str,int* sizeRead)
   int32_t v=0;
   int minu=1;
 
-#define MAXL 12 // max int32 length -4 294 967 296 (+séparator)
+#define MAXLS 12 // max int32 length -4 294 967 296 (+séparator)
 
-  for(int i=0;i<MAXL;i++){
+  for(int i=0;i<MAXLS;i++){
 //Serial.print(i);Serial.print(" ");Serial.print(str);Serial.print(" ");Serial.print((char)str[i]);Serial.print(" ");Serial.println((int)v);
 
     if(i==0){
@@ -257,7 +258,7 @@ int32_t convStrToInt(char* str,int* sizeRead)
       v*=10;
       v+=str[i]-'0';
     }
-    else {i=MAXL;}
+    else {i=MAXLS;}
   }
   //Serial.print("s>n str,num=");Serial.print(string);Serial.print(" ");Serial.println(v*minus);
   return v*minu;

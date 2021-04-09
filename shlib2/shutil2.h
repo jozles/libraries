@@ -17,7 +17,7 @@ void packMac(byte* mac,char* ascMac);
 void unpackMac(char* buf,byte* mac);
 void serialPrintMac(byte* mac,uint8_t ln);
 void charIp(byte* nipadr,char* aipadr);
-void sp(char* a,bool ln);
+void sp(const char* a,bool ln);
 void serialPrintIp(uint8_t* ip);
 void packDate(char* dateout,char* datein);
 void unpackDate(char* dateout,char* datein);
@@ -48,5 +48,5 @@ void showdebug();
 void debug(int cas);
 void setdebug(int cas,int* v0,int* v1,char* v2, char* v3);
 */
-#endif UTIL_H_
+#endif // _UTIL_H_
 

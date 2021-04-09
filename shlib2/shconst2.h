@@ -32,14 +32,14 @@
  #define PINLED 0                    //  0 = ESP-12  ; 2 = ESP-01
  #define LEDON LOW
  #define LEDOFF HIGH
-#endif  defPERIF
+#endif // defPERIF
 #ifndef PERIF
  #define STOPREQ 3          // push button pour stop request
  #define PINLED  2          // 2 sur redshield // 13 sur proto
  #define LEDON HIGH
  #define LEDOFF LOW
  #define SDCARD 4           // toujours 4 pour compatibilité lib.
-#endif ndef PERIF
+#endif // ndef PERIF
 
     // protocoles
 
@@ -127,7 +127,7 @@
 
 
 #define TOINCHCLI   100         // msec max attente car server
-#define TOFINCHCLI  3000        // msec max attente 1er car server
+#define TOFINCHCLI  3000        // msec max attente 1er car server ... devrait etre réduit
 #define TO_HTTPCX   4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000
@@ -368,9 +368,9 @@ enum {OFF,ON};
 #define ACT13 '-0-  '
 #define PMDCA_1     0x0E     // force value 1
 #define ACT14 '-1-  '
-#define PMDCA_VIDE  0x0F     //
+#define PMDCA_DISP  0x0F     //
 #define ACT15 '_____'
 
 #define MAXACT 15
 
-#endif  _SHCONST_H_
+#endif //  _SHCONST_H_
