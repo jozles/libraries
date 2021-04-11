@@ -1,23 +1,29 @@
 /*
  * EMailSender library for Arduino, esp8266 and esp32
- * Simple esp8266 Gmail send example
+ * esp8266 Gmail send example with 2 attach loaded in LittleFS
+ *
+ * You must change on library file EMailSenderKey.h this line
+ *	#define DEFAULT_INTERNAL_ESP8266_STORAGE STORAGE_SPIFFS
+ * in
+ * 	#define DEFAULT_INTERNAL_ESP8266_STORAGE STORAGE_LITTLEFS
+ *
+ *
+ * The base64 encoding of the image is slow, so be patient
  *
  * https://www.mischianti.org/category/my-libraries/emailsender-send-email-with-attachments/
  *
  */
 
 #include "Arduino.h"
+#include "LittleFS.h"
 #include <EMailSender.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid = "devolo-5d3";
-const char* password = "JNCJTRONJMGZEEQL";
 
 uint8_t connection_state = 0;
 uint16_t reconnect_interval = 10000;
 
-//EMailSender emailSend("smtp.account@gmail.com", "password");
-EMailSender emailSend("lucieliu66@gmail.com", "eicul666");
+EMailSender emailSend("<smtp_account@gmail.com>", "<PASSWORD>");
 
 uint8_t WiFiConnect(const char* nSSID = nullptr, const char* nPassword = nullptr)
 {
@@ -65,16 +71,46 @@ void Awaits()
 void setup()
 {
     Serial.begin(115200);
+    const char* ssid = "<YOUR_SSID>";
+    const char* password = "<YOUR_PASSWD>";
+
+    if(!LittleFS.begin()){
+          Serial.println("An Error has occurred while mounting LittleFS");
+          return;
+    }
+
+    Serial.println("ReadDir");
+    Dir dir = LittleFS.openDir("/");
+    while (dir.next()) {
+        Serial.print(dir.fileName());
+        if(dir.fileSize()) {
+            File f = dir.openFile("r");
+            Serial.println(f.size());
+        }
+    }
 
     connection_state = WiFiConnect(ssid, password);
     if(!connection_state)  // if not connected to WIFI
         Awaits();          // constantly trying to connect
 
     EMailSender::EMailMessage message;
-    message.subject = "test EMailSender";
-    message.message = "message de test";
+    message.subject = "Soggetto";
+    message.message = "Ciao come stai<br>io bene.<br>www.mischianti.org";
 
-    EMailSender::Response resp = emailSend.send("lucyliu66@gmail.com", message);
+    EMailSender::FileDescriptior fileDescriptor[2];
+    fileDescriptor[1].filename = F("test.txt");
+    fileDescriptor[1].url = F("/test.txt");
+    fileDescriptor[1].storageType = EMailSender::EMAIL_STORAGE_TYPE_LITTLE_FS;
+
+    fileDescriptor[0].filename = F("logo.jpg");
+    fileDescriptor[0].url = F("/logo.jpg");
+    fileDescriptor[0].mime = "image/jpg";
+    fileDescriptor[0].encode64 = true;
+    fileDescriptor[0].storageType = EMailSender::EMAIL_STORAGE_TYPE_LITTLE_FS;
+
+    EMailSender::Attachments attachs = {2, fileDescriptor};
+
+    EMailSender::Response resp = emailSend.send("<receipe@gmail.com>", message, attachs);
 
     Serial.println("Sending status: ");
 

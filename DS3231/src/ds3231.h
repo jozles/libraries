@@ -2,6 +2,7 @@
 #define _DS3231_H_INCLUDED
 
 #define LNOW 16             // len chargée par alphanow
+#define LDATEB 33           // buffer size for long ascii date format
 
 class Ds3231
 {

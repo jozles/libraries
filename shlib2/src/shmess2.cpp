@@ -91,10 +91,10 @@ void purgeServer(WiFiClient* cli,bool diags)
     cli->stop();
 }
 
-int buildMess(const char* fonction,char* data,const char* sep)
+int buildMess(const char* fonction,const char* data,const char* sep)
     {return buildMess(fonction,data,sep,true);}
 
-int buildMess(const char* fonction,char* data,const char* sep,bool diags)   // concatène un message dans bufServer
+int buildMess(const char* fonction,const char* data,const char* sep,bool diags)   // concatène un message dans bufServer
 {                                                                     // retourne la longueur totale dans bufServer ou 0 si ovf
       if((strlen(bufServer)+strlen(data)+11+5+2+1)>LBUFSERVER)
         {return 0;}

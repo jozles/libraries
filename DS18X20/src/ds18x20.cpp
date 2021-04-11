@@ -49,14 +49,14 @@ static uint8_t maskbit[]={1,2,4,8,16,32,64,128};  //  128,64,32,16,8,4,2,1
 
 void hexprint(byte hh)
 {
-  if(hh&0xf0==0x00){Serial.print("0");}Serial.print(hh,HEX);Serial.print(" ");
+  if((hh&0xf0)==0x00){Serial.print("0");}Serial.print(hh,HEX);Serial.print(" ");
 }
 
 void writeDs(uint8_t pin,uint8_t nbbyteout,uint8_t* frameout)
 //write command nbbyteout @ nbbit/byte
 {
   boolean pinstat=HIGH;
-  uint8_t i=0,j=0,delaylow,delayhigh;
+  uint8_t i=0,j=0;
 
   digitalWrite(pin,HIGH);
   pinMode(pin,OUTPUT);
@@ -120,7 +120,7 @@ int Ds1820::convertDs(uint8_t pin)
 float Ds1820::readDs(uint8_t pin)
 {
   uint8_t cmd[2]={0xCC,0xBE},rep[9];
-  uint8_t r0,r1;
+  uint8_t r0;
   uint16_t rp=0,rp1=0,rp2=0;
   int v;
   float th=0,th0=0;
@@ -167,11 +167,8 @@ float Ds1820::readDs(uint8_t pin)
 int Ds1820::getDs(uint8_t pin,uint8_t* frameout,uint8_t nbbyteout,uint8_t* framein,uint8_t nbbytein)
 {
 
-  uint8_t crc=0;
   uint8_t i=0,j=0,v=0;
-  long micr=0;
-  uint8_t delaylow=0,delayhigh=0;
-  boolean pinstat=HIGH;
+  unsigned long micr=0;
   uint8_t buff[128];for(i=0;i<128;i++){buff[i]=0;}
 
   //reset pulse

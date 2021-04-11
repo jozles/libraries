@@ -5,8 +5,8 @@
 #include "shconst2.h"
 
 
-int buildMess(const char* fonction,char* data,const char* sep);
-int buildMess(const char* fonction,char* data,const char* sep,bool diags);
+int buildMess(const char* fonction,const char* data,const char* sep);
+int buildMess(const char* fonction,const char* data,const char* sep,bool diags);
 int checkData(char* data);
 //int checkData(char* data,int* len);
 int checkHttpData(char* data,uint8_t* fonction);

@@ -4,7 +4,6 @@
 #include "ds3231.h"
 
 
-
 Ds3231::Ds3231()  // constructeur
 {
 }
@@ -76,18 +75,19 @@ void Ds3231::readTemp(float* th)
 
 void Ds3231::getDate(uint32_t* hms2,uint32_t* amj2,byte* js,char* strdate)
 {
-  char* days={"SunMonTueWedThuFriSat"};
-  char* months={"JanFebMarAprMayJunJulAugSepOctNovDec"};
-  int i=0;
-  byte seconde,minute,heure,jour,mois,annee,msb,lsb; // numérique DS3231   // ,joursemaine
-  char buf[8];for(byte i=0;i<8;i++){buf[i]=0;}
+  const char* days={"SunMonTueWedThuFriSat"};
+  const char* months={"JanFebMarAprMayJunJulAugSepOctNovDec"};
+  byte seconde,minute,heure,jour,mois,annee; // numérique DS3231   // ,joursemaine
+  #define LB 8
+  char buf[LB];memset(buf,0x00,LB);
   readTime(&seconde,&minute,&heure,js,&jour,&mois,&annee);
   *hms2=(long)(heure)*10000+(long)minute*100+(long)seconde;*amj2=(long)(annee+2000)*10000+(long)mois*100+(long)jour;
-  memset(strdate,0x00,sizeof(strdate));
-  strncpy(strdate,days+(*(js)-1)*3,3);strcat(strdate,", ");sprintf(buf,"%u",(byte)jour);strcat(strdate,buf);
+  memset(strdate,0x00,LDATEB);
+  memcpy(strdate,days+(*js-1)*3,3);strcat(strdate,", ");sprintf(buf,"%u",(byte)jour);strcat(strdate,buf);
   strcat(strdate," ");strncat(strdate,months+(mois-1)*3,3);strcat(strdate," ");sprintf(buf,"%u",annee+2000);strcat(strdate,buf);
   strcat(strdate," ");sprintf(buf,"%.2u",heure);strcat(strdate,buf);strcat(strdate,":");sprintf(buf,"%.2u",minute);
-  strcat(strdate,buf);strcat(strdate,":");sprintf(buf,"%02u",seconde);strcat(strdate,buf);strcat(strdate," GMT");
+  strcat(strdate,buf);strcat(strdate,":");sprintf(buf,"%02u",seconde);strcat(strdate,buf);
+  if(strlen(strdate)<LDATEB-5){strcat(strdate," GMT");}else{strcat(strdate,"ov");}
 }
 
 void Ds3231::alphaNow(char* buff)
