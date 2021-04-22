@@ -17,6 +17,7 @@ void packMac(byte* mac,char* ascMac);
 void unpackMac(char* buf,byte* mac);
 void serialPrintMac(byte* mac,uint8_t ln);
 void charIp(byte* nipadr,char* aipadr);
+void charIp(byte* nipadr,char* aipadr,char* jsbuf);
 void sp(const char* a,bool ln);
 void serialPrintIp(uint8_t* ip);
 void packDate(char* dateout,char* datein);

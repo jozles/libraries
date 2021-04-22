@@ -85,9 +85,9 @@ void purgeServer(WiFiClient* cli,bool diags)
 {
     if(cli->connected()){
         //Serial.print(" purge ");
-        while (cli->available()){if(diags){Serial.print(cli->read());}}
+        while (cli->available()){char c=cli->read();if(diags){Serial.print(c);}}
         if(diags){Serial.println();}
-    }
+    } 
     cli->stop();
 }
 
@@ -193,7 +193,7 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
         else if(millis()>=timerTo){return MESSTO;}
       }
       if(lbuf!=0){buf[ptbuf-lref]='\0';}
-
+      if(diags){Serial.println();}
       return MESSOK;
 }
 
@@ -204,25 +204,25 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
 }
 */
 
-int checkData(char* data)    // controle la structure des données d'un message (longueur,crc)
-{                                     // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
+int checkData(char* data)    // controle la taille et le crc d'un message (longueur,crc)
+{                            // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
   int mess;
-  int i=4;
-  int len=(int)convStrToNum(data,&i); //Serial.print("len=");Serial.print(ii);Serial.print(" strlen=");Serial.println(strlen(data));
+  int sizeReadLength;
+  int lenData=(int)convStrToNum(data,&sizeReadLength);
   uint8_t c=0;
 
-  conv_atoh(data+len,&c);
-  if(len!=(int)strlen(data)-2){mess=MESSLEN;}
-/*  Serial.print("CRC, c, lenin  =");Serial.print(calcCrc(valf,lenin-2),HEX);Serial.print(", ");
-  Serial.print(c,HEX);Serial.print(" , ");Serial.println(lenin);
-*/
-  else if(calcCrc(data,len)!=c){mess=MESSCRC;}
+  conv_atoh(data+lenData,&c);
+  if(lenData!=(int)strlen(data)-2){
+    mess=MESSLEN;
+    Serial.print(data);Serial.print(" sizeRead=");Serial.print(sizeReadLength);
+    Serial.print(" lenData=");Serial.print(lenData);Serial.print(" strlenData=");Serial.println(strlen(data));
+    Serial.print("CRC, c, len  =");Serial.print(calcCrc(data,lenData),HEX);Serial.print(", ");
+    if(c<16){Serial.print("0");}
+    Serial.print(c,HEX);Serial.print(" , ");Serial.println(lenData);
+  }
+  else if(calcCrc(data,lenData)!=c){mess=MESSCRC;}
   else mess=MESSOK;
 
-/*  Serial.print("\nlen/crc calc ");
-    Serial.print(strlen(data));Serial.print("/");Serial.print(calcCrc(data,ii),HEX);
-    Serial.print("\n checkData mess=");Serial.println(mess);
-*/
   return mess;
 }
 
@@ -232,7 +232,7 @@ int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de 
     int mess=0;
 
     memcpy(noms,data,LENNOM);noms[LENNOM]='\0';
-    mess=checkData(data+LENNOM+1);
+    mess=checkData(data+LENNOM+1);                // +1 skip '='
     if(mess==MESSOK){
         *fonction=(strstr(fonctions,noms)-fonctions)/LENNOM;
         //Serial.print("\nnbfonct=");Serial.print(nbfonct);Serial.print(" fonction=");Serial.print((strstr(fonctions,noms)-fonctions));Serial.print("/");Serial.print(*fonction);

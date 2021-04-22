@@ -98,12 +98,19 @@ void serialPrintIp(uint8_t* ip)
   //Serial.print(" ");
 }
 
-void charIp(byte* nipadr,char* aipadr)
+void charIp(byte* nipadr,char* aipadr,char* jsbuf)
 {
   char buf[8];
+  char* dm=aipadr;
   for(int i=0;i<4;i++){
         sprintf(buf,"%d",nipadr[i]);strcat(aipadr,buf);if(i<3){strcat(aipadr,".");}
   }
+  if(jsbuf!=nullptr){strcat(jsbuf,dm);strcat(jsbuf,";");}
+}
+
+void charIp(byte* nipadr,char* aipadr)
+{
+  charIp(nipadr,aipadr,nullptr);
 }
 
 void conv_atoh(char* ascii,byte* h)

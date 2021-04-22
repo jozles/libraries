@@ -112,8 +112,8 @@
 #define NBUSR       8
 #define LENUSRNAME  16
 #define LMAILPWD    16
-
 #define LMAILADD    32
+#define LMAILMESS   128      // max len mess
 
 /* >>>> WIFI <<<<< */
 
