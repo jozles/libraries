@@ -11,8 +11,8 @@ extern char  pass[];
 extern char* chexa;
 
 static unsigned long blinktime=0;
-uint8_t nbreBlink=0;          // si nbreBlink impair   -> blocage
-uint8_t cntBlink=0;
+int     nbreBlink=0;          // si nbreBlink impair   -> blocage
+int     cntBlink=0;
 
 #define TIMEOVFSLOTNB 10
 uint32_t timeOvfSlot[TIMEOVFSLOTNB];
@@ -157,6 +157,7 @@ void dumpfield(char* fd,uint8_t ll)
     for(int ff=ll-1;ff>=0;ff--){
             a=((fd[ff]&0xF0)>>4)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
             a=(fd[ff]&0x0F)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
+            Serial.print(" ");
             //if((fd[ff]&0xF0)==0){Serial.print("0");}
             //Serial.print((byte)fd[ff],HEX);
     }
@@ -368,25 +369,31 @@ void trigwd()
 void lb0()
 {
     if(millis()>blinktime){
-       if(digitalRead(pinLed)==LEDON){digitalWrite(pinLed,LEDOFF);
-          if(cntBlink<=1){blinktime=millis()+SLOWBLINK;}
-          else{blinktime=millis()+FASTBLINK;}
-          if(cntBlink>0){cntBlink--;}
+       if(digitalRead(pinLed)==LEDON){
+          digitalWrite(pinLed,LEDOFF);                                    // si allumé extinction
+          if(cntBlink<=1){blinktime=millis()+SLOWBLINK;}                  // si dernier flash extinction longue
+          else{blinktime=millis()+FASTBLINK;}                             // sinon extinction courte
+          if(cntBlink>0){
+            if(nbreBlink<0 && cntBlink==1){nbreBlink=abs(nbreBlink);}
+            cntBlink--;}
        }
-       else {digitalWrite(pinLed,LEDON);blinktime=millis()+PULSEBLINK;}
-       if(cntBlink==0){cntBlink=nbreBlink;}      // recharge cntblink
+       else {digitalWrite(pinLed,LEDON);blinktime=millis()+PULSEBLINK;}   // si éteint allumage
+       if(cntBlink==0){cntBlink=abs(nbreBlink);}                          // si fin de séquence recharge cntblink
     }
 }
 
-void ledblink(uint8_t nbBlk)    // nbre blinks rapides tous les PERBLINK
-{
-
-         if(nbreBlink==0 ){
-                if(nbBlk!=BCODEONBLINK){nbreBlink=nbBlk;}                   // une fois nbreBlink chargé, la consigne est ignorée
+void ledblink(int nbBlk)        // nbre blinks rapides (PULSEBLINK ON / FASTBLINK OFF) tous les SLOWBLINK
+{                               // si nbBlk==0 ignoré sinon programme le nbre de flashs
+                                // nbre impair bloquant (message d'erreur définitif)
+                                // si nbBlk<0 rechargement valeur abs(nbBlk) à la fin du cycle en cours
+         if(nbreBlink==0 || nbBlk!=0 ){
+                if(nbBlk!=BCODEONBLINK){
+                  nbreBlink=nbBlk;
+                  if(nbBlk>0){cntBlink=nbBlk;blinktime=millis()-1;}}     // une fois nbreBlink chargé, la consigne est ignorée
                 else digitalWrite(pinLed,LEDON);
-         }
+         }        
          if(nbBlk==100+nbreBlink){nbreBlink=0;}
-         while(nbreBlink%2!=0){lb0();}                        // si nbreBlink impair blocage
+         while(nbreBlink>0 && nbreBlink%2!=0){lb0();yield();}                // si nbreBlink impair blocage
          lb0();                                               // sinon blink 1 ou nbreBlink
 }
 

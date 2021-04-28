@@ -26,7 +26,7 @@ int  dateCmp(char* olddate,char* newdate,uint32_t offset,uint8_t skip1,uint8_t s
 void serialPrintDate(char* datein);
 void forceWd();
 void trigwd();
-void ledblink(uint8_t nbBlk);
+void ledblink(int nbBlk);
 void initLed(uint8_t pin);
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);

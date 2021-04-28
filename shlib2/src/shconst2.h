@@ -131,8 +131,8 @@
 #define TO_HTTPCX   4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000
-#define FASTBLINK 500
-#define PULSEBLINK 20
+#define FASTBLINK 60
+#define PULSEBLINK 4
 /* code blink  (valeurs impaires bloquantes) */
 /* code courant+100 reset (sauf impairs ofcourse) */
 #define BCODEONBLINK      98  // allume jusqu'au prochain blink
