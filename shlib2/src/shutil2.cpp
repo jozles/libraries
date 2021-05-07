@@ -365,7 +365,7 @@ void trigwd()
             digitalWrite(pinLed,!ledState);
             digitalWrite(pinLed,ledState);
 }
-
+/*
 void lb0()
 {
     if(millis()>blinktime){
@@ -383,24 +383,67 @@ void lb0()
 }
 
 void ledblink(int nbBlk)        // nbre blinks rapides (PULSEBLINK ON / FASTBLINK OFF) tous les SLOWBLINK
-{                               // si nbBlk==0 ignoré sinon programme le nbre de flashs
+{                               // si nbBlk==0 ignoré 
+                                // <0 programme le nbre de flashs
                                 // nbre impair bloquant (message d'erreur définitif)
-                                // si nbBlk<0 rechargement valeur abs(nbBlk) à la fin du cycle en cours
+                                // si nbBlk<0 rechargement valeur abs(nbBlk) à la fin du cycle en cours après LEDOFF SLOWBLINK
+                                // nbreBlink ref courante ; cntBlink nbre restant à faire
          if(nbreBlink==0 || nbBlk!=0 ){
                 if(nbBlk!=BCODEONBLINK){
-                  nbreBlink=nbBlk;
-                  if(nbBlk>0){cntBlink=nbBlk;blinktime=millis()-1;}}     // une fois nbreBlink chargé, la consigne est ignorée
+                  nbreBlink=nbBlk;         
+                  if(nbBlk>0){cntBlink=nbBlk;blinktime=millis()-1;}}    // une fois nbreBlink chargé, la consigne est ignorée
                 else digitalWrite(pinLed,LEDON);
          }        
          if(nbBlk==100+nbreBlink){nbreBlink=0;}
-         while(nbreBlink>0 && nbreBlink%2!=0){lb0();yield();}                // si nbreBlink impair blocage
-         lb0();                                               // sinon blink 1 ou nbreBlink
+         if(nbBlk==BCODEONBLINK){Serial.print(" Blk ");Serial.print(nbBlk);Serial.print(" nbr ");Serial.print(nbreBlink);Serial.print(" cnt ");Serial.print(cntBlink);}
+         while(nbreBlink>0 && nbreBlink%2!=0){lb0();yield();}           // si nbreBlink impair blocage
+         lb0();                                                         // cycle en cours (cntBlink puis nbreBlink)
+}
+*/
+void lb0()
+{
+  if(nbreBlink>0){blinktime=millis()-1;cntBlink=nbreBlink+1;digitalWrite(pinLed,LEDOFF);}   // nbreBlink>0 start new cycle
+  
+  if(millis()>blinktime){
+      blinktime=millis();
+      if(digitalRead(pinLed)==LEDON){
+          digitalWrite(pinLed,LEDOFF);                            // extinction
+          if(cntBlink>1){blinktime+=FASTBLINK;}
+          else {blinktime+=SLOWBLINK;cntBlink=abs(nbreBlink)+1;}  // dernière extinction
+          cntBlink--;                                         
+      }
+      else {
+        digitalWrite(pinLed,LEDON);                               // allumage
+        blinktime+=PULSEBLINK;
+      }
+  }  
+}
+
+void ledblink(int nbBlk)
+{
+  if(nbBlk!=0){
+    if(nbBlk!=BCODEONBLINK){
+      nbreBlink=nbBlk;
+      if(nbreBlink%2!=0 && nbreBlink>0){  // si nbBlk impair positif blocage
+        nbreBlink=abs(nbreBlink);         // force nbreBlink >0
+        lb0();                            // start new cycle
+        nbreBlink=-abs(nbreBlink);        // force nbreBlink <0
+        while(1){lb0();yield();}          // infinite loop
+      }
+    }
+    else {digitalWrite(pinLed,LEDON);}    // force allumage statique jusqu'au pronchain ledblink
+  }
+  lb0();      // cycle en cours (cntblink - nbreBlink allumages(PULSEBLINK) séparés par extinctions(FASTBLINK) puis 1 extinction(SLOWBLINK) )
+              // si nbreBlink >0       déclenchement immédiat 1 cycle (nbreBlink)
+              // si nbreBlink 0        rien ne change
+              // si nbreBlink <0       déclenchement cycle(nbreBlink) à la fin de SLOWBLINK
 }
 
 void initLed(uint8_t pin)
 {
   pinLed=pin;
   pinMode(pinLed,OUTPUT);
+  nbreBlink=-1;
   cntBlink=0;
 }
 
@@ -474,7 +517,7 @@ bool ctlpass(char* data,char* model)
 bool ctlto(unsigned long time,uint16_t to)
 {
     //Serial.print("ctlto=");Serial.print(time);Serial.print(" to=");Serial.println(to);
- return (millis()-time)>(to*1000);
+ return (millis()-time)>((uint32_t)to*1000);
 }
 
 void startto(unsigned long* time,uint16_t* to,uint16_t valto)

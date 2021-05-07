@@ -107,9 +107,8 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags) 
       strcat(bufServer+sb+5,data);
       setcrc(bufServer+sb,d);
       strcat(bufServer,sep);
-//#ifdef SHDIAGS
-      if(diags){Serial.print("bS=");Serial.println(bufServer);}
-//#endif // // SHDIAGS
+      if(diags){Serial.print(" bS=");Serial.println(bufServer);//Serial.print(" bm=");Serial.println(millis());
+      }
       return strlen(bufServer);
 }
 
@@ -133,11 +132,11 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
     repeat++;
 
     x=cli->connect(host,port);
-    Serial.print("connexion serveur (");Serial.print(x);Serial.print(") ");
+    Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
     Serial.print(host);Serial.print(":");Serial.print(port);
     Serial.print("...");
     x=cli->connected();
-    Serial.print("(");Serial.print(x);Serial.print(")");
+    //Serial.print("(");Serial.print(x);Serial.print(")");
     if(!x){
         switch(x){
             case -1:Serial.print("time out ");break;
@@ -193,7 +192,7 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
         else if(millis()>=timerTo){return MESSTO;}
       }
       if(lbuf!=0){buf[ptbuf-lref]='\0';}
-      if(diags){Serial.println();}
+      //if(diags){Serial.println();}
       return MESSOK;
 }
 
@@ -260,16 +259,15 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
   int q=0;
 
   q=waitRefCli(cli,body,strlen(body),bufServer,0,diags);
-  if(diags){Serial.print("waitRefCli periMess=");Serial.println(q);}
+  if(diags){Serial.print(" waitRefCli periMess=");Serial.println(q);}
   if(q==MESSOK){
         q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);
-        if(diags){Serial.print("waitRefCli periMess=");Serial.println(q);}
+        if(diags){Serial.print(" waitRefCli periMess=");Serial.println(q);}
   }
   if(q==MESSOK){
         q=checkHttpData(data,fonction);
         if(diags){Serial.print(" checkHttpData mess=");Serial.println(q);}
   }
-  if(q!=MESSTO){if(diags){Serial.println();}}
   return q;
 }
 
