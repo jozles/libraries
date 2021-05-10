@@ -132,24 +132,33 @@
 
 #define SLOWBLINK 3000
 #define FASTBLINK 60
-#define PULSEBLINK 4
-/* code blink  (valeurs impaires bloquantes) */
-/* code courant+100 reset (sauf impairs ofcourse) */
+#define PULSEBLINK 4          // plutôt dépendant de la période de la loop sur
+                              // périf NO_MODE
+/* codes blink 
+*  valeurs impaires bloquantes
+*  valeurs paires < MAXBLK jouées une fois puis le prochain ledblink reprogramme
+*  valeurs paires > MAXBLK jouées à perpétuité sans blocage
+*  valeurs négatives normales 
+*  BCODEONBLINK allume inconditionnellement jusqu'au prochain ledblink */
+
+#define MAXBLK            20  // > MAXBLK codes erreur non bloquants fixes
 #define BCODEONBLINK      98  // allume jusqu'au prochain blink
 #define BCODEPERIRECLEN   3   // PERIRECLEN ou LENMESS trop petit -> blocage
-#define BCODEPBNTP        2   // pas de service NTP
-#define BCODEWAITWIFI     4   // attente WIFI
+#define BCODEPBNTP        (2+MAXBLK)   // pas de service NTP
+#define BCODEORDREXT      4   // un ordreExt() a été reçu
+#define BCODEWAITWIFI     (4+MAXBLK)   // attente WIFI
 #define BCODESDCARDKO     5   // pas de SDCARD
-#define BCODEFHISTO       6   // write 0 car (sdstore_textdh0)
+#define BCODEFHISTO       (6+MAXBLK)   // write 0 car (sdstore_textdh0)
 #define BCODELENVAL       7   // LENVAL trop petit
 #define BCODECONFIGRECLEN 9   // CONFIGRECLEN ou MLMSET/LENMESS faux -> blocage
 #define BCODEPERICACHEKO 11   // periSave et cache invalide
 #define BCODESYSERR      13   // system error (fdatasave>99 STEPDATASAVE!=talkStep)
 #define BCODENUMPER      15   // tentative de periLoad d'un perif invalide
-#define BCODESHOWLINE    17   // buffer showline overflow
+#define BCODESHOWLINE    17   // buffer showline overflow / ordreExt overflow
 
 enum {FAUX,VRAI};
 enum {OFF,ON};
+enum {NOPRINT,PRINT};
 
 /* description périphériques */
 

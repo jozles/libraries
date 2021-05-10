@@ -359,12 +359,19 @@ void forceWd()
     while(1){};
 }
 
-void trigwd()
+void trigwd(uint32_t dur)
 {
     bool ledState=digitalRead(pinLed);
-            digitalWrite(pinLed,!ledState);
+            digitalWrite(pinLed,LEDON);
+            delayMicroseconds(dur);
             digitalWrite(pinLed,ledState);
 }
+
+void trigwd()
+{
+  trigwd(5);
+}
+
 /*
 void lb0()
 {
@@ -405,14 +412,18 @@ void lb0()
   if(nbreBlink>0){blinktime=millis()-1;cntBlink=nbreBlink+1;digitalWrite(pinLed,LEDOFF);}   // nbreBlink>0 start new cycle
   
   if(millis()>blinktime){
+    //Serial.print("led ");
       blinktime=millis();
       if(digitalRead(pinLed)==LEDON){
+        //Serial.println("OFF ");
           digitalWrite(pinLed,LEDOFF);                            // extinction
           if(cntBlink>1){blinktime+=FASTBLINK;}
           else {blinktime+=SLOWBLINK;cntBlink=abs(nbreBlink)+1;}  // dernière extinction
+          if(cntBlink>MAXBLK){cntBlink-=MAXBLK;}                  // code erreur figé
           cntBlink--;                                         
       }
       else {
+        //Serial.println("ON ");
         digitalWrite(pinLed,LEDON);                               // allumage
         blinktime+=PULSEBLINK;
       }
@@ -422,8 +433,8 @@ void lb0()
 void ledblink(int nbBlk)
 {
   if(nbBlk!=0){
-    if(nbBlk!=BCODEONBLINK){
-      nbreBlink=nbBlk;
+    if(nbBlk!=BCODEONBLINK){              // force allumage sans modif cycle en cours
+      if(!(nbreBlink>MAXBLK)){nbreBlink=nbBlk;} // si nbre courant > MAXBLK, reste sur le code d'erreur 
       if(nbreBlink%2!=0 && nbreBlink>0){  // si nbBlk impair positif blocage
         nbreBlink=abs(nbreBlink);         // force nbreBlink >0
         lb0();                            // start new cycle
@@ -431,10 +442,14 @@ void ledblink(int nbBlk)
         while(1){lb0();yield();}          // infinite loop
       }
     }
-    else {digitalWrite(pinLed,LEDON);}    // force allumage statique jusqu'au pronchain ledblink
+    else {                                // force allumage statique jusqu'au pronchain ledblink
+      digitalWrite(pinLed,LEDON);
+      blinktime=millis()+2;
+    }    
   }
   lb0();      // cycle en cours (cntblink - nbreBlink allumages(PULSEBLINK) séparés par extinctions(FASTBLINK) puis 1 extinction(SLOWBLINK) )
               // si nbreBlink >0       déclenchement immédiat 1 cycle (nbreBlink)
+              // si nbreBlink >MAXBLK  blocage sur nbreBlink-MAXBLK
               // si nbreBlink 0        rien ne change
               // si nbreBlink <0       déclenchement cycle(nbreBlink) à la fin de SLOWBLINK
 }
