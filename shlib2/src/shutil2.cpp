@@ -4,7 +4,7 @@
 
 #ifndef PERIF
 #include <MemoryFree.h>
-#include "FreeStack.h"
+#include <FreeStack.h>
 #endif // PERIF
 
 extern char  pass[];
@@ -124,10 +124,14 @@ void conv_atoh(char* ascii,byte* h)
 void conv_htoa(char* ascii,byte* h)
 {
     uint8_t c=*h,d=c>>4,e=c&0x0f;
-//    Serial.print(c,HEX);Serial.print(" ");Serial.print(d,HEX);Serial.print(" ");Serial.print(e,HEX);Serial.print(" ");
-//    Serial.print(chexa[d],HEX);Serial.print(" ");Serial.println(chexa[e],HEX);
         ascii[0]=chexa[d];ascii[1]=chexa[e];
-        // Serial.print(c,HEX);Serial.print(" ");Serial.print(ascii[0],HEX);Serial.print(" ");Serial.println(ascii[1],HEX);
+}
+
+void conv_htoa(char* ascii,byte* h,uint8_t len)
+{
+    for(uint8_t i=0;i<len;i++){
+      conv_htoa(ascii+2*(len-i-1),(byte*)(h+i));
+    }
 }
 
 void dumpstr0(char* data,uint8_t len)
@@ -197,7 +201,7 @@ byte calcBitCrc (byte shiftReg, byte data_bit)
 uint8_t calcCrc(char* buf,int len)
 {
   uint8_t crc=0,j,k,m;
-  uint16_t i;
+  int i;
 
   for(i=0;i<len;i++){
     m=(uint8_t)buf[i];

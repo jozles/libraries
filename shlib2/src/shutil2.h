@@ -5,6 +5,7 @@ uint8_t calcCrc(char* bufCrc,int len);
 byte setcrc(char* buf,int len);
 void conv_atoh(char* ascii,byte* hex);
 void conv_htoa(char* ascii,byte* hex);
+void conv_htoa(char* ascii,byte* hex,uint8_t len);
 void conv_atob(char* ascii,uint16_t* bin);
 void conv_atobl(char* ascii,uint32_t* bin);
 void conv_atobl(char* ascii,uint32_t* bin,uint8_t len);

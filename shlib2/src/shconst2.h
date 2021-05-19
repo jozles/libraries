@@ -20,12 +20,18 @@
 #define PORTPILOTSERVER2 1788    // port du serveur de remote
 #define PORTUDPSERVER2   8886
 //#define HOSTIPADDR2      {192,168,0,36} // pour frontal
-#define HOSTIPADDR2 "192.168.0.36" // pour périph
+#define HOSTIPADDR2      "SHIPADDR" // pour périph 
 //*/
 ///* Concentrateur NRF
+
 #define PORTTCPCONC      1784
-#define PORTUDPCONC      8887
-#define CONCNRFIPADDR    {192,168,0,31}
+#define PORTUDPCONC1     8887               // intérieur
+#define PORTUDPCONC2     8888               // extérieur
+#define CONCNRFIPADDR1   192,168,0,31       // intérieur
+#define CONCNRFIPADDR2   192,168,0,32       // extérieur
+#define SHIPADDR         192,168,0,36       // IP addr server SH
+#define MACADDRUDP1      {0xDE,0xAD,0xBE,0xEF,0xFE,0xED}
+#define MACADDRUDP2      {0xDE,0xAD,0xBE,0xEF,0xFE,0xEB}
 //*/
 
 #ifdef PERIF
@@ -50,6 +56,8 @@
 
 #define UNIXDATELEN 4                   // uint32_t
 
+#define MACADDRLENGTH 6
+
     // messages
 
 #define LENMESS     406+1               // longueur buffer message v1.3
@@ -57,7 +65,7 @@
 #define MPOSLEN     11                  // position longueur (longueur fonction excluse)
 #define MPOSNUMPER  MPOSLEN+5           // position num périphérique
 #define MPOSMAC     MPOSNUMPER+3        // position adr
-#define MPOSDH      MPOSMAC+18          // Date/Heure
+#define MPOSDH      (MPOSMAC+MACADDRLENGTH*3) // Date/Heure       // (MACCADDRLENGTH*2)+(MACADDRLENGTH-1 les points) +1 '_')
 #define MPOSPERREFR MPOSDH+15           // période refr
 #define MPOSTEMPPER MPOSPERREFR+6       // période check température
 #define MPOSPITCH   MPOSTEMPPER+6       // pitch
@@ -66,11 +74,11 @@
 #define MPOSPULSONE MPOSANALH+8+1       // Timers tOne (4bytes)*4
 #define MPOSPULSTWO MPOSPULSONE+NBPULSE*(LENVALPULSE+1)       // Timers tTwo (4bytes+1sep)*4
 #define MPOSPULSCTL MPOSPULSTWO+NBPULSE*(LENVALPULSE+1)       // paramètres timers (4*3 bits=2 bytes)
-#define MPOSPERINPUT MPOSPULSCTL+2*PCTLLEN+1                   // inputs
-#define MPOSMDETSRV MPOSPERINPUT+NBPERINPUT*PERINPLEN*2+1        // detecteurs serveur
+#define MPOSPERINPUT MPOSPULSCTL+2*PCTLLEN+1                  // inputs
+#define MPOSMDETSRV MPOSPERINPUT+NBPERINPUT*PERINPLEN*2+1     // detecteurs serveur
 #define MPOSPORTSRV MPOSMDETSRV+MDSLEN*2+1                    // port perif serveur
 #define MPOSMDIAG   MPOSPORTSRV+5                             // texte diag
-#define MLMSET      MPOSMDIAG+5              // longueur message fonction incluse
+#define MLMSET      MPOSMDIAG+5          // longueur message fonction incluse
 
 
     // fonctions
