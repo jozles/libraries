@@ -20,7 +20,7 @@
 #define PORTPILOTSERVER2 1788    // port du serveur de remote
 #define PORTUDPSERVER2   8886
 //#define HOSTIPADDR2      {192,168,0,36} // pour frontal
-#define HOSTIPADDR2      "SHIPADDR" // pour périph 
+#define HOSTIPADDR2 "192.168.0.36"   //  SHIPADDR // pour périph 
 //*/
 ///* Concentrateur NRF
 
@@ -135,7 +135,7 @@
 
 
 #define TOINCHCLI   100         // msec max attente car server
-#define TOFINCHCLI  3000        // msec max attente 1er car server ... devrait etre réduit
+#define TOFINCHCLI  6000        // msec max attente 1er car server ... devrait etre réduit
 #define TO_HTTPCX   4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000

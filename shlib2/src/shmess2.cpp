@@ -125,16 +125,21 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
     //purgeServer(cli);
 #endif // // PERIF
 
+  Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
+  Serial.print(host);Serial.print(":");Serial.print(port);
+  Serial.print("...");
 
-  while(!x && repeat<4){
+  cli->stop();                        // assure la disponibilité de l'instance avant usage
+  x=cli->connect(host,port);
+  while(!x && repeat<7){
+
+    #ifndef PERIF
+    trigwd();
+    #endif
 
     v=MESSOK;
     repeat++;
-
-    x=cli->connect(host,port);
-    Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
-    Serial.print(host);Serial.print(":");Serial.print(port);
-    Serial.print("...");
+    
     x=cli->connected();
     //Serial.print("(");Serial.print(x);Serial.print(")");
     if(!x){
@@ -143,9 +148,11 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
             case -2:Serial.print("invalid server ");break;
             case -3:Serial.print("truncated ");break;
             case -4:Serial.print("invalid response ");break;
-            default:Serial.print("no response ");break;
+            default:break;
         }
-        delay(100);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
+        Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
+        Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
+        delay(500);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
     }
   }
   if(v==MESSOK){
@@ -178,8 +185,13 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
 
       if(diags){
             Serial.print(" attente =");Serial.print(ref);
-            Serial.print(" ");Serial.print(lref);Serial.print(" ");}
+            Serial.print(" ");}                                 //Serial.print(lref);Serial.print(" ");}
       while(!termine){
+        
+        #ifndef PERIF
+        trigwd();
+        #endif
+
         if(cli->available()>0){
           timerTo=millis()+TOINCHCLI;
           inch=cli->read();if(diags){Serial.print(inch);}
@@ -241,6 +253,11 @@ int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de 
     return mess;
 }
 
+void waitRefCliDiag(bool diags,int pM)
+{
+  if(diags){Serial.print(" waitRefCli pM=");Serial.print(pM);Serial.print("-");Serial.print(millis());}
+}
+
 #ifndef PERIF
 int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction)
     {return getHttpResponse(cli,data,lmax,fonction,true);}
@@ -259,14 +276,14 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
   int q=0;
 
   q=waitRefCli(cli,body,strlen(body),bufServer,0,diags);
-  if(diags){Serial.print(" waitRefCli periMess=");Serial.println(q);}
+  waitRefCliDiag(diags,q);
   if(q==MESSOK){
         q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);
-        if(diags){Serial.print(" waitRefCli periMess=");Serial.println(q);}
+        waitRefCliDiag(diags,q);
   }
   if(q==MESSOK){
         q=checkHttpData(data,fonction);
-        if(diags){Serial.print(" checkHttpData mess=");Serial.println(q);}
+        if(diags){Serial.print(" checkHttpData pM=");Serial.println(q);}
   }
   return q;
 }
