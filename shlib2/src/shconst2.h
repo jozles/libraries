@@ -13,6 +13,7 @@
 ///* 1er serveur
 #define PORTPERISERVER  1790    // port du serveur pour périphériques et maintenance (RUN 1789)
 #define PORTPILOTSERVER 1792    // port du serveur de remote
+#define PORTUDPSERVER   8885
 #define HOSTIPADDR "192.168.0.35"
 //*/
 ///* 2nd serveur
