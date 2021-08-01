@@ -32,7 +32,7 @@ void ledblink(int nbBlk);
 //void ledblink(int nb,int mode);
 //void ledblink();
 //void initBlink();
-void initLed(uint8_t pin);
+void initLed();
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
 

@@ -8,7 +8,8 @@
 #define LENVERSION  4
 #define LENMODEL    6
 //#define SIZEPULSE   4  // uint32_t
-#define LENPERIDATE 6
+#define LENPERIDATE 6           // LDATEASCII packé
+#define LDATEASCII 12           // YYMMDDHHMMSS
 
 ///* 1er serveur
 #define PORTPERISERVER  1790    // port du serveur pour périphériques et maintenance (RUN 1789)
@@ -41,11 +42,26 @@
  #define LEDOFF HIGH
 #endif // defPERIF
 #ifndef PERIF
- #define STOPREQ 3          // push button pour stop request
- #define PINLED  2          // 2 sur redshield // 13 sur proto
- #define LEDON HIGH
- #define LEDOFF LOW
- #define SDCARD 4           // toujours 4 pour compatibilité lib.
+
+#define REDV1      // RED1.0
+ #ifdef REDV0
+    #define STOPREQ 3          // push button pour stop request
+    #define PINLED  2          // 2 sur redshieldV0 // 13 sur proto
+    #define LEDON HIGH
+    #define LEDOFF LOW
+    #define SDCARD 4           // toujours 4 pour compatibilité lib.
+ #endif // RED1.0
+ #ifdef REDV1
+    #define STOPREQ 2          // push button pour stop request
+    #define PINLED  3          // 2 sur redV0 // 13 sur proto
+    #define LEDON HIGH
+    #define LEDOFF LOW
+    #define SDCARD 4           // toujours 4 pour compatibilité lib.
+    #define POWCD 5            // power command W5500/SD/RADIO 
+    #define POWON HIGH
+    #define POWOFF LOW
+ #endif // RED1.0
+
 #endif // ndef PERIF
 
     // protocoles
@@ -152,7 +168,7 @@
 
 #define MAXBLK            20  // > MAXBLK codes erreur non bloquants fixes
 #define BCODEONBLINK      98  // allume jusqu'au prochain blink
-#define BCODEPERIRECLEN   3   // PERIRECLEN ou LENMESS trop petit -> blocage
+#define BCODEPERIRECLEN   3   // PERIRECLEN ou LENMESS (ou autre) trop petit -> blocage
 #define BCODEPBNTP        (2+MAXBLK)   // pas de service NTP
 #define BCODEORDREXT      4   // un ordreExt() a été reçu
 #define BCODEWAITWIFI     (4+MAXBLK)   // attente WIFI
