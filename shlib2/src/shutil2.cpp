@@ -33,6 +33,7 @@ char* v3debug[NBDBPTS*NBDBOC];
 uint32_t pinLed;
 
 bool wdEnable=false;
+bool trigwdOn=false;
 
 int   int00=0;
 int*  int0=&int00;
@@ -369,12 +370,15 @@ void trigwd(uint32_t durWd)
 {
   if(wdEnable){
     int ledState=digitalRead(pinLed);
-    
-            digitalWrite(pinLed,LEDOFF);    // pour provoquer un flanc
-            digitalWrite(pinLed,LEDON);
-            delayMicroseconds(durWd);
-            if(ledState==HIGH){digitalWrite(pinLed,HIGH);}
-            else digitalWrite(pinLed,LOW);
+            
+    digitalWrite(pinLed,LEDOFF);    // pour provoquer un flanc
+    digitalWrite(pinLed,LEDON);
+    wdEnable=false;
+    delayMicroseconds(durWd);
+    wdEnable=true;
+    digitalWrite(pinLed,ledState);
+    /*if(ledState==HIGH){digitalWrite(pinLed,HIGH);}
+    else digitalWrite(pinLed,LOW);*/
   }
 }
 
@@ -434,9 +438,9 @@ void initLed()
 {
   pinLed=PINLED;
   pinMode(pinLed,OUTPUT);
-  wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être 
+  //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être 
                                   // activé avant que PINLED soit mis en OUTPUT
-  trigwd(10000);
+  //trigwd(10000);
   
   nbreBlink=0;
   cntBlink=0;

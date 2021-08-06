@@ -58,9 +58,9 @@
     #define LEDOFF LOW
     #define SDCARD 4           // toujours 4 pour compatibilité lib.
     #define POWCD 5            // power command W5500/SD/RADIO 
-    #define POWON HIGH
-    #define POWOFF LOW
- #endif // RED1.0
+    #define POWON LOW
+    #define POWOFF HIGH
+ #endif // RED1.1
 
 #endif // ndef PERIF
 
