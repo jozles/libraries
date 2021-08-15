@@ -7,6 +7,10 @@
 #include <FreeStack.h>
 #endif // PERIF
 
+//#ifdef PERIF
+//#include <ESP8266WiFi.h>
+//#endif // PERIF
+
 extern char  pass[];
 extern char* chexa;
 
@@ -104,18 +108,31 @@ void serialPrintIp(uint8_t* ip)
 void charIp(byte* nipadr,char* aipadr,char* jsbuf)
 {
   char buf[8];
-  char* dm=aipadr;
   for(int i=0;i<4;i++){
         sprintf(buf,"%d",nipadr[i]);strcat(aipadr,buf);if(i<3){strcat(aipadr,".");}
   }
-  if(jsbuf!=nullptr){strcat(jsbuf,dm);strcat(jsbuf,";");}
+  if(jsbuf!=nullptr){strcat(jsbuf,aipadr);strcat(jsbuf,";");}
 }
 
 void charIp(byte* nipadr,char* aipadr)
 {
   charIp(nipadr,aipadr,nullptr);
 }
+/*
+void charIp(IPAddress* nipadr,char* aipadr,char* jsbuf)   // ne fonctionne pas ... pb avec <ESP8266WiFi.h>
+{
+  char buf[8];
+  for(int i=0;i<4;i++){
+        sprintf(buf,"%d",(uint8_t)nipadr[i]);strcat(aipadr,buf);if(i<3){strcat(aipadr,".");}
+  }
+  if(jsbuf!=nullptr){strcat(jsbuf,aipadr);strcat(jsbuf,";");}
+}
 
+void charIp(IPAddress* nipadr,char* aipadr)
+{
+  charIp(nipadr,aipadr,nullptr);
+}
+*/
 void conv_atoh(char* ascii,byte* h)
 {
     uint8_t c=0;
@@ -298,12 +315,12 @@ void unpackMac(char* buf,byte* mac) //uint8_t* mac)
     buf[17]='\0';
 }
 
-void serialPrintMac(byte* mac,uint8_t ln)
+void serialPrintMac(byte* mac,uint8_t nl)
 {
   char macBuff[18];
   unpackMac(macBuff,mac);
   Serial.print(macBuff);
-  if(ln!=0){Serial.println();}
+  if(nl!=0){Serial.println();}
 }
 
 
@@ -419,7 +436,7 @@ void ledblink(int nbBlk)
         nbreBlink=abs(nbreBlink);         // force nbreBlink >0
         lb0();                            // start new cycle
         nbreBlink=-abs(nbreBlink);        // force nbreBlink <0
-        while(1){lb0();yield();}          // infinite loop
+        while(1){lb0();trigwd();delay(1);}          // infinite loop
       }
     }
     else {                                // force allumage statique jusqu'au pronchain ledblink
@@ -432,6 +449,14 @@ void ledblink(int nbBlk)
               // si nbreBlink >MAXBLK  blocage sur nbreBlink-MAXBLK
               // si nbreBlink 0        rien ne change
               // si nbreBlink <0       déclenchement cycle(nbreBlink) à la fin de SLOWBLINK
+}
+
+void blink(uint8_t nb)
+{
+  for(nb=nb;nb>0;nb--){
+    digitalWrite(pinLed,LEDON);delay(5);
+    digitalWrite(pinLed,LEDOFF);delay(100);
+  }
 }
 
 void initLed()
@@ -545,4 +570,49 @@ int searchusr(char* usrname)
         if(k==LENUSRNAME || ok==VRAI){return nbu;}
     }
     return -1;
+}
+
+int serDataAvailable(uint8_t serialNb)
+{
+  switch(serialNb){
+    case 0:return Serial.available();
+    case 1:return Serial1.available();
+    default: return '\0';
+  }
+}
+
+char serDataRead(uint8_t serialNb)
+{
+  switch(serialNb){
+    case 0:return Serial.read();
+    case 1:return Serial1.read();
+    default: return '\0';
+  }
+}
+
+uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
+{  
+  char inch=RCVSYNCHAR;
+  uint8_t lfcnt=0;
+  uint16_t lrcv=0;
+
+    while(serDataAvailable(serialNb) && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
+      if(lfcnt==0){delay(2);}   // acquisition 
+      inch=serDataRead(serialNb);
+      if(inch==RCVSYNCHAR){
+        lfcnt++;
+        //Serial1.print(inch);Serial1.print(" ");Serial1.println(lfcnt);
+      }
+      else if (lfcnt<RSCNB){lfcnt=0;}
+    }
+    
+    if(lfcnt>=RSCNB){
+      *rcv=inch;lrcv++;
+      while(serDataAvailable(serialNb) && lrcv<(maxl-1)){
+        *(rcv+lrcv)=serDataRead(serialNb);lrcv++;
+      }
+      *(rcv+lrcv)='\0';
+      //Serial1.print(lrcv);Serial1.print(" ");Serial1.println(rcv);
+    }
+    return lrcv;
 }

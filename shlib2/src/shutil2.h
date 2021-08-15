@@ -1,6 +1,10 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+//#ifdef PERIF
+//#include <ESP8266WiFi.h>
+//#endif // PERIF
+
 uint8_t calcCrc(char* bufCrc,int len);
 byte setcrc(char* buf,int len);
 void conv_atoh(char* ascii,byte* hex);
@@ -16,9 +20,11 @@ int convNumToString(char* str,float num);  // retour string terminée par '\0' ;
 boolean compMac(byte* mac1,byte* mac2);       // FAUX si != ; VRAI si ==
 void packMac(byte* mac,char* ascMac);
 void unpackMac(char* buf,byte* mac);
-void serialPrintMac(byte* mac,uint8_t ln);
-void charIp(byte* nipadr,char* aipadr);
+void serialPrintMac(byte* mac,uint8_t nl);
 void charIp(byte* nipadr,char* aipadr,char* jsbuf);
+void charIp(byte* nipadr,char* aipadr);
+//void charIp(IPAddress* nipadr,char* aipadr,char* jsbuf);
+//void charIp(IPAddress* nipadr,char* aipadr);
 void sp(const char* a,bool ln);
 void serialPrintIp(uint8_t* ip);
 void packDate(char* dateout,char* datein);
@@ -29,6 +35,7 @@ void forceWd();
 void trigwd();
 void trigwd(uint32_t dur);
 void ledblink(int nbBlk);
+void blink(uint8_t nb);
 //void ledblink(int nb,int mode);
 //void ledblink();
 //void initBlink();
@@ -43,6 +50,8 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto);
 
 void timeOvfSet(uint8_t slot);
 void timeOvfCtl(uint8_t slot);
+
+uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb);
 
 #ifdef __arm__
 void memDump(char* loc);

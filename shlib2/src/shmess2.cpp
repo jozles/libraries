@@ -150,8 +150,10 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
             case -4:Serial.print("invalid response ");break;
             default:break;
         }
+        #ifndef PERIF
         Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
         Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
+        #endif // PERIF
         delay(500);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
     }
   }
