@@ -217,26 +217,34 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
 }
 */
 
-int checkData(char* data)    // controle la taille et le crc d'un message (longueur,crc)
+int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d'un message (longueur,crc)
 {                            // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
   int mess;
   int sizeReadLength;
-  int lenData=(int)convStrToNum(data,&sizeReadLength);
   uint8_t c=0;
+  uint16_t ld;
+  if(lenData==nullptr){lenData=&ld;}
 
-  conv_atoh(data+lenData,&c);
-  if(lenData!=(int)strlen(data)-2){
+  *lenData=(uint16_t)convStrToNum(data,&sizeReadLength);
+  conv_atoh(data+*lenData,&c);
+  if(*lenData!=(uint16_t)strlen(data)-2){
     mess=MESSLEN;
-    Serial.print(data);Serial.print(" sizeRead=");Serial.print(sizeReadLength);
-    Serial.print(" lenData=");Serial.print(lenData);Serial.print(" strlenData=");Serial.println(strlen(data));
-    Serial.print("CRC, c, len  =");Serial.print(calcCrc(data,lenData),HEX);Serial.print(", ");
+    
+    dumpstr(data,strlen(data));Serial.print(" sizeRead=");Serial.print(sizeReadLength);
+    Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.println(strlen(data));
+    Serial.print("CRC, c, len  =");Serial.print(calcCrc(data,*lenData),HEX);Serial.print(", ");
     if(c<16){Serial.print("0");}
-    Serial.print(c,HEX);Serial.print(" , ");Serial.println(lenData);
+    Serial.print(c,HEX);Serial.print(" , ");Serial.println(*lenData);
   }
-  else if(calcCrc(data,lenData)!=c){mess=MESSCRC;}
+  else if(calcCrc(data,*lenData)!=c){mess=MESSCRC;}
   else mess=MESSOK;
 
   return mess;
+}
+
+int checkData(char* data)
+{
+  return checkData(data,nullptr);
 }
 
 int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de la fonction

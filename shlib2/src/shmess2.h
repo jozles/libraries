@@ -10,7 +10,8 @@
 int buildMess(const char* fonction,const char* data,const char* sep);
 int buildMess(const char* fonction,const char* data,const char* sep,bool diags);
 int checkData(char* data);
-//int checkData(char* data,int* len);
+int checkData(char* data,uint16_t* lenData);
+
 int checkHttpData(char* data,uint8_t* fonction);
 const char* periDiag(int8_t diag);
 

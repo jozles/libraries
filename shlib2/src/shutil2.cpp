@@ -595,10 +595,13 @@ uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
   char inch=RCVSYNCHAR;
   uint8_t lfcnt=0;
   uint16_t lrcv=0;
+  //char rcvAscii[3];rcvAscii[2]=0x00;
 
     while(serDataAvailable(serialNb) && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
       if(lfcnt==0){delay(2);}   // acquisition 
+      
       inch=serDataRead(serialNb);
+      //conv_htoa(rcvAscii,(byte*)&inch);Serial.println(rcvAscii);
       if(inch==RCVSYNCHAR){
         lfcnt++;
         //Serial1.print(inch);Serial1.print(" ");Serial1.println(lfcnt);
@@ -613,6 +616,10 @@ uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
       }
       *(rcv+lrcv)='\0';
       //Serial1.print(lrcv);Serial1.print(" ");Serial1.println(rcv);
+    }
+    if(lrcv>0){
+      Serial.print("\nreçu=");Serial.print(lrcv);Serial.println(" char");
+      //dumpstr(rcv,lrcv);
     }
     return lrcv;
 }
