@@ -591,6 +591,13 @@ char serDataRead(uint8_t serialNb)
 }
 
 uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
+/*
+  Pour que Serial.available() ne réponde pas vide alors qu'il reste des caractères à recevoir,
+  Il faut laisser le temps à ceux-ci d'arriver (!)
+  Donc le buffer de réception doit être au moins aussi grand que le message attendu ;
+  et il peut être utile de le vider avant usage.
+    utile : Serial.getRxBufferSize() Serial.setRxBufferSize(nnnn) par défaut 256
+*/
 {  
   char inch=RCVSYNCHAR;
   uint8_t lfcnt=0;
