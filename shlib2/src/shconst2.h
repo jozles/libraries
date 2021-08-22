@@ -27,6 +27,8 @@
 
 ///* Concentrateur NRF
 
+#define MAXCONC          4                  // nombre concentrateurs/serveur
+
 #define PORTTCPCONC      1784
 #define PORTUDPCONC1     8887               // intérieur
 #define PORTUDPCONC2     8888               // extérieur
@@ -53,14 +55,21 @@
     #define SDCARD 4           // toujours 4 pour compatibilité lib.
  #endif // RED1.0
  #ifdef REDV1
+    #define AP2112
     #define STOPREQ 2          // push button pour stop request
     #define PINLED  3          // 2 sur redV0 // 13 sur proto
     #define LEDON HIGH
     #define LEDOFF LOW
     #define SDCARD 4           // toujours 4 pour compatibilité lib.
     #define POWCD 5            // power command W5500/SD/RADIO 
-    #define POWON LOW
-    #define POWOFF HIGH
+    #ifndef AP2112
+        #define POWON  LOW
+        #define POWOFF HIGH
+    #endif // AP2112
+    #ifdef AP2112
+        #define POWON  HIGH
+        #define POWOFF LOW
+    #endif // AP2112
  #endif // RED1.1
 
 #endif // ndef PERIF
@@ -150,7 +159,7 @@
 
 /* >>>> WIFI <<<<< */
 
-#define MAXSSID   8
+#define MAXSSID   4
 #define LENSSID   16
 #define LPWSSID   48
 #define SSID1     "pinks"
