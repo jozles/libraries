@@ -10,9 +10,9 @@ byte setcrc(char* buf,int len);
 void conv_atoh(char* ascii,byte* hex);
 void conv_htoa(char* ascii,byte* hex);
 void conv_htoa(char* ascii,byte* hex,uint8_t len);
-void conv_atob(char* ascii,uint16_t* bin);
-void conv_atobl(char* ascii,uint32_t* bin);
-void conv_atobl(char* ascii,uint32_t* bin,uint8_t len);
+uint8_t conv_atob(char* ascii,uint16_t* bin);
+uint8_t conv_atobl(char* ascii,uint32_t* bin);
+uint8_t conv_atobl(char* ascii,uint32_t* bin,uint8_t len);
 float convStrToNum(char* str,int* sizeRead);
 int32_t convStrToInt(char* str,int* sizeRead);
 int convIntToString(char* str,int num);
@@ -21,6 +21,7 @@ boolean compMac(byte* mac1,byte* mac2);       // FAUX si != ; VRAI si ==
 void packMac(byte* mac,char* ascMac);
 void unpackMac(char* buf,byte* mac);
 void serialPrintMac(byte* mac,uint8_t nl);
+uint8_t textIp(byte* nipadr,byte* buf);
 void charIp(byte* nipadr,char* aipadr,char* jsbuf);
 void charIp(byte* nipadr,char* aipadr);
 //void charIp(IPAddress* nipadr,char* aipadr,char* jsbuf);
@@ -64,4 +65,3 @@ void debug(int cas);
 void setdebug(int cas,int* v0,int* v1,char* v2, char* v3);
 */
 #endif // _UTIL_H_
-

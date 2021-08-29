@@ -70,28 +70,31 @@ int convNumToString(char* str,float num)  // retour string terminée par '\0' ; 
   return t;
 }
 
-void conv_atob(char* ascii,uint16_t* bin)
+uint8_t conv_atob(char* ascii,uint16_t* bin)
 {
-  int j=0;
+  uint8_t j=0;
   byte c;
   *bin=0;
-  for(j=0;j<LENVAL;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else{j=LENVAL;}}
+  for(j=0;j<LENVAL;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else break;}
+  return j;
 }
 
-void conv_atobl(char* ascii,uint32_t* bin)
+uint8_t conv_atobl(char* ascii,uint32_t* bin)
 {
-  int j=0;
+  uint8_t j=0;
   byte c;
   *bin=0;
-  for(j=0;j<LENVAL;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else{j=LENVAL;}}
+  for(j=0;j<LENVAL;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else break;}
+  return j;
 }
 
-void conv_atobl(char* ascii,uint32_t* bin,uint8_t len)
+uint8_t conv_atobl(char* ascii,uint32_t* bin,uint8_t len)
 {
-  int j=0;
+  uint8_t j=0;
   byte c;
   *bin=0;
-  for(j=0;j<len;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else{j=len;}}
+  for(j=0;j<len;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else break;}
+  return j;
 }
 
 void sp(const char* a,bool ln)
@@ -103,6 +106,18 @@ void serialPrintIp(uint8_t* ip)
 {
   for(int i=0;i<4;i++){Serial.print(ip[i]);if(i<3){Serial.print(".");}}
   //Serial.print(" ");
+}
+
+uint8_t textIp(byte* nipadr,byte* buf)
+{
+  byte* in=nipadr;
+  uint16_t uin;
+  for(int i=0;i<4;i++){
+    in+=conv_atob((char*)in,&uin);
+    in++;
+    *buf++=(uint8_t)uin;
+  }
+  return (uint8_t)(in-nipadr);
 }
 
 void charIp(byte* nipadr,char* aipadr,char* jsbuf)
@@ -602,17 +617,13 @@ uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
   char inch=RCVSYNCHAR;
   uint8_t lfcnt=0;
   uint16_t lrcv=0;
-  //char rcvAscii[3];rcvAscii[2]=0x00;
 
     while(serDataAvailable(serialNb) && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
       if(lfcnt==0){delay(2);}   // acquisition 
       
       inch=serDataRead(serialNb);
-      //conv_htoa(rcvAscii,(byte*)&inch);Serial.println(rcvAscii);
       if(inch==RCVSYNCHAR){
-        lfcnt++;
-        //Serial1.print(inch);Serial1.print(" ");Serial1.println(lfcnt);
-      }
+        lfcnt++;}
       else if (lfcnt<RSCNB){lfcnt=0;}
     }
     
@@ -622,11 +633,9 @@ uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
         *(rcv+lrcv)=serDataRead(serialNb);lrcv++;
       }
       *(rcv+lrcv)='\0';
-      //Serial1.print(lrcv);Serial1.print(" ");Serial1.println(rcv);
     }
     if(lrcv>0){
       Serial.print("\nreçu=");Serial.print(lrcv);Serial.println(" char");
-      //dumpstr(rcv,lrcv);
     }
     return lrcv;
 }

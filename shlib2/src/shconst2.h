@@ -154,7 +154,9 @@
 
   #define RCVSYNCHAR '#'
   #define RSCNB 3
-  #define MESSCONFIG "srvconf___"
+  #define WIFICFG "srvconf___"
+  #define CONCCFG "concconf__"
+  #define PERICFG "periconf__"
   #define MAXSER 1000
 
 /* >>>> WIFI <<<<< */
