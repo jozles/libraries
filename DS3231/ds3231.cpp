@@ -3,12 +3,6 @@
 
 #include "ds3231.h"
 
-extern TwoWire Wire1;
-/* ARDUINO DUE 
-  selon l'interface I2C utilisé changer Wire1. en Wire1. (sauf include)
-  et ajouter l'instance Wire1
-*/
-
 
 Ds3231::Ds3231()  // constructeur
 {
@@ -27,46 +21,46 @@ byte bcdToDec(byte val)
 void Ds3231::setTime(byte second, byte minute, byte hour,
     byte dayOfWeek,byte dayOfMonth, byte month, byte year)
 {
-  Wire1.beginTransmission(i2cAddr);
-  Wire1.write(0); // set next input to start at the seconds register
-  Wire1.write(decToBcd(second)); // set seconds
-  Wire1.write(decToBcd(minute)); // set minutes
-  Wire1.write(decToBcd(hour)); // set hours
-  Wire1.write(decToBcd(dayOfWeek)); // set day of week (1=Sunday, 7=Saturday)
-  Wire1.write(decToBcd(dayOfMonth)); // set date (1 to 31)
-  Wire1.write(decToBcd(month)); // set month
-  Wire1.write(decToBcd(year)); // set year (0 to 99)
-  Wire1.endTransmission();
+  Wire.beginTransmission(i2cAddr);
+  Wire.write(0); // set next input to start at the seconds register
+  Wire.write(decToBcd(second)); // set seconds
+  Wire.write(decToBcd(minute)); // set minutes
+  Wire.write(decToBcd(hour)); // set hours
+  Wire.write(decToBcd(dayOfWeek)); // set day of week (1=Sunday, 7=Saturday)
+  Wire.write(decToBcd(dayOfMonth)); // set date (1 to 31)
+  Wire.write(decToBcd(month)); // set month
+  Wire.write(decToBcd(year)); // set year (0 to 99)
+  Wire.endTransmission();
 }
 
 
 void Ds3231::readTime(byte *second,byte *minute,byte *hour,
     byte *dow,byte *day,byte *month,byte *year)
 {
-  Wire1.beginTransmission(i2cAddr);
-  Wire1.write(0);
-  Wire1.endTransmission();
-  Wire1.requestFrom(i2cAddr, 7);
+  Wire.beginTransmission(i2cAddr);
+  Wire.write(0);
+  Wire.endTransmission();
+  Wire.requestFrom(i2cAddr, 7);
 
-  *second = bcdToDec(Wire1.read() & 0x7f);
-  *minute = bcdToDec(Wire1.read());
-  *hour = bcdToDec(Wire1.read() & 0x3f);
-  *dow = bcdToDec(Wire1.read());
-  *day = bcdToDec(Wire1.read());
-  *month = bcdToDec(Wire1.read());
-  *year = bcdToDec(Wire1.read());
+  *second = bcdToDec(Wire.read() & 0x7f);
+  *minute = bcdToDec(Wire.read());
+  *hour = bcdToDec(Wire.read() & 0x3f);
+  *dow = bcdToDec(Wire.read());
+  *day = bcdToDec(Wire.read());
+  *month = bcdToDec(Wire.read());
+  *year = bcdToDec(Wire.read());
 }
 
 void Ds3231::readTemp(float* th)
 {
-  Wire1.beginTransmission(i2cAddr);
-  Wire1.write(17); // set DS3231 register pointer to 11h
-  Wire1.endTransmission();
-  Wire1.requestFrom(i2cAddr, 2);
+  Wire.beginTransmission(i2cAddr);
+  Wire.write(17); // set DS3231 register pointer to 11h
+  Wire.endTransmission();
+  Wire.requestFrom(i2cAddr, 2);
   // request two bytes of data from DS3231 starting from register 11h
 
-  byte msb = Wire1.read();
-  byte lsb = Wire1.read();
+  byte msb = Wire.read();
+  byte lsb = Wire.read();
   //Serial.print(*msb);Serial.print(":");Serial.println(*lsb);
   switch(lsb)
   {
