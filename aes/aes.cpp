@@ -116,7 +116,7 @@ static const uint8_t Rcon[11] = {
  *
  * From Wikipedia's article on the Rijndael key schedule @ https://en.wikipedia.org/wiki/Rijndael_key_schedule#Rcon
  *
- * "Only the first some of these constants are actually used – up to rcon[10] for AES-128 (as 11 round keys are needed),
+ * "Only the first some of these constants are actually used ï¿½ up to rcon[10] for AES-128 (as 11 round keys are needed),
  *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
  */
 
@@ -329,6 +329,7 @@ static uint8_t Multiply(uint8_t x, uint8_t y)
 
 #endif
 
+#if defined(ECB) && (ECB == 1)
 // MixColumns function mixes the columns of the state matrix.
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
@@ -392,7 +393,7 @@ static void InvShiftRows(state_t* state)
   (*state)[2][3] = (*state)[3][3];
   (*state)[3][3] = temp;
 }
-
+#endif
 
 // Cipher is the main function that encrypts the PlainText.
 static void Cipher(state_t* state, uint8_t* RoundKey)
@@ -419,6 +420,7 @@ static void Cipher(state_t* state, uint8_t* RoundKey)
   ShiftRows(state);
   AddRoundKey(Nr, state, RoundKey);
 }
+#if defined(ECB) && (ECB == 1)
 
 static void InvCipher(state_t* state,uint8_t* RoundKey)
 {
@@ -444,7 +446,7 @@ static void InvCipher(state_t* state,uint8_t* RoundKey)
   InvSubBytes(state);
   AddRoundKey(0, state, RoundKey);
 }
-
+#endif
 
 /*****************************************************************************/
 /* Public functions:                                                         */
