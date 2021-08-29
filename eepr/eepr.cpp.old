@@ -54,7 +54,6 @@ void Eepr::eewrite(byte* data,uint16_t length,uint16_t addr)
 
 void Eepr::store(byte* data,uint16_t length)
 {
-    byte len[EEPRLENGTHLENGTH];
     memcpy(data+EEPRCRCLENGTH,&length,EEPRLENGTHLENGTH);
     uint32_t crc=calcCrc32(data+EEPRCRCLENGTH,length-EEPRCRCLENGTH);
     memcpy(data,&crc,4);
