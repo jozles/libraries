@@ -56,7 +56,7 @@
     #define SDCARD 4           // toujours 4 pour compatibilité lib.
  #endif // RED1.0
  #ifdef REDV1
-    #define AP2112
+    //#define AP2112
     #define STOPREQ 2          // push button pour stop request
     #define PINLED  3          // 2 sur redV0 // 13 sur proto
     #define LEDON HIGH

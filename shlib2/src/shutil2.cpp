@@ -607,6 +607,16 @@ char serDataRead(uint8_t serialNb)
   }
 }
 
+void serPurge(uint8_t serialNb)
+{
+  unsigned long t=millis();
+  uint16_t l=0;
+  while((millis()-t)<100){
+      if(serDataAvailable(serialNb)){Serial.print(serDataRead(serialNb));l++;t=millis();}
+  }
+  if(l!=0){Serial.println();}
+}
+
 uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
 /*
   Pour que Serial.available() ne réponde pas vide alors qu'il reste des caractères à recevoir,
@@ -619,25 +629,39 @@ uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
   char inch=RCVSYNCHAR;
   uint8_t lfcnt=0;
   uint16_t lrcv=0;
+  unsigned long t=millis();
+  uint16_t n=0;
 
-    while(serDataAvailable(serialNb) && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
-      if(lfcnt==0){delay(2);}   // acquisition 
-      
-      inch=serDataRead(serialNb);
-      if(inch==RCVSYNCHAR){
-        lfcnt++;}
-      else if (lfcnt<RSCNB){lfcnt=0;}
+    // attente 1er caractère (la ligne a été purgée)
+    while ((millis()-t)<5000){
+      if(n=serDataAvailable(serialNb)){break;}
+    }
+    if(n==0){return 0;}         // rien reçu
+
+    // recevoir au moins RSCNB #
+    t=millis();
+    while((millis()-t)<1000 && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
+      if(serDataAvailable(serialNb)){
+        inch=serDataRead(serialNb);
+        if(inch==RCVSYNCHAR){
+          lfcnt++;}
+        else if (lfcnt<RSCNB){lfcnt=0;}
+      }
     }
     
+    // réception message
     if(lfcnt>=RSCNB){
-      *rcv=inch;lrcv++;
-      while(serDataAvailable(serialNb) && lrcv<(maxl-1)){
-        *(rcv+lrcv)=serDataRead(serialNb);lrcv++;
+      *rcv=inch;lrcv=1;
+      t=millis();
+      while((millis()-t)<1000 && lrcv<MAXSER){
+        if(serDataAvailable(serialNb)){*(rcv+lrcv)=serDataRead(serialNb);
+        //Serial.print(*(rcv+lrcv));
+        lrcv++;t=millis();}
       }
       *(rcv+lrcv)='\0';
     }
-    if(lrcv>0){
-      Serial.print("\nreçu=");Serial.print(lrcv);Serial.println(" char");
-    }
+//    if(lrcv>0){
+//      Serial.print("\nreçu=");Serial.print(lrcv);Serial.println(" char");
+//    }
     return lrcv;
 }
