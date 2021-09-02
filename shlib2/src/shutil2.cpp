@@ -122,11 +122,13 @@ uint8_t textIp(byte* nipadr,byte* buf)
 
 void charIp(byte* nipadr,char* aipadr,char* jsbuf)
 {
-  char buf[8];
+  char buf[TEXTIPADDRLENGTH+1];
+  memset(buf,0x00,TEXTIPADDRLENGTH+1);
   for(int i=0;i<4;i++){
-        sprintf(buf,"%d",nipadr[i]);strcat(aipadr,buf);if(i<3){strcat(aipadr,".");}
+    sprintf(buf+strlen(buf),"%d",nipadr[i]);if(i<3){strcat(buf,".");}
   }
-  if(jsbuf!=nullptr){strcat(jsbuf,aipadr);strcat(jsbuf,";");}
+  memcpy(aipadr,buf,TEXTIPADDRLENGTH);
+  if(jsbuf!=nullptr){strcat(jsbuf,buf);strcat(jsbuf,";");}
 }
 
 void charIp(byte* nipadr,char* aipadr)
