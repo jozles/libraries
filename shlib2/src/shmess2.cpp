@@ -230,9 +230,10 @@ int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d
   if(*lenData!=(uint16_t)strlen(data)-2){
     mess=MESSLEN;
     
-    dumpstr(data,strlen(data));Serial.print(" sizeRead=");Serial.print(sizeReadLength);
-    Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.println(strlen(data));
-    Serial.print("CRC, c, len  =");Serial.print(calcCrc(data,*lenData),HEX);Serial.print(", ");
+    //dumpstr(data,strlen(data));
+    Serial.print(" sizeRead=");Serial.print(sizeReadLength);
+    Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.print(strlen(data));
+    Serial.print(" CRC,c,len= ");Serial.print(calcCrc(data,*lenData),HEX);Serial.print(", ");
     if(c<16){Serial.print("0");}
     Serial.print(c,HEX);Serial.print(" , ");Serial.println(*lenData);
   }

@@ -9,6 +9,7 @@
 //#define SIZEPULSE   4  // uint32_t
 #define LENPERIDATE 6           // LDATEASCII packé
 #define LDATEASCII 12           // YYMMDDHHMMSS
+#define TEXTIPADDRLENGTH 15
 
 /*
 // 1er serveur
@@ -153,7 +154,8 @@
 /* >>>> config série <<<< */
 
   #define RCVSYNCHAR '#'
-  #define RSCNB 3
+  #define RSCNB 3                   // min Rx config char
+  #define TSCNB RSCNB*2             // Tx config char
   #define WIFICFG "srvconf___"
   #define CONCCFG "concconf__"
   #define PERICFG "periconf__"
@@ -175,9 +177,27 @@
 #define TO_HTTPCX   4000        // nbre maxi retry connexion serveur
 
 #define SLOWBLINK 3000
-#define FASTBLINK 60
+#define FASTBLINK 350
 #define PULSEBLINK 4          // plutôt dépendant de la période de la loop sur
                               // périf NO_MODE
+
+// concentrateurs
+
+#define CC_UDP0   8800
+#define CC_UDP1   8801
+#define CC_UDP2   8802
+#define CC_UDP3   8803
+
+#define CC_ADDR0   (byte*)"dtest"
+#define CC_ADDR1   (byte*)"ctest"
+#define CC_ADDR2   (byte*)"btest"
+#define CC_ADDR3   (byte*)"atest"
+
+#define CHANNEL0    120        // numéro canal radio
+#define CHANNEL1    110        // numéro canal radio
+#define CHANNEL2    100        // numéro canal radio
+#define CHANNEL3    90         // numéro canal radio
+
 /* codes blink 
 *  valeurs impaires bloquantes
 *  valeurs paires < MAXBLK jouées une fois puis le prochain ledblink reprogramme
@@ -191,7 +211,7 @@
 #define BCODEPBNTP        (2+MAXBLK)   // pas de service NTP
 #define BCODEORDREXT      4   // un ordreExt() a été reçu
 #define BCODEWAITWIFI     (4+MAXBLK)   // attente WIFI
-#define BCODESDCARDKO     5   // pas de SDCARD
+#define BCODESDCARDKO     5   // pas de SDCARD ; config KO
 #define BCODEFHISTO       (6+MAXBLK)   // write 0 car (sdstore_textdh0)
 #define BCODELENVAL       7   // LENVAL trop petit
 #define BCODECONFIGRECLEN 9   // CONFIGRECLEN ou MLMSET/LENMESS faux -> blocage
