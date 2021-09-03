@@ -29,7 +29,7 @@
 ///* Concentrateur NRF
 
 #define MAXCONC          4                  // nombre concentrateurs/serveur
-
+/*
 #define PORTTCPCONC      1784
 #define PORTUDPCONC1     8887               // intérieur
 #define PORTUDPCONC2     8888               // extérieur
@@ -56,7 +56,7 @@
     #define SDCARD 4           // toujours 4 pour compatibilité lib.
  #endif // RED1.0
  #ifdef REDV1
-    //#define AP2112
+    #define AP2112
     #define STOPREQ 2          // push button pour stop request
     #define PINLED  3          // 2 sur redV0 // 13 sur proto
     #define LEDON HIGH
@@ -171,6 +171,22 @@
 #define SSID2     "devolo-5d3"
 #define PWDSSID2  "JNCJTRONJMGZEEQL"
 
+// concentrateurs
+
+#define CC_UDP0   55556                         // port Udp concentrateur 
+#define CC_UDP1   55557
+#define CC_UDP2   55558
+#define CC_UDP3   55559
+
+#define CC_ADDRX   "ashco\0bshco\0cshco\0dshco" // adresses mac concentrateurs (les 5 premiers car addr nrf)
+                                                // le numéro de concentrateur est configuré sur la carte red
+
+#define CHANNEL0    120        // numéro canal radio
+#define CHANNEL1    110        // numéro canal radio
+#define CHANNEL2    100        // numéro canal radio
+#define CHANNEL3    90         // numéro canal radio
+
+#define CC_SPEED    0          // RF_SPEED_1Mb (voir nrf24l01s.h)
 
 #define TOINCHCLI   100         // msec max attente car server
 #define TOFINCHCLI  6000        // msec max attente 1er car server ... devrait etre réduit
@@ -180,23 +196,6 @@
 #define FASTBLINK 350
 #define PULSEBLINK 4          // plutôt dépendant de la période de la loop sur
                               // périf NO_MODE
-
-// concentrateurs
-
-#define CC_UDP0   8800
-#define CC_UDP1   8801
-#define CC_UDP2   8802
-#define CC_UDP3   8803
-
-#define CC_ADDR0   (byte*)"dtest"
-#define CC_ADDR1   (byte*)"ctest"
-#define CC_ADDR2   (byte*)"btest"
-#define CC_ADDR3   (byte*)"atest"
-
-#define CHANNEL0    120        // numéro canal radio
-#define CHANNEL1    110        // numéro canal radio
-#define CHANNEL2    100        // numéro canal radio
-#define CHANNEL3    90         // numéro canal radio
 
 /* codes blink 
 *  valeurs impaires bloquantes
