@@ -178,8 +178,9 @@
 #define CC_UDP2   55558
 #define CC_UDP3   55559
 
-#define CC_ADDRX   "ashco\0bshco\0cshco\0dshco" // adresses mac concentrateurs (les 5 premiers car addr nrf)
+#define CC_ADDRX   "rashc\0rbshc\0rcshc\0rdshc" // adresses mac concentrateurs (les 5 premiers car addr nrf)
                                                 // le numéro de concentrateur est configuré sur la carte red
+                                                // le premier car doit avoir le bit 0 à 0 pour que le dhcp fonctionne (?)
 
 #define CHANNEL0    120        // numéro canal radio
 #define CHANNEL1    110        // numéro canal radio

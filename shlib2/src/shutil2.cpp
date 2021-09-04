@@ -619,49 +619,54 @@ void serPurge(uint8_t serialNb)
 
 uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
 /*
-  Pour que Serial.available() ne réponde pas vide alors qu'il reste des caractères à recevoir,
-  Il faut laisser le temps à ceux-ci d'arriver (!)
-  Donc le buffer de réception doit être au moins aussi grand que le message attendu ;
-  et il peut être utile de le vider avant usage.
-    utile : Serial.getRxBufferSize() Serial.setRxBufferSize(nnnn) par défaut 256
+  Tout message commence par des caractères de synchro (RCVSYNCHAR). 
+  Il faut en envoyer TSCNB avant un message et en recevoir au moins RSCNB pour débuter une réception
+  (les caractères exédentaires sont ignorés)
+  Entrée : Si des caractères sont disponibles, le premier caractère utile doit être reçu en TBEGSER mS
+           et les suivants en moins de TENDSER par caractère (un délai de TENDSER termine l'attente)
+  Retour : le nombre de caractères utiles reçus + le message ;
+  
+  Le buffer de réception est petit (Serial.getRxBufferSize() - Serial.setRxBufferSize(nnnn) par défaut 256)
+  Pour éviter des écrasements, l'émission doit être ralentie (genre 1mS par caractère).
+  Il est utile de purger le buffer (serPurge()) avant de demander un envoi.
 */
 {  
+#define TBEGSER 2000 // délai maxi entre 1er caractère reçu et premier car utile
+#define TENDSER 100  // délai maxi pour la réception du caractère utile suivant 
+
+if(!serDataAvailable(serialNb)){return 0;}
+
   char inch=RCVSYNCHAR;
   uint8_t lfcnt=0;
   uint16_t lrcv=0;
   unsigned long t=millis();
   uint16_t n=0;
 
-    // attente 1er caractère (la ligne a été purgée)
-    while ((millis()-t)<5000){
-      if(n=serDataAvailable(serialNb)){break;}
-    }
-    if(n==0){return 0;}         // rien reçu
-
     // recevoir au moins RSCNB #
     t=millis();
-    while((millis()-t)<1000 && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
-      if(serDataAvailable(serialNb)){
-        inch=serDataRead(serialNb);
-        if(inch==RCVSYNCHAR){
-          lfcnt++;}
+    while((millis()-t)<TBEGSER && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
+      switch(serialNb){
+        case 0:if((n=Serial.available())){inch=Serial.read();}break;
+        case 1:if((n=Serial.available())){inch=Serial1.read();}break;
+      }
+      if(n!=0){
+        if(inch==RCVSYNCHAR){lfcnt++;}
         else if (lfcnt<RSCNB){lfcnt=0;}
       }
     }
     
     // réception message
-    if(lfcnt>=RSCNB){
+    //if(lfcnt>=RSCNB && inch!=RCVSYNCHAR){    
+    if((millis()-t)<TBEGSER){                       // pas sortie en TO
       *rcv=inch;lrcv=1;
       t=millis();
-      while((millis()-t)<1000 && lrcv<MAXSER){
-        if(serDataAvailable(serialNb)){*(rcv+lrcv)=serDataRead(serialNb);
-        //Serial.print(*(rcv+lrcv));
-        lrcv++;t=millis();}
+      while((millis()-t)<TENDSER && lrcv<MAXSER){
+        switch(serialNb){
+          case 0:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
+          case 1:if(Serial1.available()){*(rcv+lrcv)=Serial1.read();lrcv++;t=millis();}break;
+        }  
       }
       *(rcv+lrcv)='\0';
     }
-//    if(lrcv>0){
-//      Serial.print("\nreçu=");Serial.print(lrcv);Serial.println(" char");
-//    }
     return lrcv;
 }
