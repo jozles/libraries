@@ -614,7 +614,7 @@ void serPurge(uint8_t serialNb)
   while((millis()-t)<100){
       if(serDataAvailable(serialNb)){Serial.print(serDataRead(serialNb));l++;t=millis();}
   }
-  if(l!=0){Serial.println();}
+  if(l!=0){Serial.println("endPurge");}
 }
 
 uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
@@ -647,7 +647,7 @@ if(!serDataAvailable(serialNb)){return 0;}
     while((millis()-t)<TBEGSER && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
       switch(serialNb){
         case 0:if((n=Serial.available())){inch=Serial.read();}break;
-        case 1:if((n=Serial.available())){inch=Serial1.read();}break;
+        case 1:if((n=Serial1.available())){inch=Serial1.read();}break;
       }
       if(n!=0){
         if(inch==RCVSYNCHAR){lfcnt++;}
