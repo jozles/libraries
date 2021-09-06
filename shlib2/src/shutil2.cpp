@@ -654,9 +654,7 @@ if(!serDataAvailable(serialNb)){return 0;}
         else if (lfcnt<RSCNB){lfcnt=0;}
       }
     }
-    
-    // réception message
-    //if(lfcnt>=RSCNB && inch!=RCVSYNCHAR){    
+    // réception message 
     if((millis()-t)<TBEGSER){                       // pas sortie en TO
       *rcv=inch;lrcv=1;
       t=millis();

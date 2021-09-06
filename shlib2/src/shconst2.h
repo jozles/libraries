@@ -26,20 +26,6 @@
 #define HOSTIPADDR2 "192.168.0.36"   //  SHIPADDR // pour périph 
 //*/
 
-///* Concentrateur NRF
-
-#define MAXCONC          4                  // nombre concentrateurs/serveur
-/*
-#define PORTTCPCONC      1784
-#define PORTUDPCONC1     8887               // intérieur
-#define PORTUDPCONC2     8888               // extérieur
-#define CONCNRFIPADDR1   192,168,0,31       // intérieur
-#define CONCNRFIPADDR2   192,168,0,32       // extérieur
-#define SHIPADDR         192,168,0,36       // IP addr server SH
-#define MACADDRUDP1      {0xDE,0xAD,0xBE,0xEF,0xFE,0xED}
-#define MACADDRUDP2      {0xDE,0xAD,0xBE,0xEF,0xFE,0xEB}
-//*/
-
 #ifdef PERIF
  #define PINLED 0                    //  0 = ESP-12  ; 2 = ESP-01
  #define LEDON LOW
@@ -173,19 +159,23 @@
 
 // concentrateurs
 
-#define CC_UDP0   55556                         // port Udp concentrateur 
+#define MAXCONC   4            // nombre concentrateurs/serveur
+
+#define CC_UDP0   55556        // def conc Udp port 
 #define CC_UDP1   55557
 #define CC_UDP2   55558
 #define CC_UDP3   55559
 
-#define CC_ADDRX   "rashc\0rbshc\0rcshc\0rdshc" // adresses mac concentrateurs (les 5 premiers car addr nrf)
-                                                // le numéro de concentrateur est configuré sur la carte red
+#define CC_ADDRX   "rashc\0rbshc\0rcshc\0rdshc\0" // adresses mac par défaut des concentrateurs                                                 
                                                 // le premier car doit avoir le bit 0 à 0 pour que le dhcp fonctionne (?)
 
-#define CHANNEL0    120        // numéro canal radio
-#define CHANNEL1    110        // numéro canal radio
-#define CHANNEL2    100        // numéro canal radio
-#define CHANNEL3    90         // numéro canal radio
+#define RADIO_ADDR_LENGTH 5   // doit être == NRF_ADDR_LENGTH
+#define CC_NRF_ADDR "SHCO0"      // def NRF conc addr (0)
+
+#define CHANNEL0    120        // def radio channel
+#define CHANNEL1    110        
+#define CHANNEL2    100        
+#define CHANNEL3    90         
 
 #define CC_SPEED    0          // RF_SPEED_1Mb (voir nrf24l01s.h)
 
