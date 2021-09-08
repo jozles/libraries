@@ -593,8 +593,10 @@ int serDataAvailable(uint8_t serialNb)
 {
   switch(serialNb){
     case 0:return Serial.available();
+    #ifdef Serial1
     case 1:return Serial1.available();
-    default: return '\0';
+    #endif
+    default: return Serial.available();;
   }
 }
 
@@ -602,8 +604,10 @@ char serDataRead(uint8_t serialNb)
 {
   switch(serialNb){
     case 0:return Serial.read();
+    #ifdef Serial1
     case 1:return Serial1.read();
-    default: return '\0';
+    #endif
+    default: return Serial.read();;
   }
 }
 
@@ -647,7 +651,10 @@ if(!serDataAvailable(serialNb)){return 0;}
     while((millis()-t)<TBEGSER && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
       switch(serialNb){
         case 0:if((n=Serial.available())){inch=Serial.read();}break;
+        #ifdef Serial1
         case 1:if((n=Serial1.available())){inch=Serial1.read();}break;
+        #endif
+        default:if((n=Serial.available())){inch=Serial.read();}break;
       }
       if(n!=0){
         if(inch==RCVSYNCHAR){lfcnt++;}
@@ -661,7 +668,10 @@ if(!serDataAvailable(serialNb)){return 0;}
       while((millis()-t)<TENDSER && lrcv<MAXSER){
         switch(serialNb){
           case 0:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
+          #ifdef Serial1
           case 1:if(Serial1.available()){*(rcv+lrcv)=Serial1.read();lrcv++;t=millis();}break;
+          #endif
+          default:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
         }  
       }
       *(rcv+lrcv)='\0';
