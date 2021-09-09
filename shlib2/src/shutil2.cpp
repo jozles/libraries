@@ -34,7 +34,7 @@ char* v2debug[NBDBPTS*NBDBOC];
 char* v3debug[NBDBPTS*NBDBOC];
 */
 
-uint32_t pinLed;
+uint8_t pinLed;
 
 bool wdEnable=false;
 bool trigwdOn=false;
@@ -478,7 +478,7 @@ void blink(uint8_t nb)
 
 void initLed()
 {
-  pinLed=PINLED;
+  pinLed=LED;
   pinMode(pinLed,OUTPUT);
   //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être 
                                   // activé avant que PINLED soit mis en OUTPUT

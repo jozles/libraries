@@ -27,13 +27,19 @@
 //*/
 
 #ifdef PERIF
- #define PINLED 0                    //  0 = ESP-12  ; 2 = ESP-01
+ #define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01
  #define LEDON LOW
  #define LEDOFF HIGH
 #endif // defPERIF
 #ifndef PERIF
 
-#define REDV1      // RED1.0
+#ifdef DETS
+    #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
+    #define LEDON HIGH
+    #define LEDOFF LOW
+ #endif // DETS
+ 
+//#define REDV1      // RED1.0
  #ifdef REDV0
     #define STOPREQ 3          // push button pour stop request
     #define PINLED  2          // 2 sur redshieldV0 // 13 sur proto
