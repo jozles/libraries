@@ -1,7 +1,8 @@
 #ifndef _SHCONST_H_
 #define _SHCONST_H_
 
-//#define PERIF
+// params provenant de platformio.ini // 
+//     PERIF // REDV0 // REDV1      //
 
 
 #define LENVERSION  4
@@ -37,9 +38,9 @@
     #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
     #define LEDON HIGH
     #define LEDOFF LOW
+    #define STOPREQ 5         // PD5
  #endif // DETS
  
-//#define REDV1      // RED1.0
  #ifdef REDV0
     #define STOPREQ 3          // push button pour stop request
     #define PINLED  2          // 2 sur redshieldV0 // 13 sur proto
@@ -151,7 +152,7 @@
   #define WIFICFG "srvconf___"
   #define CONCCFG "concconf__"
   #define PERICFG "periconf__"
-  #define MAXSER 1000
+  #define MAXSER  200
 
 /* >>>> WIFI <<<<< */
 

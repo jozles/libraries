@@ -52,8 +52,9 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto);
 void timeOvfSet(uint8_t slot);
 void timeOvfCtl(uint8_t slot);
 
-uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb);
-void serPurge(uint8_t serialNb);
+uint16_t  serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb);
+void      serPurge(uint8_t serialNb);
+uint16_t  setExpEnd(char* bec);
 
 #ifdef __arm__
 void memDump(char* loc);

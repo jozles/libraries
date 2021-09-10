@@ -176,6 +176,7 @@ void dumpstr0(char* data,uint8_t len)
     char a[]={0x00,0x00,0x00};
     uint8_t c;
     Serial.print("   ");Serial.print((long)data,HEX);Serial.print("   ");
+    
     for(int k=0;k<len;k++){conv_htoa(a,(byte*)&data[k]);Serial.print(a);Serial.print(" ");}
     Serial.print("    ");
     for(int k=0;k<len;k++){
@@ -478,7 +479,7 @@ void blink(uint8_t nb)
 
 void initLed()
 {
-  pinLed=LED;
+  pinLed=PINLED;
   pinMode(pinLed,OUTPUT);
   //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être 
                                   // activé avant que PINLED soit mis en OUTPUT
@@ -649,6 +650,7 @@ if(!serDataAvailable(serialNb)){return 0;}
     // recevoir au moins RSCNB #
     t=millis();
     while((millis()-t)<TBEGSER && (lfcnt<RSCNB || inch==RCVSYNCHAR)){
+      trigwd();
       switch(serialNb){
         case 0:if((n=Serial.available())){inch=Serial.read();}break;
         #ifdef Serial1
@@ -666,6 +668,7 @@ if(!serDataAvailable(serialNb)){return 0;}
       *rcv=inch;lrcv=1;
       t=millis();
       while((millis()-t)<TENDSER && lrcv<MAXSER){
+        trigwd();
         switch(serialNb){
           case 0:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
           #ifdef Serial1
@@ -677,4 +680,16 @@ if(!serDataAvailable(serialNb)){return 0;}
       *(rcv+lrcv)='\0';
     }
     return lrcv;
+}
+
+
+uint16_t setExpEnd(char* bec)     // ajoute longueur au début du message et crc à la fin (pour config série)
+{
+  uint16_t ll=(uint16_t)strlen(bec);
+  sprintf(bec,"%04u",ll);
+  bec[4]=';';
+  setcrc(bec,ll);
+  
+  *(bec+ll+2)='\0';
+  return (uint16_t)(ll+2);
 }
