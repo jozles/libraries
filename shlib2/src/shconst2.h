@@ -68,6 +68,17 @@
 
 #endif // ndef PERIF
 
+// Serial pour config // DUE défini dans platformio.ini
+
+#ifdef DUE
+#define SERIALX Serial1
+#define SERNB 1
+#endif
+#ifndef DUE
+#define SERIALX Serial
+#define SERNB 0
+#endif
+
     // protocoles
 
 #define PROTOCHAR " TU"

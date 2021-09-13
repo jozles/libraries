@@ -1,12 +1,10 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-//#ifdef PERIF
-//#include <ESP8266WiFi.h>
-//#endif // PERIF
-
 uint8_t calcCrc(char* bufCrc,int len);
 byte setcrc(char* buf,int len);
+int checkData(char* data);
+int checkData(char* data,uint16_t* lenData);
 void conv_atoh(char* ascii,byte* hex);
 void conv_htoa(char* ascii,byte* hex);
 void conv_htoa(char* ascii,byte* hex,uint8_t len);
@@ -16,16 +14,14 @@ uint8_t conv_atobl(char* ascii,uint32_t* bin,uint8_t len);
 float convStrToNum(char* str,int* sizeRead);
 int32_t convStrToInt(char* str,int* sizeRead);
 int convIntToString(char* str,int num);
-int convNumToString(char* str,float num);  // retour string terminée par '\0' ; return longueur totale '\0' inclus
-boolean compMac(byte* mac1,byte* mac2);       // FAUX si != ; VRAI si ==
+int convNumToString(char* str,float num);
+boolean compMac(byte* mac1,byte* mac2);
 void packMac(byte* mac,char* ascMac);
 void unpackMac(char* buf,byte* mac);
 void serialPrintMac(byte* mac,uint8_t nl);
 uint8_t textIp(byte* nipadr,byte* buf);
 void charIp(byte* nipadr,char* aipadr,char* jsbuf);
 void charIp(byte* nipadr,char* aipadr);
-//void charIp(IPAddress* nipadr,char* aipadr,char* jsbuf);
-//void charIp(IPAddress* nipadr,char* aipadr);
 void sp(const char* a,bool ln);
 void serialPrintIp(uint8_t* ip);
 void packDate(char* dateout,char* datein);
@@ -37,29 +33,29 @@ void trigwd();
 void trigwd(uint32_t dur);
 void ledblink(int nbBlk);
 void blink(uint8_t nb);
-//void ledblink(int nb,int mode);
-//void ledblink();
-//void initBlink();
 void initLed();
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
 
-bool ctlpass(char* data,char* model);
-int  searchusr(char* usrname);
+//bool ctlpass(char* data,char* model);
+//int  searchusr(char* usrname);
 bool ctlto(unsigned long time,uint16_t to);
 void startto(unsigned long* time,uint16_t* to,uint16_t valto);
 
-void timeOvfSet(uint8_t slot);
-void timeOvfCtl(uint8_t slot);
-
+#ifndef NOCONFSER
 uint16_t  serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb);
 void      serPurge(uint8_t serialNb);
 uint16_t  setExpEnd(char* bec);
+#endif // NOCONFSER
 
 #ifdef __arm__
 void memDump(char* loc);
 #endif // __arm__
 
+/*
+void timeOvfSet(uint8_t slot);
+void timeOvfCtl(uint8_t slot);
+*/
 /*
 void initdebug();
 void showdebug();

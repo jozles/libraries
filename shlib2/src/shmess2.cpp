@@ -216,7 +216,7 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
     checkData(data,&l);
 }
 */
-
+/*
 int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d'un message (longueur,crc)
 {                            // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
   int mess;
@@ -247,7 +247,7 @@ int checkData(char* data)
 {
   return checkData(data,nullptr);
 }
-
+*/
 int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de la fonction
 {
     char noms[LENNOM+1];

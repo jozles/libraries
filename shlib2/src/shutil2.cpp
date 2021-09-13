@@ -3,28 +3,25 @@
 #include <shconst2.h>
 
 #ifndef PERIF
+#ifndef DETS
 #include <MemoryFree.h>
 #include <FreeStack.h>
+#endif // DETS
 #endif // PERIF
 
-//#ifdef PERIF
-//#include <ESP8266WiFi.h>
-//#endif // PERIF
-
-extern char  pass[];
 extern char* chexa;
 
 static unsigned long blinktime=0;
 int     nbreBlink=0;          // si nbreBlink impair   -> blocage
 int     cntBlink=0;
 
-#define TIMEOVFSLOTNB 10
-uint32_t timeOvfSlot[TIMEOVFSLOTNB];
-
+//#define TIMEOVFSLOTNB 10
+//uint32_t timeOvfSlot[TIMEOVFSLOTNB];
+/*
+extern char  pass[];
 extern char* usrnames;
 extern char* usrpass;
-
-
+*/
   /* debug
 int   cntdebug[NBDBPTS];
 unsigned long  timedebug[NBDBPTS*NBDBOC];
@@ -135,21 +132,7 @@ void charIp(byte* nipadr,char* aipadr)
 {
   charIp(nipadr,aipadr,nullptr);
 }
-/*
-void charIp(IPAddress* nipadr,char* aipadr,char* jsbuf)   // ne fonctionne pas ... pb avec <ESP8266WiFi.h>
-{
-  char buf[8];
-  for(int i=0;i<4;i++){
-        sprintf(buf,"%d",(uint8_t)nipadr[i]);strcat(aipadr,buf);if(i<3){strcat(aipadr,".");}
-  }
-  if(jsbuf!=nullptr){strcat(jsbuf,aipadr);strcat(jsbuf,";");}
-}
 
-void charIp(IPAddress* nipadr,char* aipadr)
-{
-  charIp(nipadr,aipadr,nullptr);
-}
-*/
 void conv_atoh(char* ascii,byte* h)
 {
     uint8_t c=0;
@@ -170,96 +153,6 @@ void conv_htoa(char* ascii,byte* h,uint8_t len)
       conv_htoa(ascii+2*(len-i-1),(byte*)(h+i));
     }
 }
-
-void dumpstr0(char* data,uint8_t len)
-{
-    char a[]={0x00,0x00,0x00};
-    uint8_t c;
-    Serial.print("   ");Serial.print((long)data,HEX);Serial.print("   ");
-    
-    for(int k=0;k<len;k++){conv_htoa(a,(byte*)&data[k]);Serial.print(a);Serial.print(" ");}
-    Serial.print("    ");
-    for(int k=0;k<len;k++){
-            c=data[k];
-            if(c<32 || c>127){c='.';}
-            Serial.print((char)c);
-    }
-    Serial.println();
-}
-
-void dumpstr(char* data,uint16_t len)
-{
-    while(len>=16){len-=16;dumpstr0(data,16);data+=16;}
-    if(len!=0){dumpstr0(data,len);}
-}
-
-void dumpfield(char* fd,uint8_t ll)
-{
-    byte a;
-    for(int ff=ll-1;ff>=0;ff--){
-            a=((fd[ff]&0xF0)>>4)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
-            a=(fd[ff]&0x0F)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
-            Serial.print(" ");
-            //if((fd[ff]&0xF0)==0){Serial.print("0");}
-            //Serial.print((byte)fd[ff],HEX);
-    }
-    Serial.print(" ");
-}
-
-#ifdef __arm__
-void memDump(char* loc)
-{
-  void* stackPtr = alloca(4); // This returns a pointer to the current bottom of the stack
-  Serial.print("\n====> ");Serial.print(loc);
-  Serial.print(" StackPtr ");Serial.print((unsigned long)stackPtr);
-  Serial.print(" loc ");Serial.println((unsigned long)loc);
-  delay(10);
-
-  dumpstr((char*)loc,16);
-  Serial.println()  ;
-  dumpstr((char*)stackPtr-64,64);
-  Serial.println();
-  dumpstr((char*)stackPtr,64);
-
-  delay(10); // serial
-}
-#endif // __arm__
-/*
-byte calcBitCrc (byte shiftReg, byte data_bit)
-{
-  byte fb;
-
-  fb = (shiftReg & 0x01) ^ data_bit;
-   // exclusive or least sig bit of current shift reg with the data bit
-   shiftReg = shiftReg >> 1;                  // shift one place to the right
-   if (fb==1){shiftReg = shiftReg ^ 0x8C;}    // CRC ^ binary 1000 1100
-   return(shiftReg);
-}
-*/
-uint8_t calcCrc(char* buf,int len)
-{
-  uint8_t crc=0,j,k,m;
-  int i;
-
-  for(i=0;i<len;i++){
-    m=(uint8_t)buf[i];
-    for(j=0;j<8;j++){
-        k=(crc^m)&0x01;
-        crc=crc>>1;
-        if(k==1){crc=crc^0x8C;}     // 0x8C is 00011001 rigth rotated polynom
-        m=m>>1;
-    }
-  }
-  return crc;
-}
-
-byte setcrc(char* buf,int len)
-{
-  byte c=calcCrc(buf,len);
-  conv_htoa(buf+len,&c);buf[len+2]='\0';
-  return c;
-}
-
 
 float convStrToNum(char* str,int* sizeRead)
 {
@@ -286,7 +179,6 @@ float convStrToNum(char* str,int* sizeRead)
   //Serial.print("s>n str,num=");Serial.print(string);Serial.print(" ");Serial.println(v*minus);
   return v*minu;
 }
-
 
 int32_t convStrToInt(char* str,int* sizeRead)
 {
@@ -318,6 +210,113 @@ boolean compMac(byte* mac1,byte* mac2)
 {
   for(int i=0;i<6;i++){if(mac1[i] != mac2[i]){return FAUX;}}
   return VRAI;
+}
+
+void dumpstr0(char* data,uint8_t len)
+{
+    char a[]={0x00,0x00,0x00};
+    uint8_t c;
+    Serial.print("   ");Serial.print((long)data,HEX);Serial.print("   ");
+    
+    for(int k=0;k<len;k++){conv_htoa(a,(byte*)&data[k]);Serial.print(a);Serial.print(" ");}
+    Serial.print("    ");
+    for(int k=0;k<len;k++){
+            c=data[k];
+            if(c<32 || c>127){c='.';}
+            Serial.print((char)c);
+    }
+    Serial.println();
+}
+
+void dumpstr(char* data,uint16_t len)
+{
+    while(len>=16){len-=16;dumpstr0(data,16);data+=16;}
+    if(len!=0){dumpstr0(data,len);}
+}
+
+void dumpfield(char* fd,uint8_t ll)
+{
+    byte a;
+    for(int ff=ll-1;ff>=0;ff--){
+            a=((fd[ff]&0xF0)>>4)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
+            a=(fd[ff]&0x0F)+'0';if(a>'9'){a+=7;}Serial.print((char)a);
+            Serial.print(" ");
+    }
+    Serial.print(" ");
+}
+
+#ifdef __arm__
+void memDump(char* loc)
+{
+  void* stackPtr = alloca(4); // This returns a pointer to the current bottom of the stack
+  Serial.print("\n====> ");Serial.print(loc);
+  Serial.print(" StackPtr ");Serial.print((unsigned long)stackPtr);
+  Serial.print(" loc ");Serial.println((unsigned long)loc);
+  delay(10);
+
+  dumpstr((char*)loc,16);
+  Serial.println()  ;
+  dumpstr((char*)stackPtr-64,64);
+  Serial.println();
+  dumpstr((char*)stackPtr,64);
+
+  delay(10); // serial
+}
+#endif // __arm__
+
+uint8_t calcCrc(char* buf,int len)
+{
+  uint8_t crc=0,j,k,m;
+  int i;
+
+  for(i=0;i<len;i++){
+    m=(uint8_t)buf[i];
+    for(j=0;j<8;j++){
+        k=(crc^m)&0x01;
+        crc=crc>>1;
+        if(k==1){crc=crc^0x8C;}     // 0x8C is 00011001 rigth rotated polynom
+        m=m>>1;
+    }
+  }
+  return crc;
+}
+
+byte setcrc(char* buf,int len)
+{
+  byte c=calcCrc(buf,len);
+  conv_htoa(buf+len,&c);buf[len+2]='\0';
+  return c;
+}
+
+int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d'un message (longueur,crc)
+{                            // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
+  int mess;
+  int sizeReadLength;
+  uint8_t c=0;
+  uint16_t ld;
+  if(lenData==nullptr){lenData=&ld;}
+
+  *lenData=(uint16_t)convStrToNum(data,&sizeReadLength);
+  conv_atoh(data+*lenData,&c);
+  if(*lenData!=(uint16_t)strlen(data)-2){
+    mess=MESSLEN;
+    
+    //dumpstr(data,strlen(data));
+    Serial.print(" sizeRead=");Serial.print(sizeReadLength);
+    Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.print(strlen(data));
+    Serial.print(" CRC,c,len= ");Serial.print(calcCrc(data,*lenData),HEX);Serial.print(", ");
+    if(c<16){Serial.print("0");}
+    Serial.print(c,HEX);Serial.print(" , ");Serial.println(*lenData);
+  }
+  else if(calcCrc(data,*lenData)!=c){mess=MESSCRC;}
+  else mess=MESSOK;
+
+  return mess;
+}
+
+int checkData(char* data)
+{
+  return checkData(data,nullptr);
 }
 
 void packMac(uint8_t* mac,char* ascMac)
@@ -490,6 +489,7 @@ void initLed()
   blinktime=millis();
 }
 
+/*
 void timeOvfSet(uint8_t slot)
 {
     if(slot<=TIMEOVFSLOTNB){timeOvfSlot[slot-1]=micros();}
@@ -505,7 +505,7 @@ void timeOvfCtl(uint8_t slot)
     }
 #endif
 }
-
+*/
 
 /* debug
 
@@ -551,12 +551,6 @@ void initdebug()
 }
 */
 
-
-bool ctlpass(char* data,char* model)
-{
-  return !memcmp(model,data,strlen(model));
-}
-
 bool ctlto(unsigned long time,uint16_t to)
 {
     //Serial.print("ctlto=");Serial.print(time);Serial.print(" to=");Serial.println(to);
@@ -568,6 +562,11 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
   *to=valto;
   *time=millis();
         //Serial.print("startto=");Serial.print(*time);Serial.print(" to=");Serial.print(*to);Serial.print(" valto=");Serial.println(valto);
+}
+/*
+bool ctlpass(char* data,char* model)
+{
+  return !memcmp(model,data,strlen(model));
 }
 
 int searchusr(char* usrname)
@@ -589,14 +588,17 @@ int searchusr(char* usrname)
     }
     return -1;
 }
+*/
+
+#ifndef NOCONFSER
 
 int serDataAvailable(uint8_t serialNb)
 {
   switch(serialNb){
     case 0:return Serial.available();
-    #ifdef Serial1
+#ifndef DETS
     case 1:return Serial1.available();
-    #endif
+#endif
     default: return Serial.available();;
   }
 }
@@ -605,9 +607,9 @@ char serDataRead(uint8_t serialNb)
 {
   switch(serialNb){
     case 0:return Serial.read();
-    #ifdef Serial1
+#ifndef DETS
     case 1:return Serial1.read();
-    #endif
+#endif
     default: return Serial.read();;
   }
 }
@@ -653,9 +655,9 @@ if(!serDataAvailable(serialNb)){return 0;}
       trigwd();
       switch(serialNb){
         case 0:if((n=Serial.available())){inch=Serial.read();}break;
-        #ifdef Serial1
+#ifndef DETS
         case 1:if((n=Serial1.available())){inch=Serial1.read();}break;
-        #endif
+#endif
         default:if((n=Serial.available())){inch=Serial.read();}break;
       }
       if(n!=0){
@@ -671,9 +673,9 @@ if(!serDataAvailable(serialNb)){return 0;}
         trigwd();
         switch(serialNb){
           case 0:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
-          #ifdef Serial1
+#ifndef DETS
           case 1:if(Serial1.available()){*(rcv+lrcv)=Serial1.read();lrcv++;t=millis();}break;
-          #endif
+#endif
           default:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
         }  
       }
@@ -693,3 +695,4 @@ uint16_t setExpEnd(char* bec)     // ajoute longueur au début du message et crc
   *(bec+ll+2)='\0';
   return (uint16_t)(ll+2);
 }
+#endif // NOCONFSER
