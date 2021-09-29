@@ -1,3 +1,4 @@
+#ifndef DETS
 
 #include "Arduino.h"
 #include <shconst2.h>
@@ -307,3 +308,5 @@ const char* periDiag(int8_t diag)
         v=LPERIMESS*(-(diag-1));//} // diag -n -> 1 devient 0->n-1
   return periText+v;
 }
+
+#endif // ndef DETS
