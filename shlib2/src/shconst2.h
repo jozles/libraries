@@ -64,20 +64,17 @@
         #define POWON  HIGH
         #define POWOFF LOW
     #endif // AP2112
+    #ifdef DUE
+        #define WIRE Wire1
+        #define SERIALX Serial1
+    #endif  // DUE
+    #ifndef DUE                // NUCLEO
+        #define WIRE Wire
+        #define SERIALX Serial2
+    #endif // DUE
  #endif // RED1.1
 
 #endif // ndef PERIF
-
-// Serial pour config // DUE défini dans platformio.ini
-
-#ifdef DUE
-#define SERIALX Serial1
-#define SERNB 1
-#endif
-#ifndef DUE
-#define SERIALX Serial
-#define SERNB 0
-#endif
 
     // protocoles
 

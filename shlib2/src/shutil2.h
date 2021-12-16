@@ -15,7 +15,7 @@ float convStrToNum(char* str,int* sizeRead);
 int32_t convStrToInt(char* str,int* sizeRead);
 int convIntToString(char* str,int num);
 int convNumToString(char* str,float num);
-boolean compMac(byte* mac1,byte* mac2);
+bool compMac(byte* mac1,byte* mac2);
 void packMac(byte* mac,char* ascMac);
 void unpackMac(char* buf,byte* mac);
 void serialPrintMac(byte* mac,uint8_t nl);

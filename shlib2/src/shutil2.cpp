@@ -206,7 +206,7 @@ int32_t convStrToInt(char* str,int* sizeRead)
   return v*minu;
 }
 
-boolean compMac(byte* mac1,byte* mac2)
+bool compMac(byte* mac1,byte* mac2)
 {
   for(int i=0;i<6;i++){if(mac1[i] != mac2[i]){return FAUX;}}
   return VRAI;
@@ -597,7 +597,7 @@ int serDataAvailable(uint8_t serialNb)
   switch(serialNb){
     case 0:return Serial.available();
 #ifndef DETS
-    case 1:return Serial1.available();
+    case 1:return SERIALX.available();
 #endif
     default: return Serial.available();;
   }
@@ -608,7 +608,7 @@ char serDataRead(uint8_t serialNb)
   switch(serialNb){
     case 0:return Serial.read();
 #ifndef DETS
-    case 1:return Serial1.read();
+    case 1:return SERIALX.read();
 #endif
     default: return Serial.read();;
   }
@@ -656,7 +656,7 @@ if(!serDataAvailable(serialNb)){return 0;}
       switch(serialNb){
         case 0:if((n=Serial.available())){inch=Serial.read();}break;
 #ifndef DETS
-        case 1:if((n=Serial1.available())){inch=Serial1.read();}break;
+        case 1:if((n=SERIALX.available())){inch=SERIALX.read();}break;
 #endif
         default:if((n=Serial.available())){inch=Serial.read();}break;
       }
@@ -674,7 +674,7 @@ if(!serDataAvailable(serialNb)){return 0;}
         switch(serialNb){
           case 0:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
 #ifndef DETS
-          case 1:if(Serial1.available()){*(rcv+lrcv)=Serial1.read();lrcv++;t=millis();}break;
+          case 1:if(SERIALX.available()){*(rcv+lrcv)=SERIALX.read();lrcv++;t=millis();}break;
 #endif
           default:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
         }  

@@ -164,6 +164,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
         cli->write(data);
         //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
   }
+  else cli->stop();   // libération socket
   return v;
 }
 
