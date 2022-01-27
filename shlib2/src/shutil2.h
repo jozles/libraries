@@ -14,6 +14,7 @@ uint8_t conv_atobl(char* ascii,uint32_t* bin,uint8_t len);
 float convStrToNum(char* str,int* sizeRead);
 int32_t convStrToInt(char* str,int* sizeRead);
 int convIntToString(char* str,int num);
+int convIntToString(char* str,int num,uint8_t len);
 int convNumToString(char* str,float num);
 bool compMac(byte* mac1,byte* mac2);
 void packMac(byte* mac,char* ascMac);

@@ -181,7 +181,7 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
 // wait for ref,lref    si lbuf<>0 accumule le flot dans buf (ref incluse)
 // sortie MESSTO (0) time out   MESSDEC (-1) décap     MESSOK (1) OK
 {
-  boolean termine=FAUX;
+  bool termine=FAUX;
   int ptref=0,ptbuf=0;
   char inch;
   unsigned long timerTo=millis()+TOFINCHCLI;

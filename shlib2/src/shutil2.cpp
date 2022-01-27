@@ -31,7 +31,7 @@ char* v2debug[NBDBPTS*NBDBOC];
 char* v3debug[NBDBPTS*NBDBOC];
 */
 
-uint8_t pinLed;
+uint32_t pinLed;
 
 bool wdEnable=false;
 bool trigwdOn=false;
@@ -40,11 +40,12 @@ int   int00=0;
 int*  int0=&int00;
 
 
-int convIntToString(char* str,int num)
+int convIntToString(char* str,int num,uint8_t len)
 {
-
   int i=0,t=0,num0=num;
-  while(num0!=0){num0/=10;i++;}                 // comptage nbre chiffres partie entière
+  if(num<0){i=1;str[0]='-';}
+  while(num0!=0){num0/=10;i++;}             // comptage nbre chiffres partie entière
+  if(len!=0){i=len;}                        // len!=0 complète avec des 0 ou troncate
   t=i;
   for (i=i;i>0;i--){num0=num%10;num/=10;str[i-1]=chexa[num0];}
   str[t]='\0';
@@ -52,7 +53,12 @@ int convIntToString(char* str,int num)
   return t;
 }
 
-int convNumToString(char* str,float num)  // retour string terminée par '\0' ; return longueur totale '\0' inclus
+int convIntToString(char* str,int num)
+{
+  return convIntToString(str,num,0);
+}
+
+int convNumToString(char* str,float num)    // retour string terminée par '\0' ; return longueur totale '\0' inclus
 {
   int i=0,v=0,t=0;
 
@@ -248,6 +254,7 @@ void dumpfield(char* fd,uint8_t ll)
 #ifdef __arm__
 void memDump(char* loc)
 {
+  /*
   void* stackPtr = alloca(4); // This returns a pointer to the current bottom of the stack
   Serial.print("\n====> ");Serial.print(loc);
   Serial.print(" StackPtr ");Serial.print((unsigned long)stackPtr);
@@ -261,6 +268,7 @@ void memDump(char* loc)
   dumpstr((char*)stackPtr,64);
 
   delay(10); // serial
+  */
 }
 #endif // __arm__
 
@@ -596,9 +604,9 @@ int serDataAvailable(uint8_t serialNb)
 {
   switch(serialNb){
     case 0:return Serial.available();
-#ifndef DETS
+//#ifndef DETS
     case 1:return SERIALX.available();
-#endif
+//#endif
     default: return Serial.available();;
   }
 }
@@ -607,9 +615,9 @@ char serDataRead(uint8_t serialNb)
 {
   switch(serialNb){
     case 0:return Serial.read();
-#ifndef DETS
+//#ifndef DETS
     case 1:return SERIALX.read();
-#endif
+//#endif
     default: return Serial.read();;
   }
 }

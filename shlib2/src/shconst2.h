@@ -31,48 +31,51 @@
  #define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01
  #define LEDON LOW
  #define LEDOFF HIGH
+ #define SERIALX Serial
 #endif // defPERIF
-#ifndef PERIF
 
-#ifdef DETS
-    #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
-    #define LEDON HIGH
-    #define LEDOFF LOW
-    #define STOPREQ 5         // PD5
- #endif // DETS
+#ifndef PERIF
+    #ifdef DETS
+        #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
+        #define LEDON HIGH
+        #define LEDOFF LOW
+        #define STOPREQ 5         // PD5
+    #endif // DETS
  
- #ifdef REDV0
-    #define STOPREQ 3          // push button pour stop request
-    #define PINLED  2          // 2 sur redshieldV0 // 13 sur proto
-    #define LEDON HIGH
-    #define LEDOFF LOW
-    #define SDCARD 4           // toujours 4 pour compatibilité lib.
- #endif // RED1.0
- #ifdef REDV1
-    #define AP2112
-    #define STOPREQ 2          // push button pour stop request
-    #define PINLED  3          // 2 sur redV0 // 13 sur proto
-    #define LEDON HIGH
-    #define LEDOFF LOW
-    #define SDCARD 4           // toujours 4 pour compatibilité lib.
-    #define POWCD 5            // power command W5500/SD/RADIO 
-    #ifndef AP2112
-        #define POWON  LOW
-        #define POWOFF HIGH
-    #endif // AP2112
-    #ifdef AP2112
-        #define POWON  HIGH
-        #define POWOFF LOW
-    #endif // AP2112
-    #ifdef DUE
-        #define WIRE Wire1
-        #define SERIALX Serial1
-    #endif  // DUE
-    #ifndef DUE                // NUCLEO
-        #define WIRE Wire
-        #define SERIALX Serial2
-    #endif // DUE
- #endif // RED1.1
+    #ifdef REDV0
+        #define STOPREQ 3          // push button pour stop request
+        #define PINLED  2          // 2 sur redshieldV0 // 13 sur proto
+        #define LEDON HIGH
+        #define LEDOFF LOW
+        #define SDCARD 4           // toujours 4 pour compatibilité lib.
+    #endif // RED1.0
+
+    #ifdef REDV1
+        #define AP2112             // red shield 1.2 and later
+        #define STOPREQ 2          // push button pour stop request
+        #define PINLED  3          // 2 sur redV0 // 13 sur proto
+        #define LEDON HIGH
+        #define LEDOFF LOW
+        #define SDCARD 4           // toujours 4 pour compatibilité lib.
+        #define POWCD 5            // power command W5500/SD/RADIO 
+        #ifndef AP2112             
+            #define POWON  LOW
+            #define POWOFF HIGH
+        #endif // AP2112
+        #ifdef AP2112
+            #define POWON  HIGH
+            #define POWOFF LOW
+        #endif // AP2112
+
+        #ifdef DUE
+            #define WIRE Wire1
+            #define SERIALX Serial1
+        #endif  // DUE
+        #ifndef DUE                // NUCLEO
+            #define WIRE Wire
+            #define SERIALX Serial2
+        #endif // DUE
+    #endif // RED1.1
 
 #endif // ndef PERIF
 
@@ -167,10 +170,10 @@
 #define MAXSSID   4
 #define LENSSID   16
 #define LPWSSID   48
-#define SSID1     "pinks"
-#define PWDSSID1  "cain ne dormant pas songeait au pied des monts"
-#define SSID2     "devolo-5d3"
-#define PWDSSID2  "JNCJTRONJMGZEEQL"
+#define SSID2     "pinks"
+#define PWDSSID2  "cain ne dormant pas songeait au pied des monts"
+#define SSID1     "devolo-5d3"
+#define PWDSSID1  "JNCJTRONJMGZEEQL"
 
 // concentrateurs
 
@@ -446,8 +449,8 @@ enum {NOPRINT,PRINT};
 #define ACT13 '-0-  '
 #define PMDCA_1     0x0E     // force value 1
 #define ACT14 '-1-  '
-#define PMDCA_DISP  0x0F     //
-#define ACT15 '_____'
+#define PMDCA_SET   0x0F     // force valeur srce dans dest
+#define ACT15 'SET  '
 
 #define MAXACT 15
 
