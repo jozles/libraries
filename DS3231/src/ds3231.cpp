@@ -7,7 +7,7 @@
 #define WIRE Wire
 #endif  // DUE
 #ifdef DUE
-extern TwoWIRE Wire1;
+extern TwoWire Wire1;
 #define WIRE Wire1
 #endif  // DUE
 
