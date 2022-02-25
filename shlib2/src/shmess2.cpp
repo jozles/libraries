@@ -71,8 +71,6 @@ extern char   bufServer[LBUFSERVER];
 
 extern byte   mac[6];
 
-extern byte memDetServ;  // image mémoire NBDSRV détecteurs (8)
-
 const char*   periText={TEXTMESS};
 
 #ifndef PERIF
@@ -268,7 +266,7 @@ int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de 
 
 void waitRefCliDiag(bool diags,int pM)
 {
-  if(diags){Serial.print(" waitRefCli pM=");Serial.print(pM);Serial.print("-");Serial.print(millis());}
+  //if(diags){Serial.print(" waitRefCli pM=");Serial.print(pM);Serial.print("-");Serial.print(millis());}
 }
 
 #ifndef PERIF

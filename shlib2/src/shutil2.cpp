@@ -212,11 +212,11 @@ int32_t convStrToInt(char* str,int* sizeRead)
   return v*minu;
 }
 
-bool compMac(byte* mac1,byte* mac2)
+/*bool compMac(byte* mac1,byte* mac2)
 {
   for(int i=0;i<6;i++){if(mac1[i] != mac2[i]){return FAUX;}}
   return VRAI;
-}
+}*/
 
 void dumpstr0(char* data,uint8_t len)
 {

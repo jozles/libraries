@@ -92,7 +92,7 @@
 
     // messages
 
-#define LENMESS     406+1               // longueur buffer message v1.3
+#define LENMESS     692+1               // longueur buffer message v1.6
 #define MPOSFONC    0                   // position fonction
 #define MPOSLEN     11                  // position longueur (longueur fonction excluse)
 #define MPOSNUMPER  MPOSLEN+5           // position num périphérique
@@ -106,8 +106,8 @@
 #define MPOSPULSONE MPOSANALH+8+1       // Timers tOne (4bytes)*4
 #define MPOSPULSTWO MPOSPULSONE+NBPULSE*(LENVALPULSE+1)       // Timers tTwo (4bytes+1sep)*4
 #define MPOSPULSCTL MPOSPULSTWO+NBPULSE*(LENVALPULSE+1)       // paramètres timers (4*3 bits=2 bytes)
-#define MPOSPERINPUT MPOSPULSCTL+2*PCTLLEN+1                  // inputs
-#define MPOSMDETSRV MPOSPERINPUT+NBPERINPUT*PERINPLEN*2+1     // detecteurs serveur
+#define MPOSPERRULES MPOSPULSCTL+2*PCTLLEN+1                  // rules
+#define MPOSMDETSRV MPOSPERRULES+NBPERRULES*PERINPLEN*2+1     // detecteurs serveur
 #define MPOSPORTSRV MPOSMDETSRV+MDSLEN*2+1                    // port perif serveur
 #define MPOSMDIAG   MPOSPORTSRV+5                             // texte diag
 #define MLMSET      MPOSMDIAG+5          // longueur message fonction incluse
@@ -198,8 +198,7 @@
 #define CC_SPEED    0          // RF_SPEED_1Mb (voir nrf24l01s.h)
 
 #define TOINCHCLI   100         // msec max attente car server
-#define TOFINCHCLI  6000        // msec max attente 1er car server ... devrait etre réduit
-#define TO_HTTPCX   4000        // nbre maxi retry connexion serveur
+#define TOFINCHCLI  3000        // msec max attente 1er car server ... devrait etre réduit
 
 #define SLOWBLINK 3000
 #define FASTBLINK 350
@@ -219,12 +218,12 @@
 #define BCODEPBNTP        (2+MAXBLK)   // pas de service NTP
 #define BCODEORDREXT      4   // un ordreExt() a été reçu
 #define BCODEWAITWIFI     (4+MAXBLK)   // attente WIFI
-#define BCODESDCARDKO     5   // pas de SDCARD ; config KO
+#define BCODESDCARDKO     5   // pas de SDCARD ; config KO ; file HS
 #define BCODEFHISTO       (6+MAXBLK)   // write 0 car (sdstore_textdh0)
 #define BCODELENVAL       7   // LENVAL trop petit
 #define BCODECONFIGRECLEN 9   // CONFIGRECLEN ou MLMSET/LENMESS faux -> blocage
 #define BCODEPERICACHEKO 11   // periSave et cache invalide
-#define BCODESYSERR      13   // system error (fdatasave>99 STEPDATASAVE!=talkStep)
+#define BCODESYSERR      13   // system error (fdatasave>99 ; STEPDATASAVE!=talkStep ; MDSLEN invalide)
 #define BCODENUMPER      15   // tentative de periLoad d'un perif invalide
 #define BCODESHOWLINE    17   // buffer showline overflow / ordreExt overflow
 
@@ -290,9 +289,8 @@ enum {NOPRINT,PRINT};
 
 /* nombre détecteurs externes */
 
-#define NBDSRV 32               // nombre de det serveur (param "léger" memDetServ défini uint32_t !)
-#define MDSLEN NBDSRV/8         // type memDetServ
-
+#define NBDSRV 64               // nombre de det serveur 
+#define MDSLEN 8                // (NBDSRV/8) DOIT ETRE MULTIPLE DE 4 ; len memDetServ
 
 
 /* bits memDetec */
@@ -365,7 +363,8 @@ enum {NOPRINT,PRINT};
 
 /* définition table règles switchs (ex inputs) */
 
-#define NBPERINPUT 24
+#define NBPERRULES 48               // Maxi possible pour Eprom 512 bytes des ESP8266
+//#define NBPERRULES 24               // pour serveur 1.5a et perif 1.y
 #define PERINPLEN  4
 
 // byte 0 & byte 3 -- num détecteur + type (source/dest)
@@ -395,7 +394,7 @@ enum {NOPRINT,PRINT};
 #define PERINPACTLS_PB  0x04
 #define PERINPDETES_VB  0x08        // usage detec level (0=edge 1=static)
 #define PERINPDETES_PB  0x03
-#define PERINPVALID_VB  0x04        // actif level
+#define PERINPVALID_VB  0x04        // actif level (0 rise/high 1 fall/low )
 #define PERINPVALID_PB  0x02
 #define PERINPOLDLEV_VB 0x02        // prev detec level
 #define PERINPOLDLEV_PB 0x01
