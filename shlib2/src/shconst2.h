@@ -289,7 +289,7 @@ enum {NOPRINT,PRINT};
 
 /* nombre détecteurs externes */
 
-#define NBDSRV 64               // nombre de det serveur 
+#define NBDSRV 64               // nombre de det serveur (supporté par périf v1.y ; pour serveur 1.5a MDSRV 32, MDSLEN 4 )
 #define MDSLEN 8                // (NBDSRV/8) DOIT ETRE MULTIPLE DE 4 ; len memDetServ
 
 

@@ -9,6 +9,7 @@
 
 int buildMess(const char* fonction,const char* data,const char* sep);
 int buildMess(const char* fonction,const char* data,const char* sep,bool diags);
+int buildMess(const char* fonction,const char* data,const char* sep,bool diags,bool diagMask);
 /*
 int checkData(char* data);
 int checkData(char* data,uint16_t* lenData);

@@ -93,7 +93,10 @@ void purgeServer(WiFiClient* cli,bool diags)
 int buildMess(const char* fonction,const char* data,const char* sep)
     {return buildMess(fonction,data,sep,true);}
 
-int buildMess(const char* fonction,const char* data,const char* sep,bool diags)   // concatène un message dans bufServer
+int buildMess(const char* fonction,const char* data,const char* sep,bool diags)
+    {return buildMess(fonction,data,sep,diags,false);}
+
+int buildMess(const char* fonction,const char* data,const char* sep,bool diags,bool diagMask)   // concatène un message dans bufServer
 {                                                                     // retourne la longueur totale dans bufServer ou 0 si ovf
       if((strlen(bufServer)+strlen(data)+11+5+2+1)>LBUFSERVER)
         {return 0;}
@@ -106,7 +109,7 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags) 
       strcat(bufServer+sb+5,data);
       setcrc(bufServer+sb,d);
       strcat(bufServer,sep);
-      if(diags){Serial.print(" bS=");Serial.println(bufServer);//Serial.print(" bm=");Serial.println(millis());
+      if(diags && !diagMask){Serial.print(" bS=");Serial.println(bufServer);//Serial.print(" bm=");Serial.println(millis());
       }
       return strlen(bufServer);
 }
