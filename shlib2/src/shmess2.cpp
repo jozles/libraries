@@ -74,20 +74,20 @@ extern byte   mac[6];
 const char*   periText={TEXTMESS};
 
 #ifndef PERIF
-void purgeServer(EthernetClient* cli){purgeServer(cli,true);}
-void purgeServer(EthernetClient* cli,bool diags)
+void purgeCli(EthernetClient* cli){purgeCli(cli,true);}
+void purgeCli(EthernetClient* cli,bool diags)
 #endif // // PERIF
 #ifdef PERIF
-void purgeServer(WiFiClient* cli){purgeServer(cli,true);}
-void purgeServer(WiFiClient* cli,bool diags)
+void purgeCli(WiFiClient* cli){purgeCli(cli,true);}
+void purgeCli(WiFiClient* cli,bool diags)
 #endif // // PERIF
 {
     if(cli->connected()){
-        //Serial.print(" purge ");
+        if(diags){Serial.print(" purge :");}
         while (cli->available()){char c=cli->read();if(diags){Serial.print(c);}}
         if(diags){Serial.println();}
     } 
-    cli->stop();
+    //cli->stop(); // ne doit pas être effectué de façon générique... ici purge seule
 }
 
 int buildMess(const char* fonction,const char* data,const char* sep)
@@ -124,7 +124,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
   int x=0,v=MESSOK,repeat=0;
 
 #ifndef PERIF
-    //purgeServer(cli);
+    //purgeCli(cli);
 #endif // // PERIF
 
   Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");

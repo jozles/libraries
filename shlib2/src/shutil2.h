@@ -37,6 +37,7 @@ void blink(uint8_t nb);
 void initLed();
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
+void to64(char* srce,char* dest,uint32_t len);
 
 //bool ctlpass(char* data,char* model);
 //int  searchusr(char* usrname);
