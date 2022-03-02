@@ -79,6 +79,33 @@
 
 #endif // ndef PERIF
 
+
+#ifdef ANALYZE
+// IN CASE OF MESS WITH ANALYZE FLAG, JUST COMMENT IT in platformio.ini
+#ifdef DUE
+    #define ANPIN0 A5
+    #define ANPIN1 A6
+    #define ANPIN2 A7
+#endif // DUE
+#ifdef PERIF
+    #define ANPIN0 13
+    #define ANPIN1 16
+    #define ANPIN2 10
+#endif // PERIF
+#define AN0 ANPIN0  // A5
+#define AN1 ANPIN1  // A6
+#define AN2 ANPIN2  // A7
+// toujours un LOW en premier ppour eviter les glitchs à 1 sur la sortie de la porte 
+#ifndef PERIF
+#define PERIQ   digitalWrite(AN2,LOW);digitalWrite(AN1,HIGH);digitalWrite(AN0,HIGH);  // 110 periReq
+#endif // PERIF
+#define MESTOS  digitalWrite(AN0,LOW);digitalWrite(AN1,LOW);digitalWrite(AN2,HIGH);    // 001 messToServer
+#define GHTTPR  digitalWrite(AN0,LOW);digitalWrite(AN1,LOW);digitalWrite(AN2,LOW);    // 000 getHttpResponse
+#define STOPALL digitalWrite(AN0,HIGH);digitalWrite(AN1,HIGH);digitalWrite(AN2,HIGH); // end
+#endif // ANALYZE
+
+
+
     // protocoles
 
 #define PROTOCHAR " TU"
@@ -198,7 +225,7 @@
 #define CC_SPEED    0          // RF_SPEED_1Mb (voir nrf24l01s.h)
 
 #define TOINCHCLI   100         // msec max attente car server
-#define TOFINCHCLI  3000        // msec max attente 1er car server ... devrait etre réduit
+#define TOFINCHCLI  1000        // msec max attente 1er car server ... devrait etre réduit
 
 #define SLOWBLINK 3000
 #define FASTBLINK 350

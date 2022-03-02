@@ -91,7 +91,7 @@ void purgeCli(WiFiClient* cli,bool diags)
 }
 
 int buildMess(const char* fonction,const char* data,const char* sep)
-    {return buildMess(fonction,data,sep,true);}
+    {return buildMess(fonction,data,sep,false);}
 
 int buildMess(const char* fonction,const char* data,const char* sep,bool diags)
     {return buildMess(fonction,data,sep,diags,false);}
@@ -123,9 +123,9 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
 {
   int x=0,v=MESSOK,repeat=0;
 
-#ifndef PERIF
-    //purgeCli(cli);
-#endif // // PERIF
+#ifdef ANALYZE
+  MESTOS 
+#endif // ANALYZE
 
   Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
   Serial.print(host);Serial.print(":");Serial.print(port);
@@ -166,6 +166,9 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
         //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
   }
   else cli->stop();   // libération socket
+#ifdef ANALYZE
+  STOPALL
+#endif // ANALYZE
   return v;
 }
 
@@ -213,44 +216,6 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
       return MESSOK;
 }
 
-/*int checkData(char* data)
-{
-    int l;
-    checkData(data,&l);
-}
-*/
-/*
-int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d'un message (longueur,crc)
-{                            // renvoie MESSOK (1) OK ; MESSCRC (-2) CRC ; MESSLEN (-3)  le message d'erreur est valorisé
-  int mess;
-  int sizeReadLength;
-  uint8_t c=0;
-  uint16_t ld;
-  if(lenData==nullptr){lenData=&ld;}
-
-  *lenData=(uint16_t)convStrToNum(data,&sizeReadLength);
-  conv_atoh(data+*lenData,&c);
-  if(*lenData!=(uint16_t)strlen(data)-2){
-    mess=MESSLEN;
-    
-    //dumpstr(data,strlen(data));
-    Serial.print(" sizeRead=");Serial.print(sizeReadLength);
-    Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.print(strlen(data));
-    Serial.print(" CRC,c,len= ");Serial.print(calcCrc(data,*lenData),HEX);Serial.print(", ");
-    if(c<16){Serial.print("0");}
-    Serial.print(c,HEX);Serial.print(" , ");Serial.println(*lenData);
-  }
-  else if(calcCrc(data,*lenData)!=c){mess=MESSCRC;}
-  else mess=MESSOK;
-
-  return mess;
-}
-
-int checkData(char* data)
-{
-  return checkData(data,nullptr);
-}
-*/
 int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de la fonction
 {
     char noms[LENNOM+1];
@@ -285,6 +250,11 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
 // format <body>contenu...</body></html>\n\r                        la fonction est décodée et les données sont chargées
 // contenu fonction__=nnnn_datacrc                                  renvoie les codes "MESSxxx"
 {
+
+#ifdef ANALYZE
+  GHTTPR
+#endif // ANALYZE
+
   const char* body="<body>\0";
   const char* bodyend="</body>\0";
   int q=0;
@@ -292,6 +262,10 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
   q=waitRefCli(cli,body,strlen(body),bufServer,0,diags);
   waitRefCliDiag(diags,q);
   if(q==MESSOK){
+  #ifdef ANALYZE
+    STOPALL
+    GHTTPR
+  #endif // ANALYZE  
         q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);
         waitRefCliDiag(diags,q);
   }
@@ -299,6 +273,10 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
         q=checkHttpData(data,fonction);
         if(diags){Serial.print(" checkHttpData pM=");Serial.println(q);}
   }
+#ifdef ANALYZE
+  STOPALL
+#endif // ANALYZE
+    
   return q;
 }
 
