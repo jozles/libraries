@@ -115,61 +115,86 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags,b
 }
 
 #ifndef PERIF
+int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
+#endif //
+#ifdef PERIF
+int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
+#endif //
+{
+//    Le test de réception en mode server pendant la tentative de connexion concerne uniquement les périphériques
+//    Le serveur frontal doit finir de traiter les envois avant de répondre à des demandes
+
+  int x=0,v=MESSOK,repeat=0;
+
+  #ifdef ANALYZE
+  MESTOS 
+  #endif // ANALYZE
+
+  bool noServerCall=true;
+  if(server!=nullptr){
+    *cliext=server->available();
+    if(*cliext){noServerCall=false;v=MESSSRV;}}
+
+  if(noServerCall){
+    Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
+    Serial.print(host);Serial.print(":");Serial.print(port);
+    Serial.print("...");
+
+    cli->stop();                        // assure la disponibilité de l'instance avant usage 
+                                          // (en principe inutile, messToServer utilisé lors de débuts de négociation)
+    x=cli->connect(host,port);
+    while(!x && repeat<30 && noServerCall){
+
+      #ifndef PERIF
+      trigwd();
+      #endif
+
+        v=MESSOK;
+        repeat++;
+    
+        x=cli->connected();
+        //Serial.print("(");Serial.print(x);Serial.print(")");
+        if(!x){
+          switch(x){
+            case -1:Serial.print("time out ");break;
+            case -2:Serial.print("invalid server ");break;
+            case -3:Serial.print("truncated ");break;
+            case -4:Serial.print("invalid response ");break;
+            default:break;
+          }
+          #ifndef PERIF
+          Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
+          Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
+          #endif // PERIF
+          delay(500);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
+          
+          if(server!=nullptr){
+            *cliext=server->available();
+            if(*cliext){noServerCall=false;v=MESSSRV;}}
+        }
+    }     // while not connected
+    if(v==MESSOK){
+      Serial.println(" ok");
+      cli->write(data);      //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
+    }
+    else cli->stop();     // libération socket
+  }   // noServerCall before first connection attempt
+#ifdef ANALYZE
+  STOPALL
+#endif // ANALYZE
+  if(v==MESSSRV){Serial.println("server call");}
+  //Serial.print("outofMTS v=");Serial.println(v);
+  return v;
+}
+
+#ifndef PERIF
 int messToServer(EthernetClient* cli,const char* host,int port,char* data)    // connecte au serveur et transfère la data
 #endif //
 #ifdef PERIF
 int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    // connecte au serveur et transfère la data
 #endif //
 {
-  int x=0,v=MESSOK,repeat=0;
-
-#ifdef ANALYZE
-  MESTOS 
-#endif // ANALYZE
-
-  Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
-  Serial.print(host);Serial.print(":");Serial.print(port);
-  Serial.print("...");
-
-  cli->stop();                        // assure la disponibilité de l'instance avant usage
-  x=cli->connect(host,port);
-  while(!x && repeat<7){
-
-    #ifndef PERIF
-    trigwd();
-    #endif
-
-    v=MESSOK;
-    repeat++;
-    
-    x=cli->connected();
-    //Serial.print("(");Serial.print(x);Serial.print(")");
-    if(!x){
-        switch(x){
-            case -1:Serial.print("time out ");break;
-            case -2:Serial.print("invalid server ");break;
-            case -3:Serial.print("truncated ");break;
-            case -4:Serial.print("invalid response ");break;
-            default:break;
-        }
-        #ifndef PERIF
-        Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
-        Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
-        #endif // PERIF
-        delay(500);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
-    }
-  }
-  if(v==MESSOK){
-        Serial.println(" ok");
-        //cli->print(data);
-        cli->write(data);
-        //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
-  }
-  else cli->stop();   // libération socket
-#ifdef ANALYZE
-  STOPALL
-#endif // ANALYZE
-  return v;
+  return messToServer(cli,host,port,data,nullptr,nullptr);
 }
 
 #ifndef PERIF
@@ -271,7 +296,7 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
   }
   if(q==MESSOK){
         q=checkHttpData(data,fonction);
-        if(diags){Serial.print(" checkHttpData pM=");Serial.println(q);}
+        if(diags){Serial.print(" checkHttpData pM=");Serial.print(q);Serial.print(" f=");Serial.println(*fonction);}
   }
 #ifdef ANALYZE
   STOPALL

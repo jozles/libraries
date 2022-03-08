@@ -4,7 +4,6 @@
 // params provenant de platformio.ini // 
 //     PERIF // REDV0 // REDV1      //
 
-
 #define LENVERSION  4
 #define LENMODEL    6
 //#define SIZEPULSE   4  // uint32_t
@@ -12,20 +11,17 @@
 #define LDATEASCII 12           // YYMMDDHHMMSS
 #define TEXTIPADDRLENGTH 15
 
-/*
-// 1er serveur
-#define PORTPERISERVER  1790    // port du serveur pour périphériques et maintenance (RUN 1789)
-#define PORTPILOTSERVER 1792    // port du serveur de remote
-#define PORTUDPSERVER   8885
-#define HOSTIPADDR "192.168.0.35"
-//
-// 2nd serveur
-#define PORTPERISERVER2  1786    // port du serveur pour périphériques et maintenance
-#define PORTPILOTSERVER2 1788    // port du serveur de remote
-#define PORTUDPSERVER2   8886
-//#define HOSTIPADDR2      {192,168,0,36} // pour frontal
-#define HOSTIPADDR2 "192.168.0.36"   //  SHIPADDR // pour périph 
-//*/
+#define _MODE_DEVT  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
+//#define _MODE_RUN  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
+
+#ifdef _MODE_DEVT  
+  #define IP_FRONTAL IPAddress(192,168,0,35)      // server DEVT
+  #define PORT_FRONTAL 1790                       // server DEVT
+#endif // _MODE_DEVT
+#ifdef _MODE_RUN
+  #define IP_FRONTAL IPAddress(192,168,0,36)      // server RUN
+  #define PORT_FRONTAL 1786                       // server RUN
+#endif // _MODE_RUN
 
 #ifdef PERIF
  #define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01
@@ -282,8 +278,9 @@ enum {NOPRINT,PRINT};
 #define MESSCX   -7
 #define MESSNUMP -8
 #define MESSMAC  -9
+#define MESSSRV  -10
 
-#define NBMESS   10  // OK ne compte pas
+#define NBMESS   11  // OK ne compte pas
 
 #define TEXTOK      "*OK_"
 #define TEXTTO      "*TO_"
@@ -296,6 +293,7 @@ enum {NOPRINT,PRINT};
 #define TEXTCX      "*CX_"
 #define TEXTNUMP    "*NUP"
 #define TEXTMAC     "*MAC"
+#define TEXTSRV     "*SRV"
 
 //#define TEXTMESS TEXTOK,TEXTTO,TEXTDEC,TEXTCRC,TEXTLEN,TEXTFON,TEXTFULL,TEXTSYS,TEXTCX,TEXTNUMP,TEXTMAC
 #define TEXTMESS " OK \0*TO_\0*OVF\0*CRC\0*LEN\0*FON\0*FUL\0*SYS\0*CX_\0*NUP\0*MAC\0"
