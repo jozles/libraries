@@ -98,20 +98,24 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags)
 
 int buildMess(const char* fonction,const char* data,const char* sep,bool diags,bool diagMask)   // concatène un message dans bufServer
 {                                                                     // retourne la longueur totale dans bufServer ou 0 si ovf
-      if((strlen(bufServer)+strlen(data)+11+5+2+1)>LBUFSERVER)
-        {return 0;}
-      strcat(bufServer,fonction);
-      strcat(bufServer,"=");
-      int sb=strlen(bufServer);
-      int d=strlen(data)+5;    //+strlen(sep);
-      sprintf(bufServer+sb,"%04d",d);
-      strcat(bufServer+sb+4,"_");
-      strcat(bufServer+sb+5,data);
-      setcrc(bufServer+sb,d);
-      strcat(bufServer,sep);
-      if(diags && !diagMask){Serial.print(" bS=");Serial.println(bufServer);//Serial.print(" bm=");Serial.println(millis());
-      }
-      return strlen(bufServer);
+      int v=0;
+      if((strlen(bufServer)+strlen(data)+11+5+2+1)<=LBUFSERVER){
+        strcat(bufServer,fonction);
+        strcat(bufServer,"=");
+        int sb=strlen(bufServer);
+        int d=strlen(data)+5;    //+strlen(sep);
+        sprintf(bufServer+sb,"%04d",d);
+        strcat(bufServer+sb+4,"_");
+        strcat(bufServer+sb+5,data);
+        setcrc(bufServer+sb,d);
+        strcat(bufServer,sep);
+        if(diags && !diagMask){Serial.print(" bS=");Serial.println(bufServer);//Serial.print(" bm=");Serial.println(millis());
+        }
+        v=strlen(bufServer);
+      }  
+      else {v=0;}
+      Serial.print(" buildMess:");Serial.print(v);Serial.print(' ');
+      return v;
 }
 
 #ifndef PERIF
@@ -123,6 +127,8 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
 {
 //    Le test de réception en mode server pendant la tentative de connexion concerne uniquement les périphériques
 //    Le serveur frontal doit finir de traiter les envois avant de répondre à des demandes
+
+  Serial.print("mTS ");
 
   int x=0,v=MESSOK,repeat=0;
 

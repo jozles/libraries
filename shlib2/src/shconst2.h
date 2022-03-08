@@ -237,7 +237,7 @@
 
 #define MAXBLK            20  // > MAXBLK codes erreur non bloquants fixes
 #define BCODEONBLINK      98  // allume jusqu'au prochain blink
-#define BCODEPERIRECLEN   3   // PERIRECLEN ou LENMESS (ou autre) trop petit -> blocage
+#define BCODEPERIRECLEN   3   // PERIRECLEN ou LENMESS ou LBUFSERVER (ou autre) trop petit -> blocage
 #define BCODEPBNTP        (2+MAXBLK)   // pas de service NTP
 #define BCODEORDREXT      4   // un ordreExt() a été reçu
 #define BCODEWAITWIFI     (4+MAXBLK)   // attente WIFI
