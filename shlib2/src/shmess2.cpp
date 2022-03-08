@@ -113,7 +113,7 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags,b
         }
         v=strlen(bufServer);
       }  
-      else {v=0;}
+
       Serial.print(" buildMess:");Serial.print(v);Serial.print(' ');
       return v;
 }
@@ -142,7 +142,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
     if(*cliext){noServerCall=false;v=MESSSRV;}}
 
   if(noServerCall){
-    Serial.print("cx serveur (");Serial.print(x);Serial.print(") ");
+    Serial.print("cx to ");Serial.print(x);Serial.print("_");
     Serial.print(host);Serial.print(":");Serial.print(port);
     Serial.print("...");
 
@@ -172,11 +172,22 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
           Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
           Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
           #endif // PERIF
+          
+          Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
+          unsigned long tto=millis();
+          while((millis()-tto)<500){
+            if(server!=nullptr){
+              *cliext=server->available();
+              if(*cliext){noServerCall=false;v=MESSSRV;break;}
+            }
+          }
+          /*
           delay(500);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
           
           if(server!=nullptr){
             *cliext=server->available();
             if(*cliext){noServerCall=false;v=MESSSRV;}}
+          */
         }
     }     // while not connected
     if(v==MESSOK){
