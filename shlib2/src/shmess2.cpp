@@ -176,6 +176,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
           Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
           unsigned long tto=millis();
           while((millis()-tto)<500){
+            yield();
             if(server!=nullptr){
               *cliext=server->available();
               if(*cliext){noServerCall=false;v=MESSSRV;break;}
@@ -253,7 +254,7 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
         }
         else if(millis()>=timerTo){return MESSTO;}
       }
-      if(lbuf!=0){buf[ptbuf-lref]='\0';}
+      if(lbuf!=0){buf[ptbuf-lref]='\0';}    // ptbuf>lref sinon MESSTO
       //if(diags){Serial.println();}
       return MESSOK;
 }
@@ -261,14 +262,16 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
 int checkHttpData(char* data,uint8_t* fonction)   // checkData et extraction de la fonction
 {
     char noms[LENNOM+1];
-    int mess=0;
+    int mess=MESSOK;
 
     memcpy(noms,data,LENNOM);noms[LENNOM]='\0';
     mess=checkData(data+LENNOM+1);                // +1 skip '='
     if(mess==MESSOK){
-        *fonction=(strstr(fonctions,noms)-fonctions)/LENNOM;
+        char* wf=strstr(fonctions,noms);
+        unsigned long pf=(wf-fonctions)/LENNOM;
+        if(wf==nullptr || (int)pf>=nbfonct){mess=MESSFON;}
+        else *fonction=(uint8_t)pf;
         //Serial.print("\nnbfonct=");Serial.print(nbfonct);Serial.print(" fonction=");Serial.print((strstr(fonctions,noms)-fonctions));Serial.print("/");Serial.print(*fonction);
-        if(*fonction>=nbfonct || *fonction<0){mess=MESSFON;}
     }
 
     return mess;
@@ -302,14 +305,12 @@ int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool 
   int q=0;
 
   q=waitRefCli(cli,body,strlen(body),bufServer,0,diags);
-  waitRefCliDiag(diags,q);
   if(q==MESSOK){
   #ifdef ANALYZE
     STOPALL
     GHTTPR
   #endif // ANALYZE  
-        q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-strlen(bodyend),diags);
-        waitRefCliDiag(diags,q);
+        q=waitRefCli(cli,bodyend,strlen(bodyend),data,lmax-1,diags);
   }
   if(q==MESSOK){
         q=checkHttpData(data,fonction);
