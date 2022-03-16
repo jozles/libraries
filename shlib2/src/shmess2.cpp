@@ -149,7 +149,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
     cli->stop();                        // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
     x=cli->connect(host,port);
-    while(!x && repeat<30 && noServerCall){
+    while(!x && repeat<10 && noServerCall){
 
       #ifndef PERIF
       trigwd();

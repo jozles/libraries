@@ -148,7 +148,7 @@ uint8_t textIp(byte* nipadr,byte* buf)
   return (uint8_t)(in-nipadr);
 }
 
-void charIp(byte* nipadr,char* aipadr,char* jsbuf)
+void charIp(char* aipadr,char* nipadr,char* jsbuf)
 {
   char buf[TEXTIPADDRLENGTH+1];
   memset(buf,0x00,TEXTIPADDRLENGTH+1);
@@ -159,9 +159,9 @@ void charIp(byte* nipadr,char* aipadr,char* jsbuf)
   if(jsbuf!=nullptr){strcat(jsbuf,buf);strcat(jsbuf,";");}
 }
 
-void charIp(byte* nipadr,char* aipadr)
+void charIp(char* aipadr,char* nipadr)
 {
-  charIp(nipadr,aipadr,nullptr);
+  charIp(aipadr,nipadr,nullptr);
 }
 
 void conv_atoh(char* ascii,byte* h)
