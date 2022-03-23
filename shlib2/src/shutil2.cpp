@@ -243,7 +243,7 @@ int32_t convStrToInt(char* str,int* sizeRead)
   return VRAI;
 }*/
 
-void dumpstr0(char* data,uint8_t len)
+void dumpstr0(char* data,uint8_t len,bool cr)
 {
     char a[]={0x00,0x00,0x00};
     uint8_t c;
@@ -256,13 +256,19 @@ void dumpstr0(char* data,uint8_t len)
             if(c<32 || c>127){c='.';}
             Serial.print((char)c);
     }
-    Serial.println();
+    if(cr){Serial.println();}
+}
+
+void dumpstr(char* data,uint16_t len,bool cr)
+{
+    while(len>=16){len-=16;dumpstr0(data,16,len>0);data+=16;}
+    if(len!=0){dumpstr0(data,len,false);}
+    if(cr){Serial.println();}
 }
 
 void dumpstr(char* data,uint16_t len)
 {
-    while(len>=16){len-=16;dumpstr0(data,16);data+=16;}
-    if(len!=0){dumpstr0(data,len);}
+  return dumpstr(data,len,true);
 }
 
 void dumpfield(char* fd,uint8_t ll)

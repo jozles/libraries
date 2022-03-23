@@ -114,7 +114,7 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags,b
         v=strlen(bufServer);
       }  
 
-      Serial.print(" buildMess:");Serial.print(v);Serial.print(' ');
+      Serial.print(" bM:");Serial.print(v);Serial.print(' ');
       return v;
 }
 

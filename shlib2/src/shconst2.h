@@ -473,8 +473,8 @@ enum {NOPRINT,PRINT};
 #define ACT13 '-0-  '
 #define PMDCA_1     0x0E     // force value 1
 #define ACT14 '-1-  '
-#define PMDCA_SET   0x0F     // force valeur srce dans dest
-#define ACT15 'SET  '
+#define PMDCA_FORCE 0x0F     // force valeur srce dans dest
+#define ACT15 'FORCE'
 
 #define MAXACT 15
 
