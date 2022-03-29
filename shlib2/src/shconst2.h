@@ -124,7 +124,7 @@
 #define MPOSPERREFR MPOSDH+15           // période refr
 #define MPOSTEMPPER MPOSPERREFR+6       // période check température
 #define MPOSPITCH   MPOSTEMPPER+6       // pitch
-#define MPOSSWCDE   MPOSPITCH+5         // MAXSW commandes sw 0/1 + 1sep (periSwVal)
+#define MPOSSWCDE   MPOSPITCH+5         // MAXSW commandes sw 0/1 + 1sep (periSwCde)
 #define MPOSANALH   MPOSSWCDE+MAXSW+1   // analogLow,analogHigh 2*(4digits) + 1 sep
 #define MPOSPULSONE MPOSANALH+8+1       // Timers tOne (4bytes)*4
 #define MPOSPULSTWO MPOSPULSONE+NBPULSE*(LENVALPULSE+1)       // Timers tTwo (4bytes+1sep)*4
