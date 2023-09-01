@@ -158,6 +158,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
         v=MESSOK;
         repeat++;
     
+        trigwd();
         x=cli->connected();
         //Serial.print("(");Serial.print(x);Serial.print(")");
         if(!x){
@@ -175,7 +176,8 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
           
           Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
           unsigned long tto=millis();
-          while((millis()-tto)<500){
+          while((millis()-tto)<100){
+            trigwd();
             yield();
             if(server!=nullptr){
               *cliext=server->available();
@@ -192,10 +194,14 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
         }
     }     // while not connected
     if(v==MESSOK){
+      trigwd();
       Serial.println(" ok");
       cli->write(data);      //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
     }
-    else cli->stop();     // libération socket
+    else {
+      trigwd();
+      cli->stop();     // libération socket
+    }
   }   // noServerCall before first connection attempt
 #ifdef ANALYZE
   STOPALL

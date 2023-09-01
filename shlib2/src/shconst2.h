@@ -11,8 +11,8 @@
 #define LDATEASCII 12           // YYMMDDHHMMSS
 #define TEXTIPADDRLENGTH 15
 
-#define _MODE_DEVT  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
-//#define _MODE_RUN  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
+//#define _MODE_DEVT  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
+#define _MODE_RUN  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
 
 #ifdef _MODE_DEVT  
   #define IP_FRONTAL IPAddress(192,168,0,35)      // server DEVT
@@ -24,9 +24,9 @@
 #endif // _MODE_RUN
 
 #ifdef PERIF
- #define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01
- #define LEDON LOW
- #define LEDOFF HIGH
+ //#define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01 ;
+ //#define LEDON LOW
+ //#define LEDOFF HIGH
  #define SERIALX Serial
 #endif // defPERIF
 
@@ -36,6 +36,8 @@
         #define LEDON HIGH
         #define LEDOFF LOW
         #define STOPREQ 5         // PD5
+        #define SERIALX Serial
+        #define SERNB 0
     #endif // DETS
  
     #ifdef REDV0
@@ -66,10 +68,12 @@
         #ifdef DUE
             #define WIRE Wire1
             #define SERIALX Serial1
+            #define SERENB 1
         #endif  // DUE
         #ifndef DUE                // NUCLEO
             #define WIRE Wire
             #define SERIALX Serial2
+            #define SERENB 1
         #endif // DUE
     #endif // RED1.1
 
@@ -224,7 +228,7 @@
 #define TOFINCHCLI  1000        // msec max attente 1er car server ... devrait etre réduit
 
 #define SLOWBLINK 3000
-#define FASTBLINK 350
+#define FASTBLINK 200    // 350
 #define PULSEBLINK 4          // plutôt dépendant de la période de la loop sur
                               // périf NO_MODE
 

@@ -32,6 +32,8 @@ char* v3debug[NBDBPTS*NBDBOC];
 */
 
 uint32_t pinLed;
+bool offLed;
+bool onLed;
 
 bool wdEnable=false;
 bool trigwdOn=false;
@@ -442,14 +444,13 @@ void forceWd()
 void trigwd(uint32_t durWd)
 {
   if(wdEnable){
-    int ledState=digitalRead(pinLed);
-            
-    digitalWrite(pinLed,LEDOFF);    // pour provoquer un flanc
-    digitalWrite(pinLed,LEDON);
-    wdEnable=false;
-    delayMicroseconds(durWd);
-    wdEnable=true;
-    digitalWrite(pinLed,ledState);
+    if(digitalRead(pinLed)==offLed){        // si LEDOFF faire un blink(durWd)
+      digitalWrite(pinLed,onLed);
+      wdEnable=false;
+      delayMicroseconds(durWd); 
+      wdEnable=true;
+      digitalWrite(pinLed,offLed);
+    }
     /*if(ledState==HIGH){digitalWrite(pinLed,HIGH);}
     else digitalWrite(pinLed,LOW);*/
   }
@@ -462,14 +463,14 @@ void trigwd()
 
 void lb0()
 {
-  if(nbreBlink>0){blinktime=millis()-1;cntBlink=nbreBlink+1;digitalWrite(pinLed,LEDOFF);}   // nbreBlink>0 start new cycle
+  if(nbreBlink>0){blinktime=millis()-1;cntBlink=nbreBlink+1;digitalWrite(pinLed,offLed);}   // nbreBlink>0 start new cycle
   
   if(millis()>blinktime){
     //Serial.print("led ");
       blinktime=millis();
-      if(digitalRead(pinLed)==LEDON){
+      if(digitalRead(pinLed)==onLed){
         //Serial.println("OFF ");
-          digitalWrite(pinLed,LEDOFF);                            // extinction
+          digitalWrite(pinLed,offLed);                            // extinction
           if(cntBlink>1){blinktime+=FASTBLINK;}
           else {blinktime+=SLOWBLINK;cntBlink=abs(nbreBlink)+1;}  // dernière extinction
           if(cntBlink>MAXBLK){cntBlink-=MAXBLK;}                  // code erreur figé
@@ -477,7 +478,7 @@ void lb0()
       }
       else {
         //Serial.println("ON ");
-        digitalWrite(pinLed,LEDON);                               // allumage
+        digitalWrite(pinLed,onLed);                               // allumage
         blinktime+=PULSEBLINK;
       }
   }  
@@ -496,7 +497,7 @@ void ledblink(int nbBlk)
       }
     }
     else {                                // force allumage statique jusqu'au pronchain ledblink
-      digitalWrite(pinLed,LEDON);
+      digitalWrite(pinLed,onLed);
       blinktime=millis()+2;
     }    
   }
@@ -510,14 +511,16 @@ void ledblink(int nbBlk)
 void blink(uint8_t nb)
 {
   for(nb=nb;nb>0;nb--){
-    digitalWrite(pinLed,LEDON);delay(5);
-    digitalWrite(pinLed,LEDOFF);delay(100);
+    digitalWrite(pinLed,onLed);delay(5);
+    digitalWrite(pinLed,offLed);delay(100);
   }
 }
 
-void initLed()
+void initLed(uint32_t led,bool ledoff,bool ledon)
 {
-  pinLed=PINLED;
+  offLed=ledoff;
+  onLed=ledon;
+  pinLed=led;
   pinMode(pinLed,OUTPUT);
   //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être 
                                   // activé avant que PINLED soit mis en OUTPUT
