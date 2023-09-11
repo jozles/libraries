@@ -41,7 +41,7 @@ int EthernetClient::connect(const char * host, uint16_t port)
 
 int EthernetClient::connect(IPAddress ip, uint16_t port)
 {
-	status_ap=0;
+	status_ap=0;  // !0 fail : 11=all in use ; 12=socket close ; 13=TO socketstatus ; 14=IPAddress 0 ; 
 
 	if (sockindex < MAX_SOCK_NUM) {
 		if (Ethernet.socketStatus(sockindex) != SnSR::CLOSED) {
