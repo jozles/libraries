@@ -283,6 +283,7 @@ enum {NOPRINT,PRINT};
 #define MESSNUMP -8
 #define MESSMAC  -9
 #define MESSSRV  -10
+#define MESSSRV2 -11
 
 #define NBMESS   11  // OK ne compte pas
 

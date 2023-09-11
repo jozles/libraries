@@ -125,9 +125,6 @@ int messToServer(EthernetClient* cli,const char* host,int port,char* data,Ethern
 int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 {
-//    Le test de réception en mode server pendant la tentative de connexion concerne uniquement les périphériques
-//    Le serveur frontal doit finir de traiter les envois avant de répondre à des demandes
-
   Serial.print("mTS ");
 
   int x=0,v=MESSOK,repeat=0;
@@ -136,62 +133,62 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
   MESTOS 
   #endif // ANALYZE
 
+/*   noServerCall : vérifier l'utilité 
+*    (probablement pour débug des pb de cx aux périfs-server)
+*    concerne uniquement les périphériques : server=nullptr si frontal
+*    vérifie l'absence de demande pendante
+*/
   bool noServerCall=true;
   if(server!=nullptr){
     *cliext=server->available();
     if(*cliext){noServerCall=false;v=MESSSRV;}}
 
   if(noServerCall){
-    Serial.print("cx to ");Serial.print(x);Serial.print("_");
-    Serial.print(host);Serial.print(":");Serial.print(port);
-    Serial.print("...");
+    Serial.print("cx to ");Serial.print(host);Serial.print(":");Serial.print(port);Serial.print("...");
 
-    cli->stop();                        // assure la disponibilité de l'instance avant usage 
+    cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
-    x=cli->connect(host,port);
-    while(!x && repeat<10 && noServerCall){
-
+    #define MAXCXTRY 4
+    while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
+      
       #ifndef PERIF
       trigwd();
       #endif
 
-        v=MESSOK;
         repeat++;
     
         trigwd();
-        x=cli->connected();
+        x=cli->connect(host,port);
+        //x=cli->connected();
         //Serial.print("(");Serial.print(x);Serial.print(")");
+        
         if(!x){
-          switch(x){
+          /*switch(x){
             case -1:Serial.print("time out ");break;
             case -2:Serial.print("invalid server ");break;
             case -3:Serial.print("truncated ");break;
             case -4:Serial.print("invalid response ");break;
             default:break;
-          }
+          }*/
           #ifndef PERIF
+          Serial.println();
+          Serial.print(repeat);Serial.print(" ");
           Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
           Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
           #endif // PERIF
           
-          Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
+          v=MESSCX;
           unsigned long tto=millis();
-          while((millis()-tto)<100){
+          while((millis()-tto)<100 && repeat<MAXCXTRY){        // delay 100mS avant retry
             trigwd();
             yield();
-            if(server!=nullptr){
+            if(server!=nullptr){            // voir plus haut
               *cliext=server->available();
-              if(*cliext){noServerCall=false;v=MESSSRV;break;}
+              if(*cliext){noServerCall=false;v=MESSSRV2;break;}
             }
           }
-          /*
-          delay(500);Serial.print(repeat);Serial.println(" échouée");v=MESSCX;
-          
-          if(server!=nullptr){
-            *cliext=server->available();
-            if(*cliext){noServerCall=false;v=MESSSRV;}}
-          */
-        }
+        } // !x
+        else v=MESSOK;
     }     // while not connected
     if(v==MESSOK){
       trigwd();
@@ -201,6 +198,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
     else {
       trigwd();
       cli->stop();     // libération socket
+      Serial.println();Serial.println(" ko");
     }
   }   // noServerCall before first connection attempt
 #ifdef ANALYZE
