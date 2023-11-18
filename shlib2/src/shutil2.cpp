@@ -100,7 +100,7 @@ int convNumToString(char* str,float num)    // retour string terminée par '\0' 
   return t;
 }
 
-uint8_t conv_atob(char* ascii,uint16_t* bin)
+uint8_t conv_atob(const char* ascii,uint16_t* bin)
 {
   uint8_t j=0;
   byte c;
@@ -109,7 +109,7 @@ uint8_t conv_atob(char* ascii,uint16_t* bin)
   return j;
 }
 
-uint8_t conv_atobl(char* ascii,uint32_t* bin)
+uint8_t conv_atobl(const char* ascii,uint32_t* bin)
 {
   uint8_t j=0;
   byte c;
@@ -118,7 +118,7 @@ uint8_t conv_atobl(char* ascii,uint32_t* bin)
   return j;
 }
 
-uint8_t conv_atobl(char* ascii,uint32_t* bin,uint8_t len)
+uint8_t conv_atobl(const char* ascii,uint32_t* bin,uint8_t len)
 {
   uint8_t j=0;
   byte c;

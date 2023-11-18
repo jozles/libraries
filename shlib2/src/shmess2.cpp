@@ -20,6 +20,8 @@ extern int cstlen;
 #ifndef PERIF
 #include <Ethernet.h> //bibliothèque W5100/5500 Ethernet
 
+extern uint8_t sock;
+
 //extern EthernetClient cli;
 /*
 extern int16_t*  periNum;                      // ptr ds buffer : Numéro du périphérique courant
@@ -148,6 +150,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
 
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
+    x=cli->connect(host,port);
     #define MAXCXTRY 4
     while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
       
@@ -158,10 +161,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
         repeat++;
     
         trigwd();
-        x=cli->connect(host,port);
-        //x=cli->connected();
-        //Serial.print("(");Serial.print(x);Serial.print(")");
-        
+        x=cli->connected();        
         if(!x){
           /*switch(x){
             case -1:Serial.print("time out ");break;
@@ -190,6 +190,9 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
         } // !x
         else v=MESSOK;
     }     // while not connected
+    #ifndef PERIF
+    Serial.print("sockx=");Serial.println(cli->sockx_ap);
+    #endif
     if(v==MESSOK){
       trigwd();
       Serial.println(" ok");
