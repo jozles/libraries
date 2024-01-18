@@ -216,7 +216,6 @@ uint32_t convStrToHex(char* str,uint8_t len)
   uint8_t v0=0;
   uint32_t v=0;
   int i=0;
-#define MAXL 10
 
   for(i=0;i<len;i++){
     v0=strstr(chexa,&str[i])-chexa;if(v0>15){v0-=6;}
