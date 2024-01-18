@@ -68,7 +68,7 @@
         #ifdef DUE
             #define WIRE Wire1
             #define SERIALX Serial1
-            #define SERENB 1
+            #define SERNB 1
         #endif  // DUE
         #ifndef DUE                // NUCLEO
             #define WIRE Wire
@@ -164,6 +164,7 @@
                                             // + nom fonct+1+longueur+1+crc+1
 /* positions fixées dans strSD (fhisto) */
 
+#define HISTOPOSLEN    7   // position longueur ligne / ';'
 #define HISTOPOSNUMPER 9   // position numéro périphérique / ';'
 #define HISTOPOSMAC    12  // position addr mac    / ';'
 #define HISTOPOSTEMP   30  // position température / ';'
@@ -187,9 +188,9 @@
   #define RCVSYNCHAR '#'
   #define RSCNB 3                   // min Rx config char
   #define TSCNB RSCNB*2             // Tx config char
-  #define WIFICFG "srvconf___"
-  #define CONCCFG "concconf__"
-  #define PERICFG "periconf__"
+  #define WIFICFG   "srvconf___"
+  #define CONCCFG   "concconf__"
+  #define PERICFG   "periconf__"
   #define MAXSER  200
 
 /* >>>> WIFI <<<<< */
@@ -265,9 +266,11 @@ enum {NOPRINT,PRINT};
 #define NBANST  5       // nbre d'états pour l'entrée analogique
 //#define MAXDSP  4       // nbre maxi détecteurs spéciaux
 //#define MAXDEX  8       // nbre maxi détecteurs externes
-#define MAXSDE  4       // nbre maxi sondes par périphérique
-#define MAXTAC  4       // 4 types actions sur pulses (start/stop/mask/force)
+#define MAXSDE  4         // nbre maxi sondes par périphérique
+#define MAXTAC  4         // 4 types actions sur pulses (start/stop/mask/force)
 #define NBPULSE 4
+#define PERI_SERV   0x01  // periCfg flag serveur  
+#define PERI_ANAL   0x02  // periCfg flag analogique
 
 // messages diag
 
