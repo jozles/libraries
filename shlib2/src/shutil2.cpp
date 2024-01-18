@@ -56,7 +56,7 @@ void to64(char* srce,char* dest,uint32_t len)   // len dest >= len srce*(1,33)+1
     a=(srce[i+1]&0x0F)<<2;a+=srce[i+2]>>6;dest[j+2]=table64[a];
     a=srce[i+2]&0x3F;dest[j+3]=table64[a];
     j+=4;}
-  
+
   if(k==1){dest[j]=table64[srce[i]>>2];dest[j+1]=table64[(srce[i]&0x03)<<4];}
   if(k==2){
     a=srce[i]>>2;dest[j]=table64[a];
@@ -187,6 +187,25 @@ void conv_htoa(char* ascii,byte* h,uint8_t len)
     }
 }
 
+uint32_t convStrToHex(char* str,uint8_t len)
+{
+  uint8_t v0=0;
+  uint32_t v=0;
+  int i=0;
+
+  for(i=0;i<len;i++){
+    v0=strstr(chexa,&str[i])-chexa;if(v0>15){v0-=6;}
+    //if(str[i]>='0' && str[i]<='9'){v0=*(str+i)-48;}
+    //else if(str[i]>='A' && str[i]<='F'){v0=*(str+i)-64+10;}
+    //else if(str[i]>='a' && str[i]<='f'){v0=*(str+i)-64+10;}
+    //else v0=0;
+    v+=v0;
+    v=v<<4;
+  }
+  return v;
+  //Serial.print("s>n str,num=");Serial.print(string);Serial.print(" ");Serial.println(v*minus);
+}
+
 float convStrToNum(char* str,int* sizeRead)
 {
   float v=0;
@@ -250,7 +269,7 @@ void dumpstr0(char* data,uint8_t len,bool cr)
     char a[]={0x00,0x00,0x00};
     uint8_t c;
     Serial.print("   ");Serial.print((long)data,HEX);Serial.print("   ");
-    
+
     for(int k=0;k<len;k++){conv_htoa(a,(byte*)&data[k]);Serial.print(a);Serial.print(" ");}
     Serial.print("    ");
     for(int k=0;k<len;k++){
@@ -341,7 +360,7 @@ int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d
   conv_atoh(data+*lenData,&c);
   if(*lenData!=(uint16_t)strlen(data)-2){
     mess=MESSLEN;
-    
+
     //dumpstr(data,strlen(data));
     Serial.print(" sizeRead=");Serial.print(sizeReadLength);
     Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.print(strlen(data));
@@ -447,7 +466,7 @@ void trigwd(uint32_t durWd)
     if(digitalRead(pinLed)==offLed){        // si LEDOFF faire un blink(durWd)
       digitalWrite(pinLed,onLed);
       wdEnable=false;
-      delayMicroseconds(durWd); 
+      delayMicroseconds(durWd);
       wdEnable=true;
       digitalWrite(pinLed,offLed);
     }
@@ -464,7 +483,7 @@ void trigwd()
 void lb0()
 {
   if(nbreBlink>0){blinktime=millis()-1;cntBlink=nbreBlink+1;digitalWrite(pinLed,offLed);}   // nbreBlink>0 start new cycle
-  
+
   if(millis()>blinktime){
     //Serial.print("led ");
       blinktime=millis();
@@ -474,21 +493,21 @@ void lb0()
           if(cntBlink>1){blinktime+=FASTBLINK;}
           else {blinktime+=SLOWBLINK;cntBlink=abs(nbreBlink)+1;}  // dernière extinction
           if(cntBlink>MAXBLK){cntBlink-=MAXBLK;}                  // code erreur figé
-          cntBlink--;                                         
+          cntBlink--;
       }
       else {
         //Serial.println("ON ");
         digitalWrite(pinLed,onLed);                               // allumage
         blinktime+=PULSEBLINK;
       }
-  }  
+  }
 }
 
 void ledblink(int nbBlk)
 {
   if(nbBlk!=0){
     if(nbBlk!=BCODEONBLINK){              // force allumage sans modif cycle en cours
-      if(!(nbreBlink>MAXBLK)){nbreBlink=nbBlk;} // si nbre courant > MAXBLK, reste sur le code d'erreur 
+      if(!(nbreBlink>MAXBLK)){nbreBlink=nbBlk;} // si nbre courant > MAXBLK, reste sur le code d'erreur
       if(nbreBlink%2!=0 && nbreBlink>0){  // si nbBlk impair positif blocage
         nbreBlink=abs(nbreBlink);         // force nbreBlink >0
         lb0();                            // start new cycle
@@ -499,7 +518,7 @@ void ledblink(int nbBlk)
     else {                                // force allumage statique jusqu'au pronchain ledblink
       digitalWrite(pinLed,onLed);
       blinktime=millis()+2;
-    }    
+    }
   }
   lb0();      // cycle en cours (cntblink - nbreBlink allumages(PULSEBLINK) séparés par extinctions(FASTBLINK) puis 1 extinction(SLOWBLINK) )
               // si nbreBlink >0       déclenchement immédiat 1 cycle (nbreBlink)
@@ -522,10 +541,10 @@ void initLed(uint32_t led,bool ledoff,bool ledon)
   onLed=ledon;
   pinLed=led;
   pinMode(pinLed,OUTPUT);
-  //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être 
+  //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être
                                   // activé avant que PINLED soit mis en OUTPUT
   //trigwd(10000);
-  
+
   nbreBlink=0;
   cntBlink=0;
   blinktime=millis();
@@ -668,20 +687,20 @@ void serPurge(uint8_t serialNb)
 
 uint16_t serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb)
 /*
-  Tout message commence par des caractères de synchro (RCVSYNCHAR). 
+  Tout message commence par des caractères de synchro (RCVSYNCHAR).
   Il faut en envoyer TSCNB avant un message et en recevoir au moins RSCNB pour débuter une réception
   (les caractères exédentaires sont ignorés)
   Entrée : Si des caractères sont disponibles, le premier caractère utile doit être reçu en TBEGSER mS
            et les suivants en moins de TENDSER par caractère (un délai de TENDSER termine l'attente)
   Retour : le nombre de caractères utiles reçus + le message ;
-  
+
   Le buffer de réception est petit (Serial.getRxBufferSize() - Serial.setRxBufferSize(nnnn) par défaut 256)
   Pour éviter des écrasements, l'émission doit être ralentie (genre 1mS par caractère).
   Il est utile de purger le buffer (serPurge()) avant de demander un envoi.
 */
-{  
+{
 #define TBEGSER 2000 // délai maxi entre 1er caractère reçu et premier car utile
-#define TENDSER 100  // délai maxi pour la réception du caractère utile suivant 
+#define TENDSER 100  // délai maxi pour la réception du caractère utile suivant
 
 if(!serDataAvailable(serialNb)){return 0;}
 
@@ -707,7 +726,7 @@ if(!serDataAvailable(serialNb)){return 0;}
         else if (lfcnt<RSCNB){lfcnt=0;}
       }
     }
-    // réception message 
+    // réception message
     if((millis()-t)<TBEGSER){                       // pas sortie en TO
       *rcv=inch;lrcv=1;
       t=millis();
@@ -719,7 +738,7 @@ if(!serDataAvailable(serialNb)){return 0;}
           case 1:if(SERIALX.available()){*(rcv+lrcv)=SERIALX.read();lrcv++;t=millis();}break;
 #endif
           default:if(Serial.available()){*(rcv+lrcv)=Serial.read();lrcv++;t=millis();}break;
-        }  
+        }
       }
       *(rcv+lrcv)='\0';
     }
@@ -733,7 +752,7 @@ uint16_t setExpEnd(char* bec)     // ajoute longueur au début du message et crc
   sprintf(bec,"%04u",ll);
   bec[4]=';';
   setcrc(bec,ll);
-  
+
   *(bec+ll+2)='\0';
   return (uint16_t)(ll+2);
 }

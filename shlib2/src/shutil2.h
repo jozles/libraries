@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
@@ -11,6 +13,7 @@ void conv_htoa(char* ascii,byte* hex,uint8_t len);
 uint8_t conv_atob(const char* ascii,uint16_t* bin);
 uint8_t conv_atobl(const char* ascii,uint32_t* bin);
 uint8_t conv_atobl(const char* ascii,uint32_t* bin,uint8_t len);
+uint32_t convStrToHex(char* str,uint8_t len);
 float convStrToNum(char* str,int* sizeRead);
 int32_t convStrToInt(char* str,int* sizeRead);
 int convIntToString(char* str,int num);
