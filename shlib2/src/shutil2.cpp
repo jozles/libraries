@@ -109,6 +109,15 @@ uint8_t conv_atob(const char* ascii,uint16_t* bin)
   return j;
 }
 
+uint8_t conv_atob(const char* ascii,uint16_t* bin,uint8_t len)
+{
+  uint8_t j=0;
+  byte c;
+  *bin=0;
+  for(j=0;j<len;j++){c=ascii[j];if(c>='0' && c<='9'){*bin=*bin*10+c-48;}else break;}
+  return j;
+}
+
 uint8_t conv_atobl(const char* ascii,uint32_t* bin)
 {
   uint8_t j=0;
@@ -193,8 +202,10 @@ uint32_t convStrToHex(char* str,uint8_t len)
   uint32_t v=0;
   int i=0;
 
-  for(i=0;i<len;i++){
-    v0=strstr(chexa,&str[i])-chexa;if(v0>15){v0-=6;}
+  char cc[2];cc[1]='\0';
+  for(i=len-1;i>=0;i--){
+    cc[0]=str[i];
+    v0=strstr(chexa,cc)-chexa;if(v0>15){v0-=6;}
     //if(str[i]>='0' && str[i]<='9'){v0=*(str+i)-48;}
     //else if(str[i]>='A' && str[i]<='F'){v0=*(str+i)-64+10;}
     //else if(str[i]>='a' && str[i]<='f'){v0=*(str+i)-64+10;}
@@ -415,6 +426,27 @@ void unpackDate(char* dateout,char* datein)
     }
 }
 
+void unpack(char* out,char* in,uint8_t len)
+{
+    for(int i=0;i<len;i++){
+        in[i*2]=(out[i] >> 4)+48; in[i*2+1]=(out[i] & 0x0F)+48;
+    }
+}
+
+void pack(char* out,char* in,uint8_t inputLen,bool rev)
+{
+  if(!rev){
+    for(int i=0;i<inputLen;i+=2){
+        in[i/2]=((out[i]-48)<<4)+((out[i+1]-48));
+    }
+  }
+  else {
+    for(int i=0;i<inputLen;i+=2){
+        in[i/2]=((out[i]-48)<<4)+((out[i+1]-48));
+    }
+  }
+}
+
 uint8_t dcb2b(byte val)
 {
     return ((val>>4)&0x0f)*10+(val&0x0f);
@@ -624,6 +656,13 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
   *time=millis();
         //Serial.print("startto=");Serial.print(*time);Serial.print(" to=");Serial.print(*to);Serial.print(" valto=");Serial.println(valto);
 }
+
+bool diagSetup(unsigned long t_on){
+  Serial.print(" une touche pour diags ");
+  while((millis()-t_on)<4000){Serial.print(".");delay(500);if(Serial.available()){Serial.read();Serial.println();return true;}}
+  Serial.println();return false;
+}
+
 /*
 bool ctlpass(char* data,char* model)
 {

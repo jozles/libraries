@@ -191,17 +191,17 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
         else v=MESSOK;
     }     // while not connected
     #ifndef PERIF
-    Serial.print("sockx=");Serial.println(cli->sockx_ap);
+    Serial.print("sockx=");Serial.print(cli->sockx_ap);
     #endif
     if(v==MESSOK){
       trigwd();
-      Serial.println(" ok");
+      Serial.print(" ok ");
       cli->write(data);      //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
     }
     else {
       trigwd();
       cli->stop();     // libération socket
-      Serial.println();Serial.println(" ko");
+      Serial.print(" ko ");
     }
   }   // noServerCall before first connection attempt
 #ifdef ANALYZE
@@ -291,7 +291,7 @@ void waitRefCliDiag(bool diags,int pM)
 
 #ifndef PERIF
 int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction)
-    {return getHttpResponse(cli,data,lmax,fonction,true);}
+    {return getHttpResponse(cli,data,lmax,fonction,false);}
 int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction,bool diags)  // attend un message d'un serveur ; ctle longueur et crc
 #endif //  PERIF
 #ifdef PERIF

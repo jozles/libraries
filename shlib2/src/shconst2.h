@@ -28,17 +28,19 @@
  //#define LEDON LOW
  //#define LEDOFF HIGH
  #define SERIALX Serial
-#endif // defPERIF
 
-#ifndef PERIF
     #ifdef DETS
         #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
         #define LEDON HIGH
         #define LEDOFF LOW
-        #define STOPREQ 5         // PD5
+        #define STOPREQ 14 // 5         // PD5
         #define SERIALX Serial
         #define SERNB 0
     #endif // DETS
+
+#endif // defPERIF
+
+#ifndef PERIF
  
     #ifdef REDV0
         #define STOPREQ 3          // push button pour stop request
@@ -156,12 +158,23 @@
 #define MEANVAL  6    // pour donner un param de taille à valeurs[]
 #define LENVALEURS NBVAL*MEANVAL+1   // la taille effective de valeurs[]
 //#define LENPSW  16    // nbre car maxi pswd
+
+/* erreurs getnv */
+#define GETNV_NO_FN       -1    // pas de fonction
+#define GETNV_INVALID_FN1 -2    // nom fonction inconnu
+#define GETNV_INVALID_FN2 -3    // nom fonction (caractère invalide)
+#define GETNV_FNNB_OVF    -4    // trop de fonctions
+#define GETNV_RCD_OVF     -5    // valeurs trop longues
+#define GETNV_INVALID_VAL -6    // valeur invalide (caractère interdit)
+#define GETNV_INV_SEP     -7    // séparateur invalide
+
 #define RECHEAD 28                           // en-tete strSD date/heure/xx/yy + <br> + crlf
 #define RECCHAR NBVAL*(MEANVAL+3)+RECHEAD+8  // longueur maxi record histo
 #define UDPBUFLEN NBVAL*(MEANVAL+12)+6+1 //LENCDEHTTP // longueur maxi buffer paquet UDP
 
 #define LBUFSERVER LENMESS+LENNOM+1+4+1+2+1 // longueur bufserver (messages in/out periphériques)
                                             // + nom fonct+1+longueur+1+crc+1
+#define LBUFUDP LBUFSERVER 
 /* positions fixées dans strSD (fhisto) */
 
 #define HISTOPOSLEN    7   // position longueur ligne / ';'
@@ -269,8 +282,12 @@ enum {NOPRINT,PRINT};
 #define MAXSDE  4         // nbre maxi sondes par périphérique
 #define MAXTAC  4         // 4 types actions sur pulses (start/stop/mask/force)
 #define NBPULSE 4
+
+/* bits periCfg */
+
 #define PERI_SERV   0x01  // periCfg flag serveur  
 #define PERI_ANAL   0x02  // periCfg flag analogique
+#define PERI_RAD    0x04  // commande radiateur
 
 // messages diag
 
@@ -324,7 +341,6 @@ enum {NOPRINT,PRINT};
 
 #define NBDSRV 64               // nombre de det serveur (supporté par périf v1.y ; pour serveur 1.5a MDSRV 32, MDSLEN 4 )
 #define MDSLEN 8                // (NBDSRV/8) DOIT ETRE MULTIPLE DE 4 ; len memDetServ
-
 
 /* bits memDetec */
 
