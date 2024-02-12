@@ -20,7 +20,7 @@ extern int cstlen;
 #ifndef PERIF
 #include <Ethernet.h> //bibliothèque W5100/5500 Ethernet
 
-extern uint8_t sock;
+//extern uint8_t sock;
 
 //extern EthernetClient cli;
 /*
@@ -151,6 +151,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
     x=cli->connect(host,port);
+    Serial.print("après cli->connect status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.print(cli->sockx_ap);Serial.print(" cli_socket:");Serial.println(cli->sockindex);
     #define MAXCXTRY 4
     while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
       
@@ -202,6 +203,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
       trigwd();
       cli->stop();     // libération socket
       Serial.print(" ko ");
+
     }
   }   // noServerCall before first connection attempt
 #ifdef ANALYZE
