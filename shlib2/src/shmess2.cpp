@@ -140,18 +140,25 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
 *    concerne uniquement les périphériques : server=nullptr si frontal
 *    vérifie l'absence de demande pendante
 */
+#ifndef PERIF
   bool noServerCall=true;
   if(server!=nullptr){
     *cliext=server->available();
-    if(*cliext){noServerCall=false;v=MESSSRV;}}
+    if(*cliext){noServerCall=false;v=MESSSRV;}} // message reçu non traité ---> anomalie
 
   if(noServerCall){
-    Serial.print("cx to ");Serial.print(host);Serial.print(":");Serial.print(port);Serial.print("...");
+#endif    
 
+    Serial.print(" cx to ");Serial.print(host);Serial.print(":");Serial.print(port);Serial.print("...");
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
+#ifndef PERIF
+    Serial.print("avant cli->connect cli_socket:");Serial.print(cli->sockindex);
+#endif
     x=cli->connect(host,port);
-    Serial.print("après cli->connect status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.print(cli->sockx_ap);Serial.print(" cli_socket:");Serial.println(cli->sockindex);
+#ifndef PERIF
+    Serial.print("après cli->connect cli_socket:");Serial.print(cli->sockindex);Serial.print("(");Serial.print(cli->waitTime_ap);Serial.print(") status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.println(cli->sockx_ap);
+#endif
     #define MAXCXTRY 4
     while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
       
@@ -173,8 +180,9 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
           }*/
           #ifndef PERIF
           Serial.println();
-          Serial.print(repeat);Serial.print(" ");
-          Serial.print("status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
+          Serial.print(repeat);
+          Serial.print(" (");Serial.print(cli->waitTime_ap);
+          Serial.print(") status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
           Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
           #endif // PERIF
           
@@ -205,7 +213,9 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
       Serial.print(" ko ");
 
     }
+#ifndef PERIF
   }   // noServerCall before first connection attempt
+#endif  
 #ifdef ANALYZE
   STOPALL
 #endif // ANALYZE

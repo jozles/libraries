@@ -242,7 +242,7 @@
 #define TOFINCHCLI  1000        // msec max attente 1er car server ... devrait etre réduit
 
 #define SLOWBLINK 3000
-#define FASTBLINK 200    // 350
+#define FASTBLINK 300         // 200    // 350
 #define PULSEBLINK 4          // plutôt dépendant de la période de la loop sur
                               // périf NO_MODE
 
@@ -416,7 +416,7 @@ enum {NOPRINT,PRINT};
 //#define NBPERRULES 24               // pour serveur 1.5a et perif 1.y
 #define PERINPLEN  4
 
-// byte 0 & byte 3 -- num détecteur + type (source/dest)
+// byte 0 & byte 3 -- num détecteur + type (byte 0 source / byte 3 dest ; 6 bits numéro + 2 bits type dsrv/mem/phys-swi/pulse)
 
 #define PERINPV_MS    0xFC          // mask n° det (6 bits - 64 possibles)
 #define PERINPNVMS_VB 0x80          // détec MSb
