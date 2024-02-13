@@ -43,7 +43,7 @@ int*  int0=&int00;
 
 const char* table64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-void to64(char* srce,char* dest,uint32_t len)   // len dest >= len srce*(1,33)+1
+uint16_t ato64(char* srce,char* dest,uint32_t len)   // len dest >= len srce*(1,33)+1
 {
   uint8_t a;
   uint32_t i=0;
@@ -57,12 +57,14 @@ void to64(char* srce,char* dest,uint32_t len)   // len dest >= len srce*(1,33)+1
     a=srce[i+2]&0x3F;dest[j+3]=table64[a];
     j+=4;}
 
-  if(k==1){dest[j]=table64[srce[i]>>2];dest[j+1]=table64[(srce[i]&0x03)<<4];}
+  if(k==1){dest[j]=table64[srce[i]>>2];dest[j+1]=table64[(srce[i]&0x03)<<4];return j+1;}
   if(k==2){
     a=srce[i]>>2;dest[j]=table64[a];
     a=(srce[i]&0x03)<<4;a+=srce[i+1]>>4;dest[j+1]=table64[a];
-    a=(srce[i+1]&0x0F)<<2;dest[j+2]=table64[a];}
+    a=(srce[i+1]&0x0F)<<2;dest[j+2]=table64[a];
+    return j+2;}
 
+  return j-1;
     //Serial.print("to64 len ");Serial.print(len);Serial.print(" k ");Serial.print(k);Serial.print(" i ");Serial.print(i);
     //Serial.print(" dest :");Serial.println((char*)&dest[j]);
 }

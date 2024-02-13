@@ -44,7 +44,7 @@ void initLed(uint32_t led,bool ledlow,bool ledhigh);
 void dumpstr(char* data,uint16_t len,bool cr);
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
-void to64(char* srce,char* dest,uint32_t len);
+uint16_t ato64(char* srce,char* dest,uint32_t len);
 bool diagSetup(unsigned long t_on);
 
 //bool ctlpass(char* data,char* model);
