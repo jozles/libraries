@@ -135,13 +135,14 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
   MESTOS 
   #endif // ANALYZE
 
-/*   noServerCall : vérifier l'utilité 
+/*   noServerCall : pour serveur vérifier l'utilité 
 *    (probablement pour débug des pb de cx aux périfs-server)
 *    concerne uniquement les périphériques : server=nullptr si frontal
 *    vérifie l'absence de demande pendante
 */
+bool noServerCall=true;
+
 #ifndef PERIF
-  bool noServerCall=true;
   if(server!=nullptr){
     *cliext=server->available();
     if(*cliext){noServerCall=false;v=MESSSRV;}} // message reçu non traité ---> anomalie
@@ -160,8 +161,8 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
     Serial.print("après cli->connect cli_socket:");Serial.print(cli->sockindex);Serial.print("(");Serial.print(cli->waitTime_ap);Serial.print(") status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.println(cli->sockx_ap);
 #endif
     #define MAXCXTRY 4
+
     while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
-      
       #ifndef PERIF
       trigwd();
       #endif
@@ -211,8 +212,8 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
       trigwd();
       cli->stop();     // libération socket
       Serial.print(" ko ");
-
     }
+
 #ifndef PERIF
   }   // noServerCall before first connection attempt
 #endif  
