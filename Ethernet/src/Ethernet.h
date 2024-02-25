@@ -76,6 +76,7 @@ private:
 	static IPAddress _dnsServerAddress;
 	static DhcpClass* _dhcp;
 public:
+	static int socketRecv(uint8_t s, uint8_t * buf, int16_t len);
 	// Initialise the Ethernet shield to use the provided MAC address and
 	// gain the rest of the configuration through DHCP.
 	// Returns 0 if the DHCP configuration failed, and 1 if it succeeded
@@ -125,7 +126,7 @@ private:
 	static uint16_t socketSend(uint8_t s, const uint8_t * buf, uint16_t len);
 	static uint16_t socketSendAvailable(uint8_t s);
 	// Receive data (TCP)
-	static int socketRecv(uint8_t s, uint8_t * buf, int16_t len);
+	
 	static uint16_t socketRecvAvailable(uint8_t s);
 	static uint8_t socketPeek(uint8_t s);
 	// sets up a UDP datagram, the data for which will be provided by one
@@ -157,10 +158,11 @@ private:
 	uint16_t _offset; // offset into the packet being sent
 
 protected:
-	uint8_t sockindex;
+	//uint8_t sockindex;
 	uint16_t _remaining; // remaining bytes of incoming packet yet to be processed
 
 public:
+	uint8_t sockindex;
 	EthernetUDP() : sockindex(MAX_SOCK_NUM) {}  // Constructor
 	virtual uint8_t begin(uint16_t);      // initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
 	virtual uint8_t beginMulticast(IPAddress, uint16_t);  // initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
@@ -216,9 +218,10 @@ public:
 
 	uint8_t status_ap;
 	uint8_t sockx_ap;
+	unsigned long waitTime_ap;
 
-	EthernetClient() : sockindex(MAX_SOCK_NUM), _timeout(1000) { }
-	EthernetClient(uint8_t s) : sockindex(s), _timeout(1000) { }
+	EthernetClient() : sockindex(MAX_SOCK_NUM), _timeout(1000), _timeout_dsc(100) { }
+	EthernetClient(uint8_t s) : sockindex(s), _timeout(1000), _timeout_dsc(100) { }
 
 	uint8_t status();
 	virtual int connect(IPAddress ip, uint16_t port);
@@ -248,10 +251,13 @@ public:
 
 	using Print::write;
 
-private:
 	uint8_t sockindex; // MAX_SOCK_NUM means client not in use
+private:
+	//uint8_t sockindex; // MAX_SOCK_NUM means client not in use
 	uint16_t _timeout;
+	uint16_t _timeout_dsc;
 };
+
 
 
 class EthernetServer : public Server {

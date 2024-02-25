@@ -41,7 +41,7 @@ int EthernetClient::connect(const char * host, uint16_t port)
 
 int EthernetClient::connect(IPAddress ip, uint16_t port)
 {
-	status_ap=0;  // !0 fail : 11=all in use ; 12=socket close ; 13=TO socketstatus ; 14=IPAddress 0 ; 
+	status_ap=0;  // !0 fail : 11=all in use ; 12=socket close ; 13=TO socketstatus (no server) ; 14=IPAddress 0 ; 
 
 	if (sockindex < MAX_SOCK_NUM) {
 		if (Ethernet.socketStatus(sockindex) != SnSR::CLOSED) {
@@ -52,21 +52,21 @@ int EthernetClient::connect(IPAddress ip, uint16_t port)
 #if defined(ESP8266) || defined(ESP32)
 	if (ip == IPAddress((uint32_t)0) || ip == IPAddress(0xFFFFFFFFul)) return 0;
 #else
-	if (ip == IPAddress(0ul) || ip == IPAddress(0xFFFFFFFFul)) {status_ap=14;sockx_ap=sockindex;return 0;};
+	if (ip == IPAddress(0ul) || ip == IPAddress(0xFFFFFFFFul)) {status_ap=14;sockx_ap=sockindex;waitTime_ap=0;return 0;};
 #endif
 	sockindex = Ethernet.socketBegin(SnMR::TCP, 0);
-	if (sockindex >= MAX_SOCK_NUM) {status_ap=11;sockx_ap=sockindex;return 0;};													// <--- 
+	if (sockindex >= MAX_SOCK_NUM) {status_ap=11;sockx_ap=sockindex;waitTime_ap=0;return 0;};													// <--- 
 	Ethernet.socketConnect(sockindex, rawIPAddress(ip), port);
 	uint32_t start = millis();
 	while (1) {
 		uint8_t stat = Ethernet.socketStatus(sockindex);
 		if (stat == SnSR::ESTABLISHED) return 1;
 		if (stat == SnSR::CLOSE_WAIT) return 1;
-		if (stat == SnSR::CLOSED) {status_ap=12;sockx_ap=sockindex;return 0;};														// <---
+		if (stat == SnSR::CLOSED) {status_ap=12;sockx_ap=sockindex;waitTime_ap=millis()-start;return 0;};														// <---
 		if (millis() - start > _timeout) break;
 		delay(1);
 	}
-	status_ap=13;sockx_ap=sockindex;
+	status_ap=13;sockx_ap=sockindex;waitTime_ap=millis()-start;
 	Ethernet.socketClose(sockindex);
 	sockindex = MAX_SOCK_NUM;
 	return 0;
@@ -147,7 +147,7 @@ void EthernetClient::stop()
 			return; // exit the loop
 		}
 		delay(1);
-	} while (millis() - start < _timeout);
+	} while (millis() - start < _timeout_dsc);
 
 	// if it hasn't closed, close it forcefully
 	Ethernet.socketClose(sockindex);
