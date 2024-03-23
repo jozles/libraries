@@ -439,15 +439,42 @@ void pack(char* out,char* in,uint8_t inputLen,bool rev)
 {
   if(!rev){
     for(int i=0;i<inputLen;i+=2){
-        in[i/2]=((out[i]-48)<<4)+((out[i+1]-48));
+        in[i/2]=((out[i]-48)<<4)+(out[i+1]-48);
     }
   }
   else {
-    for(int i=0;i<inputLen;i+=2){
-        in[i/2]=((out[i]-48)<<4)+((out[i+1]-48));
+    for(int i=inputLen;i>0;i-=2){
+        in[i/2]=((out[i]-48)<<4)+(out[i+1]-48);
     }
   }
 }
+
+uint16_t packHexa(const char* out,uint8_t len)
+{
+  uint16_t v=0;
+  char cc[2];cc[1]='\0';
+  for(uint8_t i=0;i<len;i+=2){
+   cc[0]=*(out+i);
+   v<<=4;
+   v+=strstr(chexa,cc)-chexa;
+   cc[0]=*(out+i+1);
+   v<<=4;
+   v+=strstr(chexa,cc)-chexa;
+  }
+  return v;
+}
+
+void unpackHexa(uint16_t out,char* in,uint8_t len)      // len =2 ou 4 !
+{
+  for(int8_t i=len;i>0;i-=2){
+    
+    in[i-1]=chexa[out&0x0f];
+    out>>=4;
+    in[i-2]=chexa[out&0x0f];
+    out>>=4;
+  }
+}
+
 
 uint8_t dcb2b(byte val)
 {

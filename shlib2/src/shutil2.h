@@ -33,6 +33,8 @@ void packDate(char* dateout,char* datein);
 void unpackDate(char* dateout,char* datein);
 void unpack(char* out,char* in,uint8_t len);
 void pack(char* out,char* in,uint8_t inputLen,bool rev);
+uint16_t packHexa(const char* out,uint8_t len);
+void unpackHexa(uint16_t out,char* in,uint8_t len);
 int  dateCmp(char* olddate,char* newdate,uint32_t offset,uint8_t skip1,uint8_t skip2);
 void serialPrintDate(char* datein);
 void forceWd();

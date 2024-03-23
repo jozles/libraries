@@ -20,7 +20,7 @@
 #endif // _MODE_DEVT
 #ifdef _MODE_RUN
   #define IP_FRONTAL IPAddress(192,168,0,36)      // server RUN
-  #define PORT_FRONTAL 1786                       // server RUN
+  #define PORT_FRONTAL 1786                       // server RUN !!! n° du port pour périfs, +1 browser, +2 remotes
 #endif // _MODE_RUN
 
 #ifdef PERIF
@@ -288,6 +288,7 @@ enum {NOPRINT,PRINT};
 #define PERI_SERV   0x01  // periCfg flag serveur  
 #define PERI_ANAL   0x02  // periCfg flag analogique
 #define PERI_RAD    0x04  // commande radiateur
+#define PERI_STA    0x08  // thermostat
 
 // messages diag
 
