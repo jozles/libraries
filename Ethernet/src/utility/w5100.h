@@ -18,7 +18,8 @@
 #include <SPI.h>
 
 // Safe for all chips
-#define SPI_ETHERNET_SETTINGS SPISettings(14000000, MSBFIRST, SPI_MODE0)
+// RETOUR A CETTE VITESSE APRES PBS DE TRANSMISSION UDP //
+#define SPI_ETHERNET_SETTINGS SPISettings(16000000, MSBFIRST, SPI_MODE0)
 
 // Safe for W5200 and W5500, but too fast for W5100
 // Uncomment this if you know you'll never need W5100 support.
