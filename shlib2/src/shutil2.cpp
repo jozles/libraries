@@ -374,7 +374,6 @@ int checkData(char* data,uint16_t* lenData)    // controle la taille et le crc d
   if(*lenData!=(uint16_t)strlen(data)-2){
     mess=MESSLEN;
 
-    //dumpstr(data,strlen(data));
     Serial.print(" sizeRead=");Serial.print(sizeReadLength);
     Serial.print(" lenData=");Serial.print(*lenData);Serial.print(" strlen(data)=");Serial.print(strlen(data));
     Serial.print(" CRC,c,len= ");Serial.print(calcCrc(data,*lenData),HEX);Serial.print(", ");
@@ -527,6 +526,7 @@ void trigwd(uint32_t durWd)
     if(digitalRead(pinLed)==offLed){        // si LEDOFF faire un blink(durWd)
       digitalWrite(pinLed,onLed);
       wdEnable=false;
+      //if(durWd==0){durWd=6;}
       delayMicroseconds(durWd);
       wdEnable=true;
       digitalWrite(pinLed,offLed);
@@ -538,7 +538,7 @@ void trigwd(uint32_t durWd)
 
 void trigwd()
 {
-  trigwd(2);
+  trigwd(10);
 }
 
 void lb0()
@@ -609,6 +609,7 @@ void initLed(uint32_t led,bool ledoff,bool ledon)
   nbreBlink=0;
   cntBlink=0;
   blinktime=millis();
+  wdEnable=true;    // autorise le fonctionnement du trigwd() (bloqué pendant les blink)
 }
 
 /*
