@@ -174,7 +174,7 @@
 
 #define LBUFSERVER LENMESS+LENNOM+1+4+1+2+1 // longueur bufserver (messages in/out periphériques)
                                             // + nom fonct+1+longueur+1+crc+1
-#define LBUFUDP LBUFSERVER 
+//#define LBUFUDP LBUFSERVER 
 /* positions fixées dans strSD (fhisto) */
 
 #define HISTOPOSLEN    7   // position longueur ligne / ';'

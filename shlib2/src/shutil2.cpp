@@ -516,17 +516,14 @@ void serialPrintDate(char* datein)
 
 void forceWd()
 {
-    digitalWrite(pinLed,LOW);
+    digitalWrite(pinLed,offLed);
     while(1){};
 }
 
 void trigwd(uint32_t durWd)
 {
   if(wdEnable){
-    if(digitalRead(pinLed)==onLed){
-      digitalWrite(pinLed,offLed);            // si LEDON l'éteindre d'abord
-    } 
-    else {                                    // si LEDOFF faire un blink(durWd)
+    if(digitalRead(pinLed)==offLed){        // si LEDOFF faire un blink(durWd)
       digitalWrite(pinLed,onLed);
       wdEnable=false;
       //if(durWd==0){durWd=6;}
@@ -541,7 +538,7 @@ void trigwd(uint32_t durWd)
 
 void trigwd()
 {
-  trigwd(10);
+  trigwd(2);
 }
 
 void lb0()
