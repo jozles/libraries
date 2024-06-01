@@ -66,8 +66,11 @@ inline void SdSpiArduinoDriver::send(uint8_t data) {
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::send(const uint8_t* buf, size_t count) {
+ // m_spi->transfer((void*)buf,count);
+///*  
   for (size_t i = 0; i < count; i++) {
     m_spi->transfer(buf[i]);
   }
+//*/
 }
 #endif  // SdSpiLibDriver_h

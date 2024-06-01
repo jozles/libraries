@@ -14,7 +14,6 @@ class Ds3231
         void getDate(uint32_t* hms2,uint32_t* amj2,byte* js,char* strdate);
         void alphaNow(char* buff);  // charge LNOW (16) car YYYYMMDDHHMMSSd\0
         int  i2cAddr;
-
 };
 
 

@@ -110,4 +110,3 @@ void Ds3231::alphaNow(char* buff)
   //Serial.print("alphaNow ");Serial.print(buff);Serial.print(" ");Serial.print(ndt.hour);Serial.print(" ");Serial.print(ndt.minute);Serial.print(" ");Serial.println(ndt.second);
   //Serial.println();
 }
-
