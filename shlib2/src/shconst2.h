@@ -141,7 +141,6 @@
 #define MPOSMDIAG   MPOSPORTSRV+5                             // texte diag
 #define MLMSET      MPOSMDIAG+5          // longueur message fonction incluse
 
-
     // fonctions
 
 /*      message GET envoyé par periTable peut envoyer 251 fonctions (maxi version 1.1k)
@@ -228,15 +227,9 @@
 #define CC_ADDRX   "rashc\0rbshc\0rcshc\0rdshc\0" // adresses mac par défaut des concentrateurs                                                 
                                                 // le premier car doit avoir le bit 0 à 0 pour que le dhcp fonctionne (?)
 
-#define RADIO_ADDR_LENGTH 5   // doit être == NRF_ADDR_LENGTH
-#define CC_NRF_ADDR "SHCO0"      // def NRF conc addr (0)
-
-#define CHANNEL0    120        // def radio channel
-#define CHANNEL1    110        
-#define CHANNEL2    100        
-#define CHANNEL3    90         
-
-#define CC_SPEED    0          // RF_SPEED_1Mb (voir nrf24l01s.h)
+#define RADIO_ADDR_LENGTH 5     // doit être == NRF_ADDR_LENGTH
+#define MAX_PAYLOAD_LENGTH 32   // doit être == NRF_MAX_PAYLOAD_LENGTH
+#define CC_NRF_ADDR "SHCO0"     // def NRF conc addr (0)
 
 #define TOINCHCLI   100         // msec max attente car server
 #define TOFINCHCLI  1000        // msec max attente 1er car server ... devrait etre réduit

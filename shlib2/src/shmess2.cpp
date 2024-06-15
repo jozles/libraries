@@ -65,7 +65,7 @@ extern int8_t    periMess;                     // code diag réception message (
 */
 #endif // // ndef PERIF
 
-extern char*  chexa;
+extern const char*  chexa;
 
 extern char*  fonctions;
 extern int    nbfonct;

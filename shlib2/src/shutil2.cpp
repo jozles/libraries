@@ -9,7 +9,7 @@
 #endif // DETS
 #endif // PERIF
 
-extern char* chexa;
+const char* chexa="0123456789ABCDEFabcdef\0";
 
 static unsigned long blinktime=0;
 int     nbreBlink=0;          // si nbreBlink impair   -> blocage
@@ -529,6 +529,7 @@ void trigwd(uint32_t durWd)
       //if(durWd==0){durWd=6;}
       delayMicroseconds(durWd);
       wdEnable=true;
+
       digitalWrite(pinLed,offLed);
     }
     /*if(ledState==HIGH){digitalWrite(pinLed,HIGH);}
