@@ -224,6 +224,13 @@
 #define CC_UDP2   55558
 #define CC_UDP3   55559
 
+#define CHANNEL0    120         // def radio channel devrait être dans nrf24l01s.h (nécessaire pour frontal2/periph.cpp)
+#define CHANNEL1    110         // def radio channel devrait être dans nrf24l01s.h (nécessaire pour frontal2/periph.cpp)
+#define CHANNEL2    100         // def radio channel devrait être dans nrf24l01s.h (nécessaire pour frontal2/periph.cpp)
+#define CHANNEL3    90          // def radio channel devrait être dans nrf24l01s.h (nécessaire pour frontal2/periph.cpp)
+
+#define CC_SPEED    0           // RF_SPEED_1Mb (voir nrf24l01s.h) devrait être dans nrf24l01s.h (nécessaire pour frontal2/periph.cpp)
+
 #define CC_ADDRX   "rashc\0rbshc\0rcshc\0rdshc\0" // adresses mac par défaut des concentrateurs                                                 
                                                 // le premier car doit avoir le bit 0 à 0 pour que le dhcp fonctionne (?)
 

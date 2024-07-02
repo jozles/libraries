@@ -18,7 +18,7 @@ extern int cstlen;
 #endif // // PERIF
 
 #ifndef PERIF
-#include <Ethernet.h> //bibliothèque W5100/5500 Ethernet
+#include <Ethernet2.h> // Ethernet 2 W5500 seul ; bibliothèque W5100/5500 Ethernet
 
 //extern uint8_t sock;
 
@@ -154,11 +154,11 @@ bool noServerCall=true;
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
 #ifndef PERIF
-    Serial.print("avant cli->connect cli_socket:");Serial.print(cli->sockindex);
+    //Serial.print("avant cli->connect cli_socket:");Serial.print(cli->sockindex);
 #endif
     x=cli->connect(host,port);
 #ifndef PERIF
-    Serial.print("après cli->connect cli_socket:");Serial.print(cli->sockindex);Serial.print("(");Serial.print(cli->waitTime_ap);Serial.print(") status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.println(cli->sockx_ap);
+    //Serial.print("après cli->connect cli_socket:");Serial.print(cli->sockindex);Serial.print("(");Serial.print(cli->waitTime_ap);Serial.print(") status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.println(cli->sockx_ap);
 #endif
     #define MAXCXTRY 4
 
@@ -182,9 +182,9 @@ bool noServerCall=true;
           #ifndef PERIF
           Serial.println();
           Serial.print(repeat);
-          Serial.print(" (");Serial.print(cli->waitTime_ap);
-          Serial.print(") status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
-          Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
+          //Serial.print(" (");Serial.print(cli->waitTime_ap);
+          //Serial.print(") status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
+          //Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
           #endif // PERIF
           
           v=MESSCX;
@@ -201,7 +201,7 @@ bool noServerCall=true;
         else v=MESSOK;
     }     // while not connected
     #ifndef PERIF
-    Serial.print("sockx=");Serial.print(cli->sockx_ap);
+    //Serial.print("sockx=");Serial.print(cli->sockx_ap);
     #endif
     if(v==MESSOK){
       trigwd();

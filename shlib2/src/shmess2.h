@@ -18,7 +18,7 @@ int checkHttpData(char* data,uint8_t* fonction);
 const char* periDiag(int8_t diag);
 
 #ifndef PERIF
-#include <Ethernet.h>
+#include <Ethernet2.h>
 
 void purgeCli(EthernetClient* cli);
 void purgeCli(EthernetClient* cli,bool diags);
