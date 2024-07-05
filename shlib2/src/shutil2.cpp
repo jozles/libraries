@@ -9,7 +9,7 @@
 #endif // DETS
 #endif // PERIF
 
-const char* chexa="0123456789ABCDEFabcdef\0";
+extern const char* chexa;     // ="0123456789ABCDEFabcdef\0";
 
 static unsigned long blinktime=0;
 int     nbreBlink=0;          // si nbreBlink impair   -> blocage
