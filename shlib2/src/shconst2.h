@@ -2,7 +2,7 @@
 #define _SHCONST_H_
 
 // params provenant de platformio.ini // 
-//     PERIF // REDV0 // REDV1      //
+//    REDV0 // REDV1      //
 
 #define LENVERSION  4
 #define LENMODEL    6
@@ -23,7 +23,7 @@
   #define PORT_FRONTAL 1786                       // server RUN !!! n° du port pour périfs, +1 browser, +2 remotes
 #endif // _MODE_RUN
 
-#ifdef PERIF
+#if MACHINE_ESP
  //#define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01 ;
  //#define LEDON LOW
  //#define LEDOFF HIGH
@@ -38,9 +38,9 @@
         #define SERNB 0
     #endif // DETS
 
-#endif // defPERIF
+#endif // MACHINE=='E'
 
-#ifndef PERIF
+#if !MACHINE_ESP
  
     #ifdef REDV0
         #define STOPREQ 3          // push button pour stop request
@@ -79,7 +79,7 @@
         #endif // DUE
     #endif // RED1.1
 
-#endif // ndef PERIF
+#endif // MACHINE!='E'
 
 
 #ifdef ANALYZE
@@ -89,18 +89,18 @@
     #define ANPIN1 A6
     #define ANPIN2 A7
 #endif // DUE
-#ifdef PERIF
+#if MACHINE_ESP
     #define ANPIN0 13
     #define ANPIN1 16
     #define ANPIN2 10
-#endif // PERIF
+#endif // MACHINE=='E'
 #define AN0 ANPIN0  // A5
 #define AN1 ANPIN1  // A6
 #define AN2 ANPIN2  // A7
 // toujours un LOW en premier ppour eviter les glitchs à 1 sur la sortie de la porte 
-#ifndef PERIF
+#if !MACHINE_ESP
 #define PERIQ   digitalWrite(AN2,LOW);digitalWrite(AN1,HIGH);digitalWrite(AN0,HIGH);  // 110 periReq
-#endif // PERIF
+#endif // MACHINE!='E'
 #define MESTOS  digitalWrite(AN0,LOW);digitalWrite(AN1,LOW);digitalWrite(AN2,HIGH);    // 001 messToServer
 #define GHTTPR  digitalWrite(AN0,LOW);digitalWrite(AN1,LOW);digitalWrite(AN2,LOW);    // 000 getHttpResponse
 #define STOPALL digitalWrite(AN0,HIGH);digitalWrite(AN1,HIGH);digitalWrite(AN2,HIGH); // end
@@ -271,6 +271,7 @@
 enum {FAUX,VRAI};
 enum {OFF,ON};
 enum {NOPRINT,PRINT};
+//const char*  chexa="0123456789ABCDEFabcdef\0";
 
 /* description périphériques */
 

@@ -17,8 +17,16 @@ int checkData(char* data,uint16_t* lenData);
 int checkHttpData(char* data,uint8_t* fonction);
 const char* periDiag(int8_t diag);
 
-#ifndef PERIF
+#if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
+
+#if MACHINE_FRONTAL
+#include <Ethernet.h>
+#endif // MACHINE==F
+
+#if MACHINE_CONCENTRATEUR
 #include <Ethernet2.h>
+#endif // MACHINE==C
+
 
 void purgeCli(EthernetClient* cli);
 void purgeCli(EthernetClient* cli,bool diags);
@@ -28,9 +36,9 @@ int messToServer(EthernetClient* cli,const char* host,int port,char* data,Ethern
 int messToServer(EthernetClient* cli,const char* host,int port,char* data);   
 int getHttpResponse(EthernetClient* cli,char* data,int lmax,uint8_t* fonction);
 int getHttpResponse(EthernetClient* cli,char* data,int lmax,uint8_t* fonction,bool diags);
-#endif // PERIF
+#endif // MACHINE!='E'
 
-#ifdef PERIF
+#if MACHINE_ESP
 #include <ESP8266WiFi.h>
 
 void purgeCli(WiFiClient* cli);
@@ -41,6 +49,6 @@ int messToServer(WiFiClient* cli,const char* host,int port,char* data);    // co
 int messToServer(WiFiClient* cli,const char* host,int port,char* data,WiFiServer* server,WiFiClient* cliext);    // connecte au serveur et transfère la data
 int getHttpResponse(WiFiClient* cli,char* data,int lmax,uint8_t* fonction);
 int getHttpResponse(WiFiClient* cli,char* data,int lmax,uint8_t* fonction,bool diags);
-#endif // PERIF
+#endif // MACHINE==E
 
 #endif // MESSAGES_H_INCLUDED

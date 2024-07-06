@@ -6,7 +6,7 @@
 #include <shmess2.h>
 
 
-#ifdef PERIF
+#if MACHINE_ESP
 #include <ESP8266WiFi.h>
 
 extern WiFiClient cli;                 // client local du serveur externe
@@ -15,55 +15,19 @@ extern WiFiClient cliext;              // client externe du serveur local
 #if CONSTANT==RTCSAVED
 extern int cstlen;
 #endif //
-#endif // // PERIF
+#endif // MACHINE==E
 
-#ifndef PERIF
-#include <Ethernet2.h> // Ethernet 2 W5500 seul ; bibliothèque W5100/5500 Ethernet
-
-//extern uint8_t sock;
-
+#if FRONTAL
+#include <Ethernet.h> // Ethernet 2 W5500 seul ; bibliothèque W5100/5500 Ethernet
+extern uint8_t sock;
 //extern EthernetClient cli;
-/*
-extern int16_t*  periNum;                      // ptr ds buffer : Numéro du périphérique courant
-extern int32_t*  periPerRefr;                  // ptr ds buffer : période maximale accès serveur
-extern uint16_t* periPerTemp;                  // ptr ds buffer : période de lecture tempèrature
-extern float*    periPitch;                    // ptr ds buffer : variation minimale de température pour datasave
-extern float*    periLastVal;                  // ptr ds buffer : dernière valeur de température
-extern float*    periAlim;                     // ptr ds buffer : dernière tension d'alimentation
-extern char*     periLastDateIn;               // ptr ds buffer : date/heure de dernière réception
-extern char*     periLastDateOut;              // ptr ds buffer : date/heure de dernier envoi
-extern char*     periLastDateErr;              // ptr ds buffer : date/heure de derniere anomalie com
-extern int8_t*   periErr;                      // ptr ds buffer : code diag anomalie com (voir MESSxxx shconst.h)
-extern char*     periNamer;                    // ptr ds buffer : description périphérique
-extern char*     periVers;                     // ptr ds buffer : version logiciel du périphérique
-extern char*     periModel;                    // ptr ds buffer : model du périphérique
-extern byte*     periMacr;                     // ptr ds buffer : mac address
-extern byte*     periIpAddr;                   // ptr ds buffer : Ip address
-extern uint16_t* periPort;                     // ptr ds buffer : port periph server
-extern byte*     periSwNb;                     // ptr ds buffer : Nbre d'interrupteurs (0 aucun ; maxi 4(MAXSW)
-extern byte*     periSwVal;                    // ptr ds buffer : état/cde des inter
-extern byte*     periInput;                    // ptr ds buffer : Mode fonctionnement inters (MAXTAC=4 par switch)
-extern uint32_t* periSwPulseOne;               // ptr ds buffer : durée pulses sec ON (0 pas de pulse)
-extern uint32_t* periSwPulseTwo;               // ptr ds buffer : durée pulses sec OFF(mode astable)
-extern uint32_t* periSwPulseCurrOne;           // ptr ds buffer : temps courant pulses ON
-extern uint32_t* periSwPulseCurrTwo;           // ptr ds buffer : temps courant pulses OFF
-extern byte*     periSwPulseCtl;               // ptr ds buffer : mode pulses
-extern byte*     periSwPulseSta;               // ptr ds buffer : état clock pulses
-extern uint8_t*  periSondeNb;                  // ptr ds buffer : nbre sonde
-extern boolean*  periProg;                     // ptr ds buffer : flag "programmable"
-extern byte*     periDetNb;                    // ptr ds buffer : Nbre de détecteurs maxi 4 (MAXDET)
-extern byte*     periDetVal;                   // ptr ds buffer : flag "ON/OFF" si détecteur (2 bits par détec))
-extern float*    periThOffset;                 // ptr ds buffer : offset correctif sur mesure température
-extern float*    periThmin;                    // ptr ds buffer : alarme mini th
-extern float*    periThmax;                    // ptr ds buffer : alarme maxi th
-extern float*    periVmin;                     // ptr ds buffer : alarme mini volts
-extern float*    periVmax;                     // ptr ds buffer : alarme maxi volts
-extern byte*     periDetServEn;                // ptr ds buffer ; 1 byte 8*enable detecteurs serveur
+#endif // FRONTAL
 
-extern byte      periMacBuf[6];
-extern int8_t    periMess;                     // code diag réception message (voir MESSxxx shconst.h)
-*/
-#endif // // ndef PERIF
+#if FRONTAL
+#include <Ethernet2.h> // Ethernet 2 W5500 seul ; bibliothèque W5100/5500 Ethernet
+//extern EthernetClient cli;
+#endif // CONCENTRATEUR
+
 
 extern const char*  chexa;
 
@@ -75,14 +39,14 @@ extern byte   mac[6];
 
 const char*   periText={TEXTMESS};
 
-#ifndef PERIF
+#if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
 void purgeCli(EthernetClient* cli){purgeCli(cli,true);}
 void purgeCli(EthernetClient* cli,bool diags)
-#endif // // PERIF
-#ifdef PERIF
+#endif // FRONTAL
+#if MACHINE_ESP
 void purgeCli(WiFiClient* cli){purgeCli(cli,true);}
 void purgeCli(WiFiClient* cli,bool diags)
-#endif // // PERIF
+#endif // MACHINE==E
 {
     if(cli->connected()){
         if(diags){Serial.print(" purge :");}
@@ -120,10 +84,10 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags,b
       return v;
 }
 
-#ifndef PERIF
+#if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
 int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
 #endif //
-#ifdef PERIF
+#if MACHINE_ESP
 int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 {
@@ -142,7 +106,7 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
 */
 bool noServerCall=true;
 
-#ifndef PERIF
+#if !MACHINE_ESP
   if(server!=nullptr){
     *cliext=server->available();
     if(*cliext){noServerCall=false;v=MESSSRV;}} // message reçu non traité ---> anomalie
@@ -153,17 +117,12 @@ bool noServerCall=true;
     Serial.print(" cx to ");Serial.print(host);Serial.print(":");Serial.print(port);Serial.print("...");
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
-#ifndef PERIF
-    //Serial.print("avant cli->connect cli_socket:");Serial.print(cli->sockindex);
-#endif
     x=cli->connect(host,port);
-#ifndef PERIF
-    //Serial.print("après cli->connect cli_socket:");Serial.print(cli->sockindex);Serial.print("(");Serial.print(cli->waitTime_ap);Serial.print(") status_ap:");Serial.print(cli->status_ap);Serial.print(" sockx_ap:");Serial.println(cli->sockx_ap);
-#endif
+
     #define MAXCXTRY 4
 
     while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
-      #ifndef PERIF
+      #if !MACHINE_ESP
       trigwd();
       #endif
 
@@ -179,13 +138,13 @@ bool noServerCall=true;
             case -4:Serial.print("invalid response ");break;
             default:break;
           }*/
-          #ifndef PERIF
+          #if !MACHINE_ESP
           Serial.println();
           Serial.print(repeat);
           //Serial.print(" (");Serial.print(cli->waitTime_ap);
           //Serial.print(") status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
           //Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
-          #endif // PERIF
+          #endif // MACHINE!='E'
           
           v=MESSCX;
           unsigned long tto=millis();
@@ -200,9 +159,6 @@ bool noServerCall=true;
         } // !x
         else v=MESSOK;
     }     // while not connected
-    #ifndef PERIF
-    //Serial.print("sockx=");Serial.print(cli->sockx_ap);
-    #endif
     if(v==MESSOK){
       trigwd();
       Serial.print(" ok ");
@@ -214,7 +170,7 @@ bool noServerCall=true;
       Serial.print(" ko ");
     }
 
-#ifndef PERIF
+#if !MACHINE_ESP
   }   // noServerCall before first connection attempt
 #endif  
 #ifdef ANALYZE
@@ -225,26 +181,26 @@ bool noServerCall=true;
   return v;
 }
 
-#ifndef PERIF
+#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
 int messToServer(EthernetClient* cli,const char* host,int port,char* data)    // connecte au serveur et transfère la data
 #endif //
-#ifdef PERIF
+#if MACHINE_ESP
 int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    // connecte au serveur et transfère la data
 #endif //
 {
   return messToServer(cli,host,port,data,nullptr,nullptr);
 }
 
-#ifndef PERIF
+#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
 int waitRefCli(EthernetClient* cli,const char* ref,int lref,char* buf,int lbuf)   // attente d'un chaine spécifique dans le flot
     {return waitRefCli(cli,ref,lref,buf,lbuf,true);}
 int waitRefCli(EthernetClient* cli,const char* ref,int lref,char* buf,int lbuf,bool diags)
-#endif // PERIF
-#ifdef PERIF
+#endif // MACHINE!='E'
+#if MACHINE_ESP
 int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf)       // attente d'un chaine spécifique dans le flot
     {return waitRefCli(cli,ref,lref,buf,lbuf,true);}
 int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool diags)
-#endif // PERIF
+#endif // MACHINE=='E'
 // wait for ref,lref    si lbuf<>0 accumule le flot dans buf (ref incluse)
 // sortie MESSTO (0) time out   MESSDEC (-1) décap     MESSOK (1) OK
 {
@@ -259,7 +215,7 @@ int waitRefCli(WiFiClient* cli,const char* ref,int lref,char* buf,int lbuf,bool 
             Serial.print(" ");}                                 //Serial.print(lref);Serial.print(" ");}
       while(!termine){
         
-        #ifndef PERIF
+        #if !MACHINE_ESP
         trigwd();
         #endif
 
@@ -302,16 +258,16 @@ void waitRefCliDiag(bool diags,int pM)
   //if(diags){Serial.print(" waitRefCli pM=");Serial.print(pM);Serial.print("-");Serial.print(millis());}
 }
 
-#ifndef PERIF
+#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
 int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction)
     {return getHttpResponse(cli,data,lmax,fonction,false);}
 int getHttpResponse(EthernetClient* cli, char* data,int lmax,uint8_t* fonction,bool diags)  // attend un message d'un serveur ; ctle longueur et crc
-#endif //  PERIF
-#ifdef PERIF
+#endif //  MACHINE!='E'
+#if MACHINE_ESP
 int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction)
     {return getHttpResponse(cli,data,lmax,fonction,true);}
 int getHttpResponse(WiFiClient* cli, char* data,int lmax,uint8_t* fonction,bool diags)      // attend un message d'un serveur ; ctle longueur et crc
-#endif //  PERIF
+#endif //  MACHINE=='E'
 // format <body>contenu...</body></html>\n\r                        la fonction est décodée et les données sont chargées
 // contenu fonction__=nnnn_datacrc                                  renvoie les codes "MESSxxx"
 {

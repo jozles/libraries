@@ -1,9 +1,6 @@
 
 
 #ifdef DEFPER_H_INCLUDED
-
-#define PERIF
-
 #endif // DEFPER_H_INCLUDED
 
 

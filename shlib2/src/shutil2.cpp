@@ -2,14 +2,14 @@
 #include "Arduino.h"
 #include <shconst2.h>
 
-#ifndef PERIF
+#if !MACHINE_ESP
 #ifndef DETS
 #include <MemoryFree.h>
 #include <FreeStack.h>
 #endif // DETS
-#endif // PERIF
+#endif // MACHINE!='E'
 
-extern const char* chexa;     // ="0123456789ABCDEFabcdef\0";
+const char* chexa="0123456789ABCDEFabcdef\0";
 
 static unsigned long blinktime=0;
 int     nbreBlink=0;          // si nbreBlink impair   -> blocage
