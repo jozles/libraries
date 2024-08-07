@@ -39,7 +39,13 @@ int getHttpResponse(EthernetClient* cli,char* data,int lmax,uint8_t* fonction,bo
 #endif // MACHINE!='E'
 
 #if MACHINE_ESP
+#ifndef ESP32 
 #include <ESP8266WiFi.h>
+#endif
+#ifdef ESP32
+#include <WiFi.h>
+#endif
+
 
 void purgeCli(WiFiClient* cli);
 void purgeCli(WiFiClient* cli,bool diags);

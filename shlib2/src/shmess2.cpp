@@ -7,7 +7,12 @@
 
 
 #if MACHINE_ESP
+#ifndef ESP32
 #include <ESP8266WiFi.h>
+#endif
+#ifdef ESP32
+#include <WiFi.h>
+#endif
 
 extern WiFiClient cli;                 // client local du serveur externe
 extern WiFiClient cliext;              // client externe du serveur local
