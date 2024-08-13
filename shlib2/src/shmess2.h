@@ -32,8 +32,10 @@ void purgeCli(EthernetClient* cli);
 void purgeCli(EthernetClient* cli,bool diags);
 int waitRefCli(EthernetClient* cli,const char* ref,int lref,char* buf,int lbuf);           // attente d'un chaine spécifique dans le flot
 int waitRefCli(EthernetClient* cli,const char* ref,int lref,char* buf,int lbuf,bool diags);
-int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server);    // connecte au serveur et transfère la data
+int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server,EthernetClient* cliext);    // connecte au serveur et transfère la data
 int messToServer(EthernetClient* cli,const char* host,int port,char* data);   
+int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data,EthernetServer* server,EthernetClient* cliext);    // connecte au serveur et transfère la data
+int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data);   
 int getHttpResponse(EthernetClient* cli,char* data,int lmax,uint8_t* fonction);
 int getHttpResponse(EthernetClient* cli,char* data,int lmax,uint8_t* fonction,bool diags);
 #endif // MACHINE!='E'

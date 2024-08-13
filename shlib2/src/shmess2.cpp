@@ -90,11 +90,12 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags,b
 }
 
 #if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
-int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
+int messToServer0(EthernetClient* cli,IPAddress* host,uint16_t port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 #if MACHINE_ESP
-int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
+int messToServer0(WiFiClient* cli,IPAddress* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
 #endif //
+
 {
   Serial.print("mTS ");
 
@@ -119,10 +120,10 @@ bool noServerCall=true;
   if(noServerCall){
 #endif    
 
-    Serial.print(" cx to ");Serial.print(host);Serial.print(":");Serial.print(port);Serial.print("...");
+    Serial.print(" cx to ");serialPrintIp((uint8_t*) host);Serial.print(":");Serial.print(port);Serial.print("...");
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
-    x=cli->connect(host,port);
+    x=cli->connect(*host,port);
 
     #define MAXCXTRY 4
 
@@ -184,6 +185,120 @@ bool noServerCall=true;
   if(v==MESSSRV){Serial.println("server call");}
   //Serial.print("outofMTS v=");Serial.println(v);
   return v;
+}
+
+#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
+int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data)    // connecte au serveur et transfère la data
+#endif //
+#if MACHINE_ESP
+int messToServer(WiFiClient* cli,IPAddress* host,const int port,char* data)    // connecte au serveur et transfère la data
+#endif //
+{
+  return messToServer(cli,host,port,data,nullptr,nullptr);
+}
+
+#if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
+int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
+#endif //
+#if MACHINE_ESP
+int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
+#endif //
+{
+  /*
+  IPAddress IpHost;
+  textIp((byte*)&IpHost,(byte*)host);
+  return messToServer0(cli,&IpHost,port,data,server,cliext);
+  */
+
+  Serial.print("mTS ");
+
+  int x=0,v=MESSOK,repeat=0;
+
+  #ifdef ANALYZE
+  MESTOS 
+  #endif // ANALYZE
+
+// noServerCall : pour serveur vérifier l'utilité 
+// (probablement pour débug des pb de cx aux périfs-server)
+// concerne uniquement les périphériques : server=nullptr si frontal
+// vérifie l'absence de demande pendante
+//
+bool noServerCall=true;
+
+#if !MACHINE_ESP
+  if(server!=nullptr){
+    *cliext=server->available();
+    if(*cliext){noServerCall=false;v=MESSSRV;}} // message reçu non traité ---> anomalie
+
+  if(noServerCall){
+#endif    
+
+    Serial.print(" cx to ");Serial.print(host);Serial.print(":");Serial.print(port);Serial.print("...");
+    cli->stop();                          // assure la disponibilité de l'instance avant usage 
+                                          // (en principe inutile, messToServer utilisé lors de débuts de négociation)
+    x=cli->connect(host,port);
+
+    #define MAXCXTRY 4
+
+    while(!x && repeat<MAXCXTRY && noServerCall){          // (en principe fonctionne du premier coup ou pas)
+      #if !MACHINE_ESP
+      trigwd();
+      #endif
+
+        repeat++;
+    
+        trigwd();
+        x=cli->connected();        
+        if(!x){
+          //switch(x){
+            //case -1:Serial.print("time out ");break;
+            //case -2:Serial.print("invalid server ");break;
+            //case -3:Serial.print("truncated ");break;
+            //case -4:Serial.print("invalid response ");break;
+            //default:break;
+          //}
+          #if !MACHINE_ESP
+          Serial.println();
+          Serial.print(repeat);
+          //Serial.print(" (");Serial.print(cli->waitTime_ap);
+          //Serial.print(") status_ap=");Serial.print(cli->status_ap);Serial.print(" ");
+          //Serial.print("sockx=");Serial.print(cli->sockx_ap);Serial.print(" ");
+          #endif // MACHINE!='E'
+          
+          v=MESSCX;
+          unsigned long tto=millis();
+          while((millis()-tto)<100 && repeat<MAXCXTRY){        // delay 100mS avant retry
+            trigwd();
+            yield();
+            if(server!=nullptr){            // voir plus haut
+              *cliext=server->available();
+              if(*cliext){noServerCall=false;v=MESSSRV2;break;}
+            }
+          }
+        } // !x
+        else v=MESSOK;
+    }     // while not connected
+    if(v==MESSOK){
+      trigwd();
+      Serial.print(" ok ");
+      cli->write(data);      //cli->write("\r\n HTTP/1.1\r\n Connection:close\r\n\r\n"); // inutile pour serveur sh
+    }
+    else {
+      trigwd();
+      cli->stop();     // libération socket
+      Serial.print(" ko ");
+    }
+
+#if !MACHINE_ESP
+  }   // noServerCall before first connection attempt
+#endif  
+#ifdef ANALYZE
+  STOPALL
+#endif // ANALYZE
+  if(v==MESSSRV){Serial.println("server call");}
+  //Serial.print("outofMTS v=");Serial.println(v);
+  return v;
+
 }
 
 #if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL

@@ -151,6 +151,16 @@ void serialPrintIp(uint8_t* ip)
 
 uint8_t textIp(byte* nipadr,byte* buf)
 {
+  uint16_t bin;
+  uint8_t l=0;
+  for(int i=0;i<4;i++){
+    bin=0;
+    l+=conv_atob((char*)(buf+i+l),&bin);
+    nipadr[i]=(uint8_t)bin;
+  }
+  return l;
+
+  /*
   byte* in=nipadr;
   uint16_t uin;
   for(int i=0;i<4;i++){
@@ -159,6 +169,7 @@ uint8_t textIp(byte* nipadr,byte* buf)
     *buf++=(uint8_t)uin;
   }
   return (uint8_t)(in-nipadr);
+  */
 }
 
 void charIp(char* aipadr,char* nipadr,char* jsbuf)
