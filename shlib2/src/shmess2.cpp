@@ -194,7 +194,7 @@ int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data)  
 int messToServer(WiFiClient* cli,IPAddress* host,const int port,char* data)    // connecte au serveur et transfère la data
 #endif //
 {
-  return messToServer(cli,host,port,data,nullptr,nullptr);
+  return messToServer0(cli,host,port,data,nullptr,nullptr);
 }
 
 #if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
@@ -204,11 +204,12 @@ int messToServer(EthernetClient* cli,const char* host,int port,char* data,Ethern
 int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 {
-  /*
+  ///*
   IPAddress IpHost;
-  textIp((byte*)&IpHost,(byte*)host);
+  IpHost.fromString(host);                // convert 15 bytes ascii address (aaa.aaa.aaa.aaa) to IPAdress format
+  //textIp((byte*)&IpHost,(byte*)host);
   return messToServer0(cli,&IpHost,port,data,server,cliext);
-  */
+  //*/
 
   Serial.print("mTS ");
 
