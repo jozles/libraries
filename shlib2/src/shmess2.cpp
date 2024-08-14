@@ -45,11 +45,15 @@ extern byte   mac[6];
 const char*   periText={TEXTMESS};
 
 #if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
-void purgeCli(EthernetClient* cli){purgeCli(cli,true);}
+void purgeCli(EthernetClient* cli){
+  purgeCli(cli,true);}
+
 void purgeCli(EthernetClient* cli,bool diags)
 #endif // FRONTAL
 #if MACHINE_ESP
-void purgeCli(WiFiClient* cli){purgeCli(cli,true);}
+void purgeCli(WiFiClient* cli){
+  purgeCli(cli,true);}
+
 void purgeCli(WiFiClient* cli,bool diags)
 #endif // MACHINE==E
 {
@@ -90,14 +94,14 @@ int buildMess(const char* fonction,const char* data,const char* sep,bool diags,b
 }
 
 #if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
-int messToServer0(EthernetClient* cli,IPAddress* host,uint16_t port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
+int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 #if MACHINE_ESP
-int messToServer0(WiFiClient* cli,IPAddress* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
+int messToServer(WiFiClient* cli,IPAddress* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 
 {
-  Serial.print("mTS ");
+  Serial.print("mTS0 ");
 
   int x=0,v=MESSOK,repeat=0;
 
@@ -120,7 +124,8 @@ bool noServerCall=true;
   if(noServerCall){
 #endif    
 
-    Serial.print(" cx to ");serialPrintIp((uint8_t*) host);Serial.print(":");Serial.print(port);Serial.print("...");
+    Serial.print(" cx to ");Serial.print(*host);Serial.print(":");Serial.print(port);Serial.print("...");
+    //serialPrintIp((uint8_t*) host);
     cli->stop();                          // assure la disponibilité de l'instance avant usage 
                                           // (en principe inutile, messToServer utilisé lors de débuts de négociation)
     x=cli->connect(*host,port);
@@ -187,16 +192,6 @@ bool noServerCall=true;
   return v;
 }
 
-#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
-int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data)    // connecte au serveur et transfère la data
-#endif //
-#if MACHINE_ESP
-int messToServer(WiFiClient* cli,IPAddress* host,const int port,char* data)    // connecte au serveur et transfère la data
-#endif //
-{
-  return messToServer0(cli,host,port,data,nullptr,nullptr);
-}
-
 #if MACHINE_FRONTAL || MACHINE_CONCENTRATEUR
 int messToServer(EthernetClient* cli,const char* host,int port,char* data,EthernetServer* server,EthernetClient* cliext)    // connecte au serveur et transfère la data
 #endif //
@@ -207,10 +202,17 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFi
   ///*
   IPAddress IpHost;
   IpHost.fromString(host);                // convert 15 bytes ascii address (aaa.aaa.aaa.aaa) to IPAdress format
+  //uint8_t ip[4]={192,168,0,52};
+  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);  // convert uint8_t[4] to IPAddress format
+  //byte ip[4]={192,168,0,52};
+  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);    // convert byte[4] to IPAddress format
+  //uint32_t ip;ip=192+168*256+52*256*256*256;                                   // petit indien
+  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);  // convert uint32_t to IPAddress format
   //textIp((byte*)&IpHost,(byte*)host);
-  return messToServer0(cli,&IpHost,port,data,server,cliext);
+  return messToServer(cli,&IpHost,port,data,server,cliext);
   //*/
 
+/*
   Serial.print("mTS ");
 
   int x=0,v=MESSOK,repeat=0;
@@ -299,7 +301,7 @@ bool noServerCall=true;
   if(v==MESSSRV){Serial.println("server call");}
   //Serial.print("outofMTS v=");Serial.println(v);
   return v;
-
+*/
 }
 
 #if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
@@ -313,8 +315,20 @@ int messToServer(WiFiClient* cli,const char* host,const int port,char* data)    
 }
 
 #if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
+int messToServer(EthernetClient* cli,IPAddress* host,uint16_t port,char* data)    // connecte au serveur et transfère la data
+#endif //
+#if MACHINE_ESP
+int messToServer(WiFiClient* cli,IPAddress* host,const uint16_t port,char* data)    // connecte au serveur et transfère la data
+#endif //
+{
+  return messToServer(cli,host,port,data,nullptr,nullptr);
+}
+
+
+#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
 int waitRefCli(EthernetClient* cli,const char* ref,int lref,char* buf,int lbuf)   // attente d'un chaine spécifique dans le flot
     {return waitRefCli(cli,ref,lref,buf,lbuf,true);}
+
 int waitRefCli(EthernetClient* cli,const char* ref,int lref,char* buf,int lbuf,bool diags)
 #endif // MACHINE!='E'
 #if MACHINE_ESP
