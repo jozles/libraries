@@ -145,9 +145,8 @@
   }
 
   void CSE7766::handle() {
-
       if (!_ready) {cse_status=1;return;}
-      cse_status=0;
+      cse_status=99;
       _read();
 
   }
