@@ -9,7 +9,26 @@
 //#define SIZEPULSE   4  // uint32_t
 #define LENPERIDATE 6           // LDATEASCII packé
 #define LDATEASCII 12           // YYMMDDHHMMSS
-#define TEXTIPADDRLENGTH 15
+//#define TEXTIPADDRLENGTH 15
+
+
+/* /////////// format des adresses IP ///////// 
+    
+    Les périphériques WiFi les stockent en format IPAddress 
+    le serveur en byte[4]
+    anciennement messToServer utilisait une adresse texte sur 16 caractères ; 
+    acuellement au format IPAddress ce qui permet d'éviter la demande de DNS 
+    ci-après les différentes conversions (noter le format petit indien pour uint32_t)
+
+  //IPAddress IpHost;
+  //IpHost.fromString(host);                // convert 15 bytes ascii address (aaa.aaa.aaa.aaa) to IPAdress format
+  //uint8_t ip[4]={192,168,0,52};
+  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);  // convert uint8_t[4] to IPAddress format
+  //byte ip[4]={192,168,0,52};
+  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);    // convert byte[4] to IPAddress format
+  //uint32_t ip;ip=192+168*256+52*256*256*256;                                   // petit indien
+  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);  // convert uint32_t to IPAddress format
+*/
 
 //#define _MODE_DEVT  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)
 #define _MODE_RUN  // _MODE_RUN _MODE_DEVT // force et change l'adresse Mac de la carte red, l'adresse IP (via DHCP de la box) et le port (en accord avec redir de port de la box)

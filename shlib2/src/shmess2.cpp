@@ -199,18 +199,11 @@ int messToServer(EthernetClient* cli,const char* host,int port,char* data,Ethern
 int messToServer(WiFiClient* cli,const char* host,const int port,char* data,WiFiServer* server,WiFiClient* cliext)    // connecte au serveur et transfère la data
 #endif //
 {
-  ///*
+
   IPAddress IpHost;
   IpHost.fromString(host);                // convert 15 bytes ascii address (aaa.aaa.aaa.aaa) to IPAdress format
-  //uint8_t ip[4]={192,168,0,52};
-  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);  // convert uint8_t[4] to IPAddress format
-  //byte ip[4]={192,168,0,52};
-  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);    // convert byte[4] to IPAddress format
-  //uint32_t ip;ip=192+168*256+52*256*256*256;                                   // petit indien
-  //IPAddress IpTest;IpTest=ip;Serial.print("test ip ");Serial.println(IpTest);  // convert uint32_t to IPAddress format
-  //textIp((byte*)&IpHost,(byte*)host);
+
   return messToServer(cli,&IpHost,port,data,server,cliext);
-  //*/
 
 /*
   Serial.print("mTS ");
