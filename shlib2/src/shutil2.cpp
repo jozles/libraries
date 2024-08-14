@@ -553,7 +553,7 @@ void trigwd()
   trigwd(2);
 }
 
-void lb0()
+void lb0(uint8_t pulseBlink)
 {
   if(nbreBlink>0){blinktime=millis()-1;cntBlink=nbreBlink+1;digitalWrite(pinLed,offLed);}   // nbreBlink>0 start new cycle
 
@@ -571,21 +571,23 @@ void lb0()
       else {
         //Serial.println("ON ");
         digitalWrite(pinLed,onLed);                               // allumage
-        blinktime+=PULSEBLINK;
+        blinktime+=pulseBlink;
       }
   }
 }
 
-void ledblink(int nbBlk)
+//void lb0(){lb0(PULSEBLINK);}
+
+void ledblink(int nbBlk,uint8_t pulseBlink)
 {
   if(nbBlk!=0){
     if(nbBlk!=BCODEONBLINK){              // force allumage sans modif cycle en cours
       if(!(nbreBlink>MAXBLK)){nbreBlink=nbBlk;} // si nbre courant > MAXBLK, reste sur le code d'erreur
       if(nbreBlink%2!=0 && nbreBlink>0){  // si nbBlk impair positif blocage
         nbreBlink=abs(nbreBlink);         // force nbreBlink >0
-        lb0();                            // start new cycle
+        lb0(pulseBlink);                            // start new cycle
         nbreBlink=-abs(nbreBlink);        // force nbreBlink <0
-        while(1){lb0();trigwd();delay(1);}          // infinite loop
+        while(1){lb0(pulseBlink);trigwd();delay(1);}          // infinite loop
       }
     }
     else {                                // force allumage statique jusqu'au pronchain ledblink
@@ -593,7 +595,7 @@ void ledblink(int nbBlk)
       blinktime=millis()+2;
     }
   }
-  lb0();      // cycle en cours (cntblink - nbreBlink allumages(PULSEBLINK) séparés par extinctions(FASTBLINK) puis 1 extinction(SLOWBLINK) )
+  lb0(pulseBlink);      // cycle en cours (cntblink - nbreBlink allumages(PULSEBLINK) séparés par extinctions(FASTBLINK) puis 1 extinction(SLOWBLINK) )
               // si nbreBlink >0       déclenchement immédiat 1 cycle (nbreBlink)
               // si nbreBlink >MAXBLK  blocage sur nbreBlink-MAXBLK
               // si nbreBlink 0        rien ne change

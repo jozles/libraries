@@ -9,7 +9,7 @@
 //#define SIZEPULSE   4  // uint32_t
 #define LENPERIDATE 6           // LDATEASCII packé
 #define LDATEASCII 12           // YYMMDDHHMMSS
-//#define TEXTIPADDRLENGTH 15
+#define TEXTIPADDRLENGTH 15
 
 
 /* /////////// format des adresses IP ///////// 
@@ -50,6 +50,7 @@
 
     #ifdef DETS
         #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
+        #define PULSEBLINK 4       // durée blink
         #define LEDON HIGH
         #define LEDOFF LOW
         #define STOPREQ 14 // 5         // PD5
@@ -64,6 +65,7 @@
     #ifdef REDV0
         #define STOPREQ 3          // push button pour stop request
         #define PINLED  2          // 2 sur redshieldV0 // 13 sur proto
+        #define PULSEBLINK 4       // durée blink
         #define LEDON HIGH
         #define LEDOFF LOW
         #define SDCARD 4           // toujours 4 pour compatibilité lib.
@@ -73,6 +75,7 @@
         #define AP2112             // red shield 1.2 and later
         #define STOPREQ 2          // push button pour stop request
         #define PINLED  3          // 2 sur redV0 // 13 sur proto
+        #define PULSEBLINK 4       // durée blink
         #define LEDON HIGH
         #define LEDOFF LOW
         #define SDCARD 4           // toujours 4 pour compatibilité lib.
@@ -262,8 +265,8 @@
 
 #define SLOWBLINK 3000
 #define FASTBLINK 300         // 200    // 350
-#define PULSEBLINK 4          // plutôt dépendant de la période de la loop sur
-                              // périf NO_MODE
+//#define PULSEBLINK 10         // plutôt dépendant de la période de la loop sur
+//                              // périf NO_MODE
 
 /* codes blink 
 *  valeurs impaires bloquantes
