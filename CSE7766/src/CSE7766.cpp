@@ -131,8 +131,12 @@
       if (_serial) delete _serial;
 
       if (1 == _pin_rx) {
-          Serial.begin(CSE7766_BAUDRATE);
-      } else {
+          Serial.begin(CSE7766_BAUDRATE);      
+      }
+      else if(16 == _pin_rx) {
+          Serial2.begin(4800,SERIAL_8E1,_pin_rx,-1);
+      }
+      else {
           //_serial = new SoftwareSerial(_pin_rx, SW_SERIAL_UNUSED_PIN, _inverted, 32);
           _serial = new SoftwareSerial(_pin_rx, SW_SERIAL_UNUSED_PIN, _inverted);
           _serial->enableIntTx(false);
@@ -315,6 +319,8 @@
   bool CSE7766::_serial_available() {
       if (1 == _pin_rx) {
           return Serial.available();
+      } else if (16 == _pin_rx) {
+          return Serial2.available();
       } else {
           return _serial->available();
       }
@@ -323,6 +329,8 @@
   void CSE7766::_serial_flush() {
       if (1 == _pin_rx) {
           return Serial.flush();
+      } else if (16 == _pin_rx) {
+          return Serial2.flush();
       } else {
           return _serial->flush();
       }
@@ -331,6 +339,8 @@
   uint8_t CSE7766::_serial_read() {
       if (1 == _pin_rx) {
           return Serial.read();
+      } else if(16==_pin_rx) {
+          return Serial2.read();
       } else {
           return _serial->read();
       }
