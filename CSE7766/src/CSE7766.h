@@ -70,7 +70,7 @@ public:
   double getEnergy(); //_energy
 
   void begin();
-  void handle();
+  bool handle();
 
   uint8_t cse_status;
   unsigned char _data[24];
@@ -101,7 +101,7 @@ private:
 
 bool _checksum();
 void _process();
-void _read();
+bool _read();
 bool _serial_available();
 void _serial_flush();
 uint8_t _serial_read();

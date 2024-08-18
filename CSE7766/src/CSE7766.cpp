@@ -148,10 +148,10 @@
 
   }
 
-  void CSE7766::handle() {
-      if (!_ready) {cse_status=1;return;}
+  bool CSE7766::handle() {
+      if (!_ready) {cse_status=1;return false;}
       cse_status=99;
-      _read();
+      return _read();
 
   }
 
@@ -268,7 +268,7 @@
 
   }
 
-  void CSE7766::_read() {
+  bool CSE7766::_read() {
 
       _error = SENSOR_ERROR_OK;
 
@@ -312,6 +312,9 @@
           _process();
           index = 0;
       }
+
+      if(cse_status==187){return true;} // handle(99)+64+index(24)
+      return false;
 
   }
 
