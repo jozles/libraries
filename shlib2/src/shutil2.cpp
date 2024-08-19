@@ -585,9 +585,9 @@ void ledblink(int nbBlk,uint8_t pulseBlink)
       if(!(nbreBlink>MAXBLK)){nbreBlink=nbBlk;} // si nbre courant > MAXBLK, reste sur le code d'erreur
       if(nbreBlink%2!=0 && nbreBlink>0){  // si nbBlk impair positif blocage
         nbreBlink=abs(nbreBlink);         // force nbreBlink >0
-        lb0(pulseBlink);                            // start new cycle
+        lb0(pulseBlink);                  // start new cycle
         nbreBlink=-abs(nbreBlink);        // force nbreBlink <0
-        while(1){lb0(pulseBlink);trigwd();delay(1);}          // infinite loop
+        while(1){lb0(pulseBlink);trigwd();delay(1);}  
       }
     }
     else {                                // force allumage statique jusqu'au pronchain ledblink
