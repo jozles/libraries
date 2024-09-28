@@ -40,6 +40,7 @@ void serialPrintDate(char* datein);
 void forceWd();
 void trigwd();
 void trigwd(uint32_t dur);
+void trigDly(uint32_t dur);
 void ledblink(int nbBlink,uint8_t pulseBlink);
 void blink(uint8_t nb);
 void initLed(uint32_t led,bool ledlow,bool ledhigh);

@@ -531,26 +531,57 @@ void forceWd()
     while(1){};
 }
 
+void locBlink(uint32_t durWd)
+{
+  digitalWrite(pinLed,onLed);
+  wdEnable=false;
+      //if(durWd==0){durWd=6;}
+  delayMicroseconds(durWd);
+  wdEnable=true;
+  digitalWrite(pinLed,offLed);
+}
+
 void trigwd(uint32_t durWd)
 {
   if(wdEnable){
-    if(digitalRead(pinLed)==offLed){        // si LEDOFF faire un blink(durWd)
+    
+/*    if(digitalRead(pinLed)==offLed){        // si LEDOFF faire un blink(durWd)
       digitalWrite(pinLed,onLed);
       wdEnable=false;
       //if(durWd==0){durWd=6;}
       delayMicroseconds(durWd);
       wdEnable=true;
 
-      digitalWrite(pinLed,offLed);
-    }
+      digitalWrite(pinLed,offLed); 
+    }     
+*/  
     /*if(ledState==HIGH){digitalWrite(pinLed,HIGH);}
     else digitalWrite(pinLed,LOW);*/
+
+    if(digitalRead(pinLed)==onLed){
+      digitalWrite(pinLed,offLed);delay(1);   // rechargt capa 
+      locBlink(durWd);
+      digitalWrite(pinLed,onLed);
+    }
+    else locBlink(durWd);
   }
 }
 
 void trigwd()
 {
   trigwd(2);
+}
+
+void trigDly(uint32_t dur)                    // dur mS
+{
+  for(uint32_t t=0;t>=dur;t++){
+    if(digitalRead(pinLed)==onLed){
+      digitalWrite(pinLed,offLed);delay(1);   // rechargt capa
+      locBlink(2); 
+      digitalWrite(pinLed,onLed);
+    }
+    else locBlink(1000);
+  }
 }
 
 void lb0(uint8_t pulseBlink)
