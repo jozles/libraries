@@ -342,6 +342,18 @@ int LoRaClass::read()
   return readRegister(REG_FIFO);
 }
 
+int LoRaClass::readPacket(byte* payload,int nbBytes)
+{
+  _packetIndex=0;
+  //int nbBytes=readRegister(REG_RX_NB_BYTES);
+
+  while (nbBytes--){ 
+    *(payload+_packetIndex)=readRegister(REG_FIFO);
+    _packetIndex++;
+  }
+  return -1;
+}
+
 int LoRaClass::peek()
 {
   if (!available()) {

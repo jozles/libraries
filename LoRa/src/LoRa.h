@@ -60,6 +60,7 @@ public:
   // from Stream
   virtual int available();
   virtual int read();
+  virtual int readPacket(byte* payload,int nbBytes);
   virtual int peek();
   virtual void flush();
 
