@@ -41,17 +41,17 @@ public:
   LoRaClass();
 
   int begin(long frequency);
-  //void end();
+  void end();
 
-  //int beginPacket(int implicitHeader = false);
-  //int endPacket(bool async = false);
+  int beginPacket(int implicitHeader = false);
+  int endPacket(bool async = false);
 
   int parsePacket(int size = 0);
   int packetRssi();
-  //float packetSnr();
-  //long packetFrequencyError();
+  float packetSnr();
+  long packetFrequencyError();
 
-  //int rssi();
+  int rssi();
 
   // from Print
   virtual size_t write(uint8_t byte);
@@ -59,10 +59,10 @@ public:
 
   // from Stream
   virtual int available();
-  virtual int read();
+  //virtual int read();
   virtual int readPacket(byte* payload,int nbBytes);
-  virtual int peek();
-  virtual void flush();
+  //virtual int peek();
+  //virtual void flush();
 
 #ifndef ARDUINO_SAMD_MKRWAN1300
   //void onReceive(void(*callback)(int));
@@ -85,7 +85,7 @@ public:
   //void enableInvertIQ();
   //void disableInvertIQ();
   
-  void setOCP(uint8_t mA); // Over Current Protection control
+  //void setOCP(uint8_t mA); // Over Current Protection control
   
   void setGain(uint8_t gain); // Set LNA gain
 
@@ -100,19 +100,6 @@ public:
   void setSPIFrequency(uint32_t frequency);
 
   void dumpRegisters(Stream& out);
-
-  void powerUp();
-  void powerDown();
-  void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif);
-  void powerOff();
-  int transmitting(uint8_t bid);
-  void addrWrite(uint8_t bid,byte* bidx);
-  void readStop();
-  void printAddr(char* addr,char n);
-  void flushRx();
-  void flushTx();
-
-  uint8_t nbPerif;
 
 private:
   void explicitHeaderMode();
@@ -130,7 +117,7 @@ private:
   void writeRegister(uint8_t address, uint8_t value);
   uint8_t singleTransfer(uint8_t address, uint8_t value);
 
-  static void onDio0Rise();
+  //static void onDio0Rise();
 
 private:
   SPISettings _spiSettings;

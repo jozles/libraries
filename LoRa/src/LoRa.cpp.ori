@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <LoRa.h>
-#include <Lora_const.h>
 
 // registers
 #define REG_FIFO                 0x00
@@ -69,29 +68,6 @@
     #define ISR_PREFIX
 #endif
 
-#ifdef DETS        // idem for PRO MINI
-#define CSN_HIGH  bitSet(PORT_CSN,BIT_CSN);
-#define CSN_LOW   bitClear(PORT_CSN,BIT_CSN);
-#define CE_HIGH   bitSet(PORT_CE,BIT_CE);delayMicroseconds(10);
-// 10uS is minimal pulse ; 4uS to CSN low
-#define CE_LOW    bitClear(PORT_CE,BIT_CE);
-#define CSN_INIT  bitSet(DDR_CSN,BIT_CSN);
-#define CSN_OFF   bitClear(DDR_CSN,BIT_CSN);
-#define CE_INIT   bitSet(DDR_CE,BIT_CE);
-#define CE_OFF    bitClear(DDR_CE,BIT_CE);
-#endif // DETS
-
-#ifndef CSN_HIGH
-#define CSN_HIGH  digitalWrite(CSN_PIN,HIGH);
-#define CSN_LOW   digitalWrite(CSN_PIN,LOW);
-#define CE_HIGH   digitalWrite(CE_PIN,HIGH);delayMicroseconds(8);
-#define CE_LOW    digitalWrite(CE_PIN,LOW);
-#define CE_INIT   pinMode(CE_PIN,OUTPUT);
-#define CE_OFF    pinMode(CE_PIN,INPUT);
-#define CSN_INIT  pinMode(CSN_PIN,OUTPUT);
-#define CSN_OFF   pinMode(CSN_PIN,INPUT);
-#endif // CSN_HIGH
-
 LoRaClass::LoRaClass() :
   _spiSettings(LORA_DEFAULT_SPI_FREQUENCY, MSBFIRST, SPI_MODE0),
   _spi(&LORA_DEFAULT_SPI),
@@ -105,110 +81,6 @@ LoRaClass::LoRaClass() :
   // overide Stream timeout value
   setTimeout(0);
 }
-
-
-void LoRaClass::powerOff()
-{
-#if MACHINE_DET328
-  
-  allPinsLow();
-
-  digitalWrite(RPOW_PIN,HIGH);    // power off
-  pinMode(RPOW_PIN,OUTPUT);
-
-#endif // MACHINE_DET328  
-}
-
-void LoRaClass::powerDown()
-{
-  idle();
-
-#ifdef SPI_MODE
-        SPI_OFF
-#endif // SPI_MODE              
-}
-
-void LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
-{
-#if MACHINE_DET328
-#if PER_PO == 'P'
-
-  allPinsLow();                   // in order to minimize power during POWONDLY
-      
-  digitalWrite(RPOW_PIN,LOW);     // power on
-  pinMode(RPOW_PIN,OUTPUT);
-
-  delay(POWONDLY);                // powerOn delay ******************** mettre en sleep *********************
-
-  bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
-
-#endif // PER_PO
-#endif // MACHINE_DET328
-#if ((MACHINE_CONCENTRATEUR) || (PER_PO == 'N'))
-
-  digitalWrite(CSN_PIN,HIGH);
-  pinMode(CSN_PIN,OUTPUT);
-
-  digitalWrite(CE_PIN,LOW);
-  pinMode(CE_PIN,OUTPUT);
-
-#ifdef SPI_MODE  
-  digitalWrite(CLK_PIN,LOW);
-  pinMode(CLK_PIN,OUTPUT);
-  digitalWrite(MOSI_PIN,LOW);
-  pinMode(MOSI_PIN,OUTPUT);
-  digitalWrite(MOSI_PIN,HIGH);  
-#endif //
-  
-#endif // (MACHINE_CONCENTRATEUR)
-
-  powerUp();
-  
-  nbPerif=nbperif;
-
-  begin((long)speed*1E6);
-
-}
-
-void LoRaClass::powerUp()
-{   
-#ifdef SPI_MODE
-    SPI_INIT;
-    SPI_START;
-#endif // SPI_MODE
-
-    flushRx();
-    flushTx();
-
-    idle();
-
-    delay(POWUPDLY);       // powerUp delay
-}
-
-int LoRaClass::transmitting(uint8_t bid)          // pour echo() à développer
-{
-  return -1; 
-}
-
-void LoRaClass::addrWrite(uint8_t bid,byte* bidx)   // pour radioInit() inutile
-{}
-
-void LoRaClass::readStop()                         // pour radioInit() inutile
-{}
-
-void LoRaClass::flushRx()                          // à developper
-{}
-
-void LoRaClass::flushTx()                          // à developper
-{}
-
-void LoRaClass::printAddr(char* addr,char n)
-{
-  for(int j=0;j<LORA_ADDR_LENGTH;j++){Serial.print((char)addr[j]);}
-  if(n=='n'){Serial.println();}
-}
-
-/* ============== original ============== */
 
 int LoRaClass::begin(long frequency)
 {
@@ -284,7 +156,6 @@ int LoRaClass::begin(long frequency)
   return 1;
 }
 
-/*
 void LoRaClass::end()
 {
   // put in sleep mode
@@ -293,8 +164,7 @@ void LoRaClass::end()
   // stop SPI
   _spi->end();
 }
-*/
-/*
+
 int LoRaClass::beginPacket(int implicitHeader)
 {
   if (isTransmitting()) {
@@ -316,9 +186,7 @@ int LoRaClass::beginPacket(int implicitHeader)
 
   return 1;
 }
-*/
 
-/*
 int LoRaClass::endPacket(bool async)
 {
   
@@ -339,8 +207,7 @@ int LoRaClass::endPacket(bool async)
 
   return 1;
 }
-*/
-/*
+
 bool LoRaClass::isTransmitting()
 {
   if ((readRegister(REG_OP_MODE) & MODE_TX) == MODE_TX) {
@@ -354,7 +221,6 @@ bool LoRaClass::isTransmitting()
 
   return false;
 }
-*/
 
 int LoRaClass::parsePacket(int size)
 {
@@ -406,14 +272,11 @@ int LoRaClass::packetRssi()
   return (readRegister(REG_PKT_RSSI_VALUE) - (_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 }
 
-/*
 float LoRaClass::packetSnr()
 {
   return ((int8_t)readRegister(REG_PKT_SNR_VALUE)) * 0.25;
 }
-*/
 
-/*
 long LoRaClass::packetFrequencyError()
 {
   int32_t freqError = 0;
@@ -432,14 +295,11 @@ long LoRaClass::packetFrequencyError()
 
   return static_cast<long>(fError);
 }
-*/
 
-/*
 int LoRaClass::rssi()
 {
   return (readRegister(REG_RSSI_VALUE) - (_frequency < RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 }
-*/
 
 size_t LoRaClass::write(uint8_t byte)
 {
@@ -471,7 +331,6 @@ int LoRaClass::available()
   return (readRegister(REG_RX_NB_BYTES) - _packetIndex);
 }
 
-
 int LoRaClass::read()
 {
   if (!available()) {
@@ -482,7 +341,6 @@ int LoRaClass::read()
 
   return readRegister(REG_FIFO);
 }
-
 
 int LoRaClass::readPacket(byte* payload,int nbBytes)
 {
@@ -495,7 +353,6 @@ int LoRaClass::readPacket(byte* payload,int nbBytes)
   }
   return -1;
 }
-
 
 int LoRaClass::peek()
 {
@@ -515,12 +372,10 @@ int LoRaClass::peek()
   return b;
 }
 
-
 void LoRaClass::flush()
 {
 }
 
-/*
 #ifndef ARDUINO_SAMD_MKRWAN1300
 void LoRaClass::onReceive(void(*callback)(int))
 {
@@ -574,7 +429,6 @@ void LoRaClass::receive(int size)
   writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_CONTINUOUS);
 }
 #endif
-*/
 
 void LoRaClass::idle()
 {
@@ -634,12 +488,10 @@ void LoRaClass::setFrequency(long frequency)
   writeRegister(REG_FRF_LSB, (uint8_t)(frf >> 0));
 }
 
-
 int LoRaClass::getSpreadingFactor()
 {
   return readRegister(REG_MODEM_CONFIG_2) >> 4;
 }
-
 
 void LoRaClass::setSpreadingFactor(int sf)
 {
@@ -661,7 +513,6 @@ void LoRaClass::setSpreadingFactor(int sf)
   setLdoFlag();
 }
 
-
 long LoRaClass::getSignalBandwidth()
 {
   byte bw = (readRegister(REG_MODEM_CONFIG_1) >> 4);
@@ -681,7 +532,6 @@ long LoRaClass::getSignalBandwidth()
 
   return -1;
 }
-
 
 void LoRaClass::setSignalBandwidth(long sbw)
 {
@@ -760,7 +610,6 @@ void LoRaClass::disableCrc()
   writeRegister(REG_MODEM_CONFIG_2, readRegister(REG_MODEM_CONFIG_2) & 0xfb);
 }
 
-/*
 void LoRaClass::enableInvertIQ()
 {
   writeRegister(REG_INVERTIQ,  0x66);
@@ -772,8 +621,6 @@ void LoRaClass::disableInvertIQ()
   writeRegister(REG_INVERTIQ,  0x27);
   writeRegister(REG_INVERTIQ2, 0x1d);
 }
-*/
-
 
 void LoRaClass::setOCP(uint8_t mA)
 {
@@ -787,7 +634,6 @@ void LoRaClass::setOCP(uint8_t mA)
 
   writeRegister(REG_OCP, 0x20 | (0x1F & ocpTrim));
 }
-
 
 void LoRaClass::setGain(uint8_t gain)
 {
@@ -815,12 +661,10 @@ void LoRaClass::setGain(uint8_t gain)
   }
 }
 
-/*
 byte LoRaClass::random()
 {
   return readRegister(REG_RSSI_WIDEBAND);
 }
-*/
 
 void LoRaClass::setPins(int ss, int reset, int dio0)
 {
@@ -862,7 +706,7 @@ void LoRaClass::implicitHeaderMode()
 
   writeRegister(REG_MODEM_CONFIG_1, readRegister(REG_MODEM_CONFIG_1) | 0x01);
 }
-/*
+
 void LoRaClass::handleDio0Rise()
 {
   int irqFlags = readRegister(REG_IRQ_FLAGS);
@@ -893,7 +737,6 @@ void LoRaClass::handleDio0Rise()
     }
   }
 }
-*/
 
 uint8_t LoRaClass::readRegister(uint8_t address)
 {
@@ -920,29 +763,10 @@ uint8_t LoRaClass::singleTransfer(uint8_t address, uint8_t value)
 
   return response;
 }
-/*
+
 ISR_PREFIX void LoRaClass::onDio0Rise()
 {
   LoRa.handleDio0Rise();
 }
-*/
 
 LoRaClass LoRa;
-
-
-#if MACHINE_DET328
-void LoraClass::allPinsLow()                     /* all radio/SPI pins low */
-{
-  bitClear(PORT_CE,BIT_CE);       //digitalWrite(CE_PIN,LOW);
-  bitSet(DDR_CE,BIT_CE);          //pinMode(CE_PIN,OUTPUT);
-  
-  bitClear(PORT_CLK,BIT_CLK);     //digitalWrite(CLK_PIN,LOW);
-  bitSet(DDR_CLK,BIT_CLK);        //pinMode(CLK_PIN,OUTPUT);
-      
-  bitClear(PORT_CSN,BIT_CSN);     //digitalWrite(CSN_PIN,LOW);
-  bitSet(DDR_CSN,BIT_CSN);        //pinMode(CSN_PIN,OUTPUT);
-  
-  bitClear(PORT_MOSI,BIT_MOSI);   //digitalWrite(MOSI_PIN,LOW);
-  bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);  
-}
-#endif // MACHINE='P'  
