@@ -12,6 +12,10 @@
   #define ARD_VALUE  0          // ((0-15)+1) x 250uS delay before repeat
   #define ARC_VALUE  4          // (0-15) repetitions
 
+  #define LORA_PLD_CRC_ERROR -22
+  #define LORA_RCV_TO_ERROR  -21
+  #define LORA_PLD_OVF_ERROR -23
+
 #if MACHINE_CONCENTRATEUR
          
   #define CE_PIN     9          // pin pour CE du nrf

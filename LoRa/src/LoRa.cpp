@@ -185,6 +185,154 @@ void LoRaClass::powerUp()
     delay(POWUPDLY);       // powerUp delay
 }
 
+void LoRaClass::write(byte* data,bool ack,uint8_t len,byte* destAddr) // write data,len to destAddr
+{
+  byte dataBuffer[MAX_PKT_LENGTH];
+  memcopy(dataBuffer,destAddr,LORA_ADDR_LENGTH);                  // dest addr
+  memcopy(dataBuffer+LORA_ADDR_LENGTH,locAddr,LORA_ADDR_LENGTH);  // srce addr
+
+  LoRa.beginPacket();  
+  LoRa.write(data,len);
+  LoRa.endPacket();
+
+}
+
+int LoRaClass::read(byte* data,uint8_t* pipe,uint8_t* pldLength,int numP)
+{
+   
+    /* mode 'C' returns  0  registration to do 
+                        >0  valid data table entry nb 
+                        <0  empty, pipe err, length err, mac addr table error
+       mode 'P' returns =0  full
+                        <0  empty, pipe err or length error
+    */
+
+   int err=packetRead(data,*pldLength);
+
+}
+
+int LoRaClass::packetRead(byte* payload,int nbBytes)
+{
+  /* returns packetSize =-1 if overflow */
+
+  int packetSize = parsePacket(nbBytes);
+
+  if(packetsize==LORA_PLD_OVF_ERROR){
+    flushRx();
+    }
+
+  if(packetsize<=nbBytes and packetsize>0){
+
+    _packetIndex=0;
+
+    while (_packetIndex<=packetSize){ 
+      *(payload+_packetIndex)=readRegister(REG_FIFO);
+      _packetIndex++;
+    }
+  }
+  return packetSize;
+}
+
+#if MACHINE_DET328
+int LoRaClass::pRegister(byte* message,uint8_t* pldLength)  // peripheral registration to get numP
+{                                                           // ER_MAXRT ; AV_errors codes ; >=0 numP ok
+
+    memset(message,0x00,PERI_PAYLOAD_LENGTH+1);                  // numP is 0
+    memcopy(message+LORA_ADDR_LENGTH,ccAddr,LORA_ADDR_LENGTH);   // dest addr
+    memcopy(dataBuffer,locAddr,LORA_ADDR_LENGTH);                // srce addr
+    
+    write(message,NO_ACK,PERI_ADDR_LENGTH+1,0);                  // send macAddr + numP=0 to ccAddr ; (no ACK)
+
+    // format message peri : 16 bits conc addr ; 16 bits mac addr ; 8 bits num per (from conc table)
+    
+    /* mode 'C' returns  0  registration to do 
+                        >0  valid data table entry nb 
+                        <0  empty, pipe err, length err, mac addr table error
+       mode 'P' returns =0  full
+                        <0  empty, pipe err or length error
+    */
+ 
+    byte data[CONC_PLOAD_LENGTH];
+    pldLength=CONC_PLOAD_LENGTH;
+    uint8_t nump=0;
+    
+    unsigned long time_beg = millis();
+    long readTo=0;
+    int numP=0;
+    uint8_t pipe=0;                         // compatibility nrf    
+    while(numP==0 && (readTo>=0)){          // waiting for concentrator answer
+        readTo=TO_REGISTER-millis()+time_beg;
+        numP=read(data,&pipe,pldLength,nbPerif);}   
+
+    if(readTo<0){nump=ER_RDYTO;}            // TO
+      
+    if(numP>=0){             
+        numP=data[LORA_ADDR_LENGTH*2]-'0';  // numP ok (0 if table full)
+    }                       
+    
+    return numP;                            // or CRC/OVF error 
+}
+#endif // MACHINE_DET328
+
+/*
+int Nrfp::txRx(byte* message,uint8_t* pldLength)
+{                      // ER_MAXRT ; AV_errors codes ; >=0 numP ok
+
+    //memset(message,0x00,MAX_PAYLOAD_LENGTH+1);
+    message[MAX_PAYLOAD_LENGTH]=0x00;
+    memcpy(message,locAddr,NRF_ADDR_LENGTH);
+    
+    write(message,NO_ACK,MAX_PAYLOAD_LENGTH,0);     // send macAddr + numP=0 to ccAddr ; no ACK
+
+#ifndef DETS
+    int trst=1;
+    while(trst==1){trst=transmitting(NO_ACK);}
+    if(trst<0){return ER_MAXRT;}              // MAX_RT error should not happen (no ACK mode)
+                                              // radio card HS or missing
+#endif // ndef DETS
+      
+#ifdef DETS
+// version accélérée pour minimiser le délai entre TX_DS et setRx()
+// (jusqu'à 40uS en compil release ; moins de 20uS accéléré)
+    GET_STA
+    conf=(CONFREG) | (PRIM_RX_BIT);           // ready pour setRx()
+    while((statu & (TX_DS_BIT | MAX_RT_BIT))==0){GET_STA}
+
+    if(statu & MAX_RT_BIT){
+      Serial.print("\nsyst err maxrt without ack ");Serial.println(statu,HEX);delay(2);
+      return ER_MAXRT;} 
+
+    CE_LOW              // to change from TX to RX
+    regWrite(CONFIG,&conf);                   // setRx()
+    CE_HIGH
+    prxMode=true;
+// fin version accélérée
+#endif // def DETS
+
+    unsigned long time_beg = millis();
+    long readTo=0;
+    uint8_t pipe=99;
+    *pldLength=MAX_PAYLOAD_LENGTH;
+    int numP=AV_EMPTY;    
+    while(numP==AV_EMPTY && (readTo>=0)){     // waiting for concentrator answer
+        readTo=TO_REGISTER-millis()+time_beg;
+        numP=read(message,&pipe,pldLength,nbPerif);}
+
+    PP4_HIGH
+    CE_LOW
+    if(numP>=0 && (readTo>=0)){               // no TO && pld ok
+        numP=message[NRF_ADDR_LENGTH]-'0';        // numP
+        PP4
+        return numP;}                         // PRX mode still true
+
+    if(numP>=0){
+        return ER_RDYTO;}                     // else TO error
+    
+    return numP;                              // or AV error 
+}
+//#endif // MACHINE_DET328
+*/
+
 int LoRaClass::transmitting(uint8_t bid)          // pour echo() à développer
 {
   return -1; 
@@ -357,6 +505,7 @@ bool LoRaClass::isTransmitting()
 */
 
 int LoRaClass::parsePacket(int size)
+          // returns 0 (empty) or LORA_PLD_CRC_ERROR or LORA_PLD_OVF_ERROR
 {
   int packetLength = 0;
   int irqFlags = readRegister(REG_IRQ_FLAGS);
@@ -396,6 +545,15 @@ int LoRaClass::parsePacket(int size)
 
     // put in single RX mode
     writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
+  } else if((irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) != 0) {
+    // CRC error
+    packetLength=LORA_PLD_CRC_ERROR;
+  } else if(size!=0 && packetLength>size){
+    // implicite ovf
+    packetLength=LORA_PLD_OVF_ERROR;
+  } else if(size=0 && packetLength>MAX_PAYLOD_LENGTH){
+    // explicite ovf
+    packetLength=LORA_PLD_OVF_ERROR;
   }
 
   return packetLength;
@@ -481,19 +639,6 @@ int LoRaClass::read()
   _packetIndex++;
 
   return readRegister(REG_FIFO);
-}
-
-
-int LoRaClass::readPacket(byte* payload,int nbBytes)
-{
-  _packetIndex=0;
-  //int nbBytes=readRegister(REG_RX_NB_BYTES);
-
-  while (nbBytes--){ 
-    *(payload+_packetIndex)=readRegister(REG_FIFO);
-    _packetIndex++;
-  }
-  return -1;
 }
 
 

@@ -60,7 +60,6 @@ public:
   // from Stream
   virtual int available();
   virtual int read();
-  virtual int readPacket(byte* payload,int nbBytes);
   virtual int peek();
   virtual void flush();
 
@@ -105,7 +104,10 @@ public:
   void powerDown();
   void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif);
   void powerOff();
-  int transmitting(uint8_t bid);
+  void write(byte* data,bool ack,uint8_t len,byte* macTableAddr);
+  int  read(byte* data,uint8_t* pipe,uint8_t* pldLength,int numP);
+  int  packetRead(byte* payload,int nbBytes);
+  int  transmitting(uint8_t bid);
   void addrWrite(uint8_t bid,byte* bidx);
   void readStop();
   void printAddr(char* addr,char n);
