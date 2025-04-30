@@ -3,6 +3,7 @@
 #include "nrf24l01s.h"
 
 #include "nrf24l01s_const.h"
+#include "radio_const.h"
 //#include "radio_user_conc.h"
 
 /* AP NFR24L01+ node single */

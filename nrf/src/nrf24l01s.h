@@ -78,8 +78,8 @@
 #define NO_ACK  false
 
 #define NB_PIPE 2         // nombre pipes utilisées
-#define NRF_MAX_PAYLOAD_LENGTH 32
-#define NRF_ADDR_LENGTH 5
+#define NRF_MAX_PAYLOAD_LENGTH MAX_PAYLOAD_LENGTH
+#define NRF_ADDR_LENGTH RADIO_ADDR_LENGTH
 
 /*
 #define CHANNEL0    120         // def radio channel
@@ -97,16 +97,7 @@
 #define RF_SPD_1MB 0
 #define RF_SPD_250K RF_DR_LOW_BIT
 
-/*** return (error) codes ***/
-#define AV_NBPIP -1
-#define AV_LMERR -2
-#define AV_MCADD -3 // read output (need message upload)
-#define AV_EMPTY -4
-#define AV_MAXAV AV_EMPTY
-#define ER_MAXRT (AV_MAXAV)-1 // code erreur MAX_RT
-#define ER_RDYTO (ER_MAXRT)-1 // code erreur Time Out attente réception
-#define ER_MAXER (ER_RDYTO)
-#define ER_TEXT "to\0rt\0em\0mc\0le\0pi\0--\0ok\0" // 2 char libs for codes
+
 
 /*** logic analyzer debug pulse ***/
 

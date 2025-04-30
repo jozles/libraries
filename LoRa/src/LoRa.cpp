@@ -188,40 +188,54 @@ void LoRaClass::powerUp()
 void LoRaClass::write(byte* data,bool ack,uint8_t len,byte* destAddr) // write data,len to destAddr
 {
   byte dataBuffer[MAX_PKT_LENGTH];
-  memcopy(dataBuffer,destAddr,LORA_ADDR_LENGTH);                  // dest addr
-  memcopy(dataBuffer+LORA_ADDR_LENGTH,locAddr,LORA_ADDR_LENGTH);  // srce addr
+  memcpy(dataBuffer,destAddr,LORA_ADDR_LENGTH);                  // dest addr
+  memcpy(dataBuffer+LORA_ADDR_LENGTH,locAddr,LORA_ADDR_LENGTH);  // srce addr
 
-  LoRa.beginPacket();  
-  LoRa.write(data,len);
-  LoRa.endPacket();
+  beginPacket();  
+  write(data,len);
+  endPacket();
 
 }
 
 int LoRaClass::read(byte* data,uint8_t* pipe,uint8_t* pldLength,int numP)
 {
    
-    /* mode 'C' returns  0  registration to do 
+    /* mode 'C' returns  (pipe=1) 
+                        0   registration to do 
                         >0  valid data table entry nb 
-                        <0  empty, pipe err, length err, mac addr table error
-       mode 'P' returns =0  full
-                        <0  empty, pipe err or length error
+                        <0  empty, ovf, crc, mac addr table error
+       mode 'P' returns =0  data received, pldLength updated
+                        <0  empty, ovf, crc error
+                        (read() utilisé dans TxRxMessage() et pRegister())
     */
 
-   int err=packetRead(data,*pldLength);
+  int sta=packetRead(data,*pldLength);
+  if  (sta>0){                                                                  // valid data received
+    *pldLength=sta;                                                             // compat nrf
+
+    #if MACHINE_CONCENTRATEUR
+    *pipe=1;                                                                    // compat nrf
+
+/*    // find numP
+      sta=data[LORA_ADDR_LENGTH]-'0';                                            // sender numP
+      if(sta!=0 && memcmp(data,tableC[sta].periMac,LORA_ADDR_LENGTH)!=0){  // macAddr ko ?
+        sta=AV_MCADD;}                                                          // if numP==0 registration to do
+*/        
+    #endif // MACHINE_CONCENTRATEUR
+  }
+
+
+  return sta;         // <0 error ; >=0 numP
 
 }
 
 int LoRaClass::packetRead(byte* payload,int nbBytes)
 {
-  /* returns packetSize =-1 if overflow */
+  /* returns packetSize or EMPTY/OVF/CRC ERR  (see parsePacket) */
 
   int packetSize = parsePacket(nbBytes);
 
-  if(packetsize==LORA_PLD_OVF_ERROR){
-    flushRx();
-    }
-
-  if(packetsize<=nbBytes and packetsize>0){
+  if(packetSize>0){         // data in fifo ; no error
 
     _packetIndex=0;
 
@@ -229,7 +243,10 @@ int LoRaClass::packetRead(byte* payload,int nbBytes)
       *(payload+_packetIndex)=readRegister(REG_FIFO);
       _packetIndex++;
     }
+  } else if(packetSize<0){
+    flushRx();
   }
+
   return packetSize;
 }
 
@@ -241,7 +258,7 @@ int LoRaClass::pRegister(byte* message,uint8_t* pldLength)  // peripheral regist
     memcopy(message+LORA_ADDR_LENGTH,ccAddr,LORA_ADDR_LENGTH);   // dest addr
     memcopy(dataBuffer,locAddr,LORA_ADDR_LENGTH);                // srce addr
     
-    write(message,NO_ACK,PERI_ADDR_LENGTH+1,0);                  // send macAddr + numP=0 to ccAddr ; (no ACK)
+    write(message,NO_ACK,LORA_ADDR_LENGTH+1,0);                  // send macAddr + numP=0 to ccAddr ; (no ACK)
 
     // format message peri : 16 bits conc addr ; 16 bits mac addr ; 8 bits num per (from conc table)
     
@@ -274,23 +291,25 @@ int LoRaClass::pRegister(byte* message,uint8_t* pldLength)  // peripheral regist
 }
 #endif // MACHINE_DET328
 
-/*
-int Nrfp::txRx(byte* message,uint8_t* pldLength)
+
+int LoRaClass::txRx(byte* message,uint8_t* pldLength)
 {                      // ER_MAXRT ; AV_errors codes ; >=0 numP ok
 
     //memset(message,0x00,MAX_PAYLOAD_LENGTH+1);
     message[MAX_PAYLOAD_LENGTH]=0x00;
-    memcpy(message,locAddr,NRF_ADDR_LENGTH);
+    memcpy(message,locAddr,LORA_ADDR_LENGTH);
     
     write(message,NO_ACK,MAX_PAYLOAD_LENGTH,0);     // send macAddr + numP=0 to ccAddr ; no ACK
 
+/*
 #ifndef DETS
     int trst=1;
     while(trst==1){trst=transmitting(NO_ACK);}
     if(trst<0){return ER_MAXRT;}              // MAX_RT error should not happen (no ACK mode)
                                               // radio card HS or missing
 #endif // ndef DETS
-      
+*/
+/*      
 #ifdef DETS
 // version accélérée pour minimiser le délai entre TX_DS et setRx()
 // (jusqu'à 40uS en compil release ; moins de 20uS accéléré)
@@ -308,7 +327,7 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
     prxMode=true;
 // fin version accélérée
 #endif // def DETS
-
+*/
     unsigned long time_beg = millis();
     long readTo=0;
     uint8_t pipe=99;
@@ -318,11 +337,8 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
         readTo=TO_REGISTER-millis()+time_beg;
         numP=read(message,&pipe,pldLength,nbPerif);}
 
-    PP4_HIGH
-    CE_LOW
     if(numP>=0 && (readTo>=0)){               // no TO && pld ok
-        numP=message[NRF_ADDR_LENGTH]-'0';        // numP
-        PP4
+        numP=message[LORA_ADDR_LENGTH]-'0';   // numP
         return numP;}                         // PRX mode still true
 
     if(numP>=0){
@@ -331,7 +347,7 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
     return numP;                              // or AV error 
 }
 //#endif // MACHINE_DET328
-*/
+
 
 int LoRaClass::transmitting(uint8_t bid)          // pour echo() à développer
 {
@@ -442,7 +458,7 @@ void LoRaClass::end()
   _spi->end();
 }
 */
-/*
+
 int LoRaClass::beginPacket(int implicitHeader)
 {
   if (isTransmitting()) {
@@ -464,9 +480,7 @@ int LoRaClass::beginPacket(int implicitHeader)
 
   return 1;
 }
-*/
 
-/*
 int LoRaClass::endPacket(bool async)
 {
   
@@ -487,8 +501,7 @@ int LoRaClass::endPacket(bool async)
 
   return 1;
 }
-*/
-/*
+
 bool LoRaClass::isTransmitting()
 {
   if ((readRegister(REG_OP_MODE) & MODE_TX) == MODE_TX) {
@@ -502,10 +515,9 @@ bool LoRaClass::isTransmitting()
 
   return false;
 }
-*/
 
 int LoRaClass::parsePacket(int size)
-          // returns 0 (empty) or LORA_PLD_CRC_ERROR or LORA_PLD_OVF_ERROR
+          // returns <0 ER_EMPTY/AV_EMPTY or ER_CRC or ER_OVF or >0 packetLength
 {
   int packetLength = 0;
   int irqFlags = readRegister(REG_IRQ_FLAGS);
@@ -537,6 +549,9 @@ int LoRaClass::parsePacket(int size)
 
     // put in standby mode
     idle();
+    
+    if(packetLength==0){packetLength=ER_EMPTY;}
+
   } else if (readRegister(REG_OP_MODE) != (MODE_LONG_RANGE_MODE | MODE_RX_SINGLE)) {
     // not currently in RX mode
 
@@ -547,13 +562,15 @@ int LoRaClass::parsePacket(int size)
     writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_RX_SINGLE);
   } else if((irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) != 0) {
     // CRC error
-    packetLength=LORA_PLD_CRC_ERROR;
-  } else if(size!=0 && packetLength>size){
+    packetLength=ER_CRC;
+  } else if((size!=0) && (packetLength>size)){
     // implicite ovf
-    packetLength=LORA_PLD_OVF_ERROR;
-  } else if(size=0 && packetLength>MAX_PAYLOD_LENGTH){
+    packetLength=ER_OVF;
+  } else if((size==0) && packetLength>MAX_PAYLOAD_LENGTH){
     // explicite ovf
-    packetLength=LORA_PLD_OVF_ERROR;
+    packetLength=ER_OVF;
+  } else if(irqFlags & IRQ_RX_DONE_MASK){
+    packetLength=AV_EMPTY;
   }
 
   return packetLength;
@@ -659,7 +676,6 @@ int LoRaClass::peek()
 
   return b;
 }
-
 
 void LoRaClass::flush()
 {

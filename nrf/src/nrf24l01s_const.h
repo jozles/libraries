@@ -141,6 +141,6 @@
 
 #define VOLTMIN 3.2             // minimal value to run
 
-#endif // MACHINE == 'P'
+#endif // MACHINE_DET328
 
 #endif // _NRF_CONST_INCLUDED

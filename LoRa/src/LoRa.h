@@ -43,8 +43,8 @@ public:
   int begin(long frequency);
   //void end();
 
-  //int beginPacket(int implicitHeader = false);
-  //int endPacket(bool async = false);
+  int beginPacket(int implicitHeader = false);
+  int endPacket(bool async = false);
 
   int parsePacket(int size = 0);
   int packetRssi();
@@ -100,6 +100,7 @@ public:
 
   void dumpRegisters(Stream& out);
 
+  /* ajout pour Radio */
   void powerUp();
   void powerDown();
   void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif);
@@ -108,6 +109,8 @@ public:
   int  read(byte* data,uint8_t* pipe,uint8_t* pldLength,int numP);
   int  packetRead(byte* payload,int nbBytes);
   int  transmitting(uint8_t bid);
+  int  pRegister(byte* message,uint8_t* pldLength);
+  int  txRx(byte* message,uint8_t* pldLength);
   void addrWrite(uint8_t bid,byte* bidx);
   void readStop();
   void printAddr(char* addr,char n);
@@ -115,13 +118,14 @@ public:
   void flushTx();
 
   uint8_t nbPerif;
+  byte*   locAddr;          // local Addr
 
 private:
   void explicitHeaderMode();
   void implicitHeaderMode();
 
   //void handleDio0Rise();
-  //bool isTransmitting();
+  bool isTransmitting();
 
   int getSpreadingFactor();
   long getSignalBandwidth();
@@ -132,7 +136,7 @@ private:
   void writeRegister(uint8_t address, uint8_t value);
   uint8_t singleTransfer(uint8_t address, uint8_t value);
 
-  static void onDio0Rise();
+  //static void onDio0Rise();
 
 private:
   SPISettings _spiSettings;
