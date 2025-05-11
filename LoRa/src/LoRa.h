@@ -119,6 +119,8 @@ public:
 
   uint8_t nbPerif;
   byte*   locAddr;          // local Addr
+  byte*   ccAddr;           // conc Addr
+  uint8_t lastSta=0;
 
 private:
   void explicitHeaderMode();

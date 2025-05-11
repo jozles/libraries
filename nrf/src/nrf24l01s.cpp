@@ -94,7 +94,8 @@ void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif)
     regWrite(DYNPD,&regw);          // dynamic payload length
 
     addrWrite(RX_ADDR_P1,locAddr);  // RXP1 = macAddr du circuit pour réception messages dans pipe 1
-
+    addrWrite(RX_ADDR_P2,CB_ADDR);  // RXP2 = pipe 2 pour recevoir les demandes d'adresse de concentrateur
+                                    // (conc only ; chargée en EEPROM sur périf)
     regw=channel;
     regWrite(RF_CH,&regw);
 
@@ -165,7 +166,7 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
   bitClear(PORT_MOSI,BIT_MOSI);   //digitalWrite(MOSI_PIN,LOW);
   bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);  
 }
-#endif // MACHINE='P'  
+#endif // MACHINE_DET328 
 
 void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
 {
@@ -182,7 +183,7 @@ void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
   bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
 
 #endif // PER_PO
-#endif // MACHINE == 'P'
+#endif // MACHINE_DET328
 #if ((MACHINE_CONCENTRATEUR) || (PER_PO == 'N'))
 
   digitalWrite(CSN_PIN,HIGH);
@@ -199,7 +200,7 @@ void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
   digitalWrite(MOSI_PIN,HIGH);  
 #endif //
   
-#endif // MACHINE == 'C'
+#endif // (MACHINE_CONCENTRATEUR) || (PER_PO == 'N')
 
   powerUp();
   setup(channel,speed,nbperif);                        // registry inits 

@@ -16,7 +16,7 @@
 
   #define LRAMREM 16
 
-#endif // MACHINE == 'C'
+#endif // MACHINE_CONCENTRATEUR
 
 #if MACHINE_DET328             /* voltage and temp acquisition params */
    // param carte DETS (sinon ?) dans platformo.ini

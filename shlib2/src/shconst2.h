@@ -46,17 +46,7 @@
  //#define PINLED  0                    //  0 = ESP-12  ; 2 = ESP-01 ;
  //#define LEDON LOW
  //#define LEDOFF HIGH
- #define SERIALX Serial
-
-    #ifdef DETS
-        #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
-        #define PULSEBLINK 4       // durée blink
-        #define LEDON HIGH
-        #define LEDOFF LOW
-        #define STOPREQ 14 // 5         // PD5
-        #define SERIALX Serial
-        #define SERNB 0
-    #endif // DETS
+  #define SERIALX Serial
 
 #endif // MACHINE=='E'
 
@@ -100,6 +90,17 @@
             #define SERENB 1
         #endif // DUE
     #endif // RED1.1
+
+    #ifdef DETS
+        #define SERIALX Serial
+        #define PINLED  4          // 2 sur redshieldV0 // 13 sur proto
+        #define PULSEBLINK 4       // durée blink
+        #define LEDON HIGH
+        #define LEDOFF LOW
+        #define STOPREQ 14 // 5         // PD5
+        #define SERIALX Serial
+        #define SERNB 0
+    #endif // DETS
 
 #endif // MACHINE!='E'
 
