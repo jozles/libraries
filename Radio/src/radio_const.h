@@ -4,7 +4,7 @@
 #define VERSION "2.b "
 #define LENVERSION 4
 
-#define LORA //NRF
+#define NRF // LORA //NRF
 
 
 #include <Arduino.h>
