@@ -95,14 +95,13 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
   #define MAX_PAYLOAD_LENGTH 32         // doit être == NRF_MAX_PAYLOAD_LENGTH
   #define CC_NRF_ADDR "SHCO0"           // def NRF conc addr (0)
 
-  //#define CLK_PIN    13
-  #define MISO_PIN   12
-  #define MOSI_PIN   11
-
   #define NBPERIF 12                      // dim table
   #define BUF_SERVER_LENGTH LBUFSERVER    // to/from server buffer length
 
 #if MACHINE_CONCENTRATEUR
+
+  #define MISO_PIN   12
+  #define MOSI_PIN   11
          
   #define CE_PIN     9          // pin pour CE du nrf
   #define CSN_PIN    8          // pin pour CS du SPI-nrf
@@ -111,11 +110,16 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
 
   #define LRAMREM 16
 
-#endif // MACHINE == 'C'
+#endif // MACHINE_CONCENTRATEUR
 
 #if MACHINE_DET328             /* voltage and temp acquisition params */
    // param carte DETS (sinon ?) dans platformo.ini
-  #define ATMEGA328                 // option ATMEGA8 ... manque de memoire programme (8K dispo et nécessite 17K)
+  #define ATMEGA328               // option ATMEGA8 ... manque de memoire programme (8K dispo et nécessite 17K)
+
+  #define CLK_PIN    13                 
+  #define MISO_PIN   12
+  #define MOSI_PIN   11
+
   #define PER_PO    'P'           // 'N' no powoff 'P' powoff
   #define SPI_MODE                // SPI initialisé par la lib (ifndef -> lib externe) 
   #define DEF_ADDR  "peri_"
@@ -193,7 +197,7 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
   #define A1ADMUXVAL  0 | (1<<REFS1) | (1<<REFS0) | A1CHECKADC     // internal 1,1V ref + ADC input for volts
   #define A2CHECKADC 6            // user ADC2
   #define A2ADMUXVAL  0 | (1<<REFS1) | (1<<REFS0) | A2CHECKADC     // internal 1,1V ref + ADC input for volts
-#endif // def DETS
+#endif // DETS
 #ifndef DETS                      // params douteux
   #define PLED        PINLED
   #define CSN_PIN    10
@@ -236,7 +240,7 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
 
 #define VOLTMIN 3.2             // minimal value to run
 
-#endif // MACHINE == 'P'  
+#endif // MACHINE_DET328  
 
 #if MACHINE_CONCENTRATEUR
   //#define DUE                   // DUE OU STM32... provient de platformio.ini  
