@@ -257,10 +257,12 @@
 #define CC_ADDRX   "rashc\0rbshc\0rcshc\0rdshc\0" // adresses mac par défaut des concentrateurs                                                 
                                                 // le premier car doit avoir le bit 0 à 0 pour que le dhcp fonctionne (?)
 
+
+#define RADIO_ADDR_LENGTH 5     // doit être == NRF_ADDR_LENGTH // commun pour sketch radio et frontal 
+// modif de la valeur compliquée à mettre en oeuvre
+#define CC_NRF_ADDR "SHCO0"     // def conc addr (0)            // commun pour sketch radio et frontal 
 /*
-#define RADIO_ADDR_LENGTH 5     // doit être == NRF_ADDR_LENGTH
 #define MAX_PAYLOAD_LENGTH 32   // doit être == NRF_MAX_PAYLOAD_LENGTH
-#define CC_NRF_ADDR "SHCO0"     // def NRF conc addr (0)
 */
 
 #define TOINCHCLI   100         // msec max attente car server

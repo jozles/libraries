@@ -8,7 +8,7 @@
 
 
 #include <Arduino.h>
-//#include <shconst2.h>
+#include <shconst2.h>
 
 /*
 Le serveur contient la config des concentrateurs ; (mac,ip pour forçage éventuel,adresse NRF,RF channel, RF speed) ;
@@ -74,7 +74,10 @@ v2.a  utilisation lib ethernet2 ; delay après Udp.endPacket() ; reset hard du w
       après les retry définis dans userResetSetup, puis le reset hard du w5500 puis 2 essais
       entre 15/09 et 6/10 17 reboot avec journées de 7,3,2,2,1,1,1,0...0
       Des soucis avec l'écriture lecture de la config après power off sur Due... la carte marquée "TEST_CFG" fonctionne
-v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
+v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h ; 
+      dets modif beginP : retry + poweron permanent
+      le port udp du server auquel s'adresse le concentrateur provient de configCreate ou de getServerConfig
+      Le numéro d'UDP qui s'affiche dans periLine correspond à l'instance UDP qui a reçu le message (selon le port de la config du concentrateur)
 
 */
 
@@ -91,9 +94,9 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
   #define CB_ADDR   (byte*)"shcc0"      // adresse fixe de broadcast concentrateurs (recup MAC_ADDR concentrateurs) 0 nécessaire pour read()
   #define BR_ADDR   (byte*)"bcast"      // adresse fixe de broadcast
 
-  #define RADIO_ADDR_LENGTH 5           // doit être == NRF_ADDR_LENGTH
+  //#define RADIO_ADDR_LENGTH 5           // doit être == NRF_ADDR_LENGTH --- voir shconst
   #define MAX_PAYLOAD_LENGTH 32         // doit être == NRF_MAX_PAYLOAD_LENGTH
-  #define CC_NRF_ADDR "SHCO0"           // def NRF conc addr (0)
+  //#define CC_NRF_ADDR "SHCO0"           // def NRF conc addr (0)        --- voir shconst
 
   #define NBPERIF 12                      // dim table
   #define BUF_SERVER_LENGTH LBUFSERVER    // to/from server buffer length
@@ -273,7 +276,8 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h
   #define SBVINIT "00072_00024_0025_00000000"  // server buffer init value
   #define SBLINIT 25                           // server buffer init length (MAX_PAYLOAD_LENGTH-ADDR_LENGTH-1)
          
-#endif // MACHINE == 'C'
+#endif // MACHINE_CONCENTRATEUR
+
 
 
 /*** return (error) codes ***/
