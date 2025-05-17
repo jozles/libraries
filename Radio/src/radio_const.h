@@ -1,7 +1,7 @@
 #ifndef _RADIO_CONST_INCLUDED
 #define _RADIO_CONST_INCLUDED
 
-#define VERSION "2.b "
+#define VERSION "2.c "
 #define LENVERSION 4
 
 #define NRF // LORA //NRF
@@ -78,7 +78,7 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h ;
       dets modif beginP : retry + poweron permanent
       le port udp du server auquel s'adresse le concentrateur provient de configCreate ou de getServerConfig
       Le numéro d'UDP qui s'affiche dans periLine correspond à l'instance UDP qui a reçu le message (selon le port de la config du concentrateur)
-
+v2.c  La structure du message vers le périf change pour faire de la place au temps absolu des cellules (voir radio_user_peri/conc)
 */
 
 /************* config ****************/
@@ -95,8 +95,13 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h ;
   #define BR_ADDR   (byte*)"bcast"      // adresse fixe de broadcast
 
   //#define RADIO_ADDR_LENGTH 5           // doit être == NRF_ADDR_LENGTH --- voir shconst
-  #define MAX_PAYLOAD_LENGTH 32         // doit être == NRF_MAX_PAYLOAD_LENGTH
+  #define MAX_PAYLOAD_LENGTH 32           // doit être == NRF_MAX_PAYLOAD_LENGTH
   //#define CC_NRF_ADDR "SHCO0"           // def NRF conc addr (0)        --- voir shconst
+
+  #define ABSTIME_STEP 6                  // 6 bits par caractère
+  #define NBCELLS 32                      // nre de cellules temporelles
+  #define CELLDUR 128                     // durée cellule
+  #define ABSTIME NBCELLS*CELLDUR         // millis cells size
 
   #define NBPERIF 12                      // dim table
   #define BUF_SERVER_LENGTH LBUFSERVER    // to/from server buffer length
@@ -273,8 +278,8 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h ;
     bool    periBufSent;  
   };
 
-  #define SBVINIT "00072_00024_0025_00000000"  // server buffer init value
-  #define SBLINIT 25                           // server buffer init length (MAX_PAYLOAD_LENGTH-ADDR_LENGTH-1)
+  #define SBVINIT "00012018000025000000000001"  // server buffer init value
+  #define SBLINIT 26                            // server buffer init length (MAX_PAYLOAD_LENGTH-ADDR_LENGTH-1)
          
 #endif // MACHINE_CONCENTRATEUR
 
