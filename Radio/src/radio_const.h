@@ -79,6 +79,7 @@ v2.b  Compatibilté avec LoRa ; les codes erreur sont dans radio_const.h ;
       le port udp du server auquel s'adresse le concentrateur provient de configCreate ou de getServerConfig
       Le numéro d'UDP qui s'affiche dans periLine correspond à l'instance UDP qui a reçu le message (selon le port de la config du concentrateur)
 v2.c  La structure du message vers le périf change pour faire de la place au temps absolu des cellules (voir radio_user_peri/conc)
+      mise en place cellules temporelles
 */
 
 /************* config ****************/
@@ -99,9 +100,13 @@ v2.c  La structure du message vers le périf change pour faire de la place au te
   //#define CC_NRF_ADDR "SHCO0"           // def NRF conc addr (0)        --- voir shconst
 
   #define ABSTIME_STEP 6                  // 6 bits par caractère
-  #define NBCELLS 32                      // nre de cellules temporelles
-  #define CELLDUR 128                     // durée cellule
-  #define ABSTIME NBCELLS*CELLDUR         // millis cells size
+  #define ABSMASK 0x3f
+  #define NBCELLPOWER 2                   
+  #define NBCELLS 0x4 //(2^NBCELLPOWER)         // nre de cellules temporelles  !!!!puissance de 2!!!!
+  #define CELLDURPOWER 7
+  #define CELLDUR 0x80 //(2^CELLDURPOWER)        // durée cellule                !!!!puissance de 2!!!!
+  #define ABSTIMEPOWER (NBCELLPOWER+CELLDURPOWER)
+  #define ABSTIME (NBCELLS*CELLDUR)         // millis cells size
 
   #define NBPERIF 12                      // dim table
   #define BUF_SERVER_LENGTH LBUFSERVER    // to/from server buffer length
@@ -278,7 +283,7 @@ v2.c  La structure du message vers le périf change pour faire de la place au te
     bool    periBufSent;  
   };
 
-  #define SBVINIT "00012018000025000000000001"  // server buffer init value
+  #define SBVINIT "00040000400025000000000001"  // server buffer init value
   #define SBLINIT 26                            // server buffer init length (MAX_PAYLOAD_LENGTH-ADDR_LENGTH-1)
          
 #endif // MACHINE_CONCENTRATEUR
