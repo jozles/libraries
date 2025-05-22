@@ -102,11 +102,14 @@ v2.c  La structure du message vers le périf change pour faire de la place au te
   #define ABSTIME_STEP 6                  // 6 bits par caractère
   #define ABSMASK 0x3f
   #define NBCELLPOWER 2                   
-  #define NBCELLS 0x4 //(2^NBCELLPOWER)         // nre de cellules temporelles  !!!!puissance de 2!!!!
+  #define NBCELLS 0x4                     // nre de cellules temporelles  !!!!puissance de 2!!!!
   #define CELLDURPOWER 7
-  #define CELLDUR 0x80 //(2^CELLDURPOWER)        // durée cellule                !!!!puissance de 2!!!!
+  #define CELLDUR 0x80                    // durée cellule                !!!!puissance de 2!!!!
   #define ABSTIMEPOWER (NBCELLPOWER+CELLDURPOWER)
-  #define ABSTIME (NBCELLS*CELLDUR)         // millis cells size
+  #define ABSTIME (NBCELLS*CELLDUR)       // millis cells size
+  #define MARKER 5
+
+  #define DLYSTP (int)32
 
   #define NBPERIF 12                      // dim table
   #define BUF_SERVER_LENGTH LBUFSERVER    // to/from server buffer length
