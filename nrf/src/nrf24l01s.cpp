@@ -3,7 +3,7 @@
 #include "nrf24l01s.h"
 
 #include "nrf24l01s_const.h"
-#include "radio_const.h"
+//#include "radio_const.h"
 //#include "radio_user_conc.h"
 
 /* AP NFR24L01+ node single */
@@ -46,7 +46,7 @@
 #define SPI_INIT    SPI.beginTransaction(SPISettings(8000000,MSBFIRST,SPI_MODE0));
 #endif //
 #define SPI_START   SPI.begin();
-#define SPI_OFF     SPI.end();pinMode(MOSI_PIN,INPUT);pinMode(CLK_PIN,INPUT);
+#define SPI_OFF     SPI.end();//pinMode(MOSI_PIN,INPUT);pinMode(CLK_PIN,INPUT);
 #endif // SPI_MODE
 
 #ifdef DETS
@@ -70,7 +70,7 @@ Nrfp::Nrfp()    // constructeur
 {
 }
 
-void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif)
+void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 { 
     /* registers */
 
@@ -80,10 +80,10 @@ void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif)
 //    regw=(NRF_ADDR_LENGTH-2)<<AW;       // addresses width
 //    regWrite(SETUP_AW,&regw);
 
-//    regw=9;//MAX_PAYLOAD_LENGTH;        // set payload length
+//    regw=9;//NRF_MAX_PAYLOAD_LENGTH;        // set payload length
 //    regWrite(RX_PW_P0,&regw);
 
-//    regw=9;//MAX_PAYLOAD_LENGTH;        // set payload length
+//    regw=9;//NRF_MAX_PAYLOAD_LENGTH;        // set payload length
 //    regWrite(RX_PW_P1,&regw);
 
 //    regw=(ERX_P1_BIT|ERX_P0_BIT);   // R0,R1 seuls (ERX_P5_BIT|ERX_P4_BIT|ERX_P3_BIT|ERX_P2_BIT|ERX_P1_BIT|ERX_P0_BIT);
@@ -94,7 +94,7 @@ void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif)
     regWrite(DYNPD,&regw);          // dynamic payload length
 
     addrWrite(RX_ADDR_P1,locAddr);  // RXP1 = macAddr du circuit pour réception messages dans pipe 1
-    addrWrite(RX_ADDR_P2,CB_ADDR);  // RXP2 = pipe 2 pour recevoir les demandes d'adresse de concentrateur
+    addrWrite(RX_ADDR_P2,cbAddr);  // RXP2 = pipe 2 pour recevoir les demandes d'adresse de concentrateur
                                     // (conc only ; chargée en EEPROM sur périf)
     regw=channel;
     regWrite(RF_CH,&regw);
@@ -168,7 +168,7 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
 }
 #endif // MACHINE_DET328 
 
-void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
+void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 {
 #if MACHINE_DET328
 #if PER_PO == 'P'
@@ -203,7 +203,7 @@ void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
 #endif // (MACHINE_CONCENTRATEUR) || (PER_PO == 'N')
 
   powerUp();
-  setup(channel,speed,nbperif);                        // registry inits 
+  setup(channel,speed,nbperif,cbAddr);                        // registry inits 
 }
 
 /*void Nrfp::powerOn(uint8_t channel)
@@ -310,7 +310,7 @@ void Nrfp::rxError()
 
 void Nrfp::write(byte* data,bool ack,uint8_t len,byte* macTableAddr)  // write data,len to numP if 'C' mode or to CCADDR if 'P' mode
 {
-    uint8_t llen=len; // MAX_PAYLOAD_LENGTH;
+    uint8_t llen=len; // NRF_MAX_PAYLOAD_LENGTH;
 
     prxMode=false;
     CE_LOW
@@ -370,7 +370,7 @@ int Nrfp::available(uint8_t* pipe,uint8_t* pldLength)
    only receiving in pipe 1 ...
 */
 
-    uint8_t maxLength=*pldLength; // MAX_PAYLOAD_LENGTH; //
+    uint8_t maxLength=*pldLength; // NRF_MAX_PAYLOAD_LENGTH; //
     int err=0;
 
     if(!prxMode){letsPrx();}
@@ -414,7 +414,7 @@ int Nrfp::read(byte* data,uint8_t* pipe,uint8_t* pldLength,int numP)
     // PRX mode still true if no error
 
     if(numP>=nbPerif){
-        numP=available(pipe,pldLength);
+        numP=available(pipe,pldLength);                     // returns 0:pld_ok <0:err
     }
 
     if(numP>=0){                                            // pipe 1 or 2 pld available
@@ -439,12 +439,13 @@ void Nrfp::readStop()
 #if MACHINE_DET328
 int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registration to get pipeAddr
 {                      // ER_MAXRT ; AV_errors codes ; >=0 numP ok
-
-    memset(message,0x00,MAX_PAYLOAD_LENGTH+1);
+    /*      message doit être chargé avec adresseMac et version au minimum pour que le concentrateur renvoie le bon format
+    memset(message,0x00,NRF_MAX_PAYLOAD_LENGTH+1);
     memcpy(message,locAddr,NRF_ADDR_LENGTH);
     message[NRF_ADDR_LENGTH]='0';
-    
     write(message,NO_ACK,NRF_ADDR_LENGTH+1,0);     // send macAddr + numP=0 to ccAddr ; no ACK
+    */
+    write(message,NO_ACK,*pldLength,0);     // send macAddr + numP=0 to ccAddr ; no ACK
  
 #ifndef DETS
     int trst=1;
@@ -475,7 +476,7 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
     unsigned long time_beg = millis();
     long readTo=0;
     uint8_t pipe=99;
-    *pldLength=MAX_PAYLOAD_LENGTH;
+    *pldLength=NRF_MAX_PAYLOAD_LENGTH;
     int numP=AV_EMPTY;    
     while(numP==AV_EMPTY && (readTo>=0)){   // waiting for concentrator answer
         readTo=TO_REGISTER-millis()+time_beg;
@@ -499,11 +500,14 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
 int Nrfp::txRx(byte* message,uint8_t* pldLength)
 {                      // ER_MAXRT ; AV_errors codes ; >=0 numP ok
 
-    //memset(message,0x00,MAX_PAYLOAD_LENGTH+1);
-    message[MAX_PAYLOAD_LENGTH]=0x00;
+    //memset(message,0x00,NRF_MAX_PAYLOAD_LENGTH+1);
+    message[NRF_MAX_PAYLOAD_LENGTH]=0x00;
     memcpy(message,locAddr,NRF_ADDR_LENGTH);
     
-    write(message,NO_ACK,MAX_PAYLOAD_LENGTH,0);     // send macAddr + numP=0 to ccAddr ; no ACK
+    write(message,NO_ACK,NRF_MAX_PAYLOAD_LENGTH,0);     // send macAddr + numP=0 to ccAddr ; no ACK
+
+
+    //Serial.print("\n___1___");
 
 #ifndef DETS
     int trst=1;
@@ -519,6 +523,10 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
     conf=(CONFREG) | (PRIM_RX_BIT);           // ready pour setRx()
     while((statu & (TX_DS_BIT | MAX_RT_BIT))==0){GET_STA}
 
+    
+
+    //Serial.print("\n___2___");
+
     if(statu & MAX_RT_BIT){
       Serial.print("\nsyst err maxrt without ack ");Serial.println(statu,HEX);delay(2);
       return ER_MAXRT;} 
@@ -533,11 +541,13 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
     unsigned long time_beg = millis();
     long readTo=0;
     uint8_t pipe=99;
-    *pldLength=MAX_PAYLOAD_LENGTH;
+    *pldLength=NRF_MAX_PAYLOAD_LENGTH;
     int numP=AV_EMPTY;    
     while(numP==AV_EMPTY && (readTo>=0)){     // waiting for concentrator answer
         readTo=TO_REGISTER-millis()+time_beg;
         numP=read(message,&pipe,pldLength,nbPerif);}
+
+    //Serial.print("\n___3___");
 
     PP4_HIGH
     CE_LOW

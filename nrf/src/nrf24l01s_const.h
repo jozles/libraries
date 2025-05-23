@@ -143,4 +143,20 @@
 
 #endif // MACHINE_DET328
 
+
+/*** return (error) codes ***/
+#define AV_NBPIP -1
+#define AV_LMERR -2
+#define AV_MCADD -3 // read output (need message upload)
+#define AV_EMPTY -4
+#define AV_MAXAV AV_EMPTY
+#define ER_MAXRT (AV_MAXAV)-1 // code erreur MAX_RT
+#define ER_RDYTO (ER_MAXRT)-1 // code erreur Time Out attente réception
+#define ER_CRC   (ER_RDYTO)-1
+#define ER_OVF   (ER_CRC)-1
+#define ER_EMPTY (ER_OVF)-1
+#define ER_MAXER (ER_EMPTY)
+
+#define ER_TEXT "ey\0ov\0cc\0to\0rt\0em\0mc\0le\0pi\0--\0ok\0" // 2 char libs for codes
+
 #endif // _NRF_CONST_INCLUDED

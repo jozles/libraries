@@ -78,8 +78,8 @@
 #define NO_ACK  false
 
 #define NB_PIPE 2         // nombre pipes utilisées
-#define NRF_MAX_PAYLOAD_LENGTH MAX_PAYLOAD_LENGTH
-#define NRF_ADDR_LENGTH RADIO_ADDR_LENGTH
+#define NRF_MAX_PAYLOAD_LENGTH 32
+#define NRF_ADDR_LENGTH 5
 
 /*
 #define CHANNEL0    120         // def radio channel
@@ -124,7 +124,7 @@ class Nrfp
   public:
     Nrfp();
 
-    void setup(uint8_t channel,uint8_t speed,uint8_t nbperif);
+    void setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr);
 
     int  available(uint8_t* pipe,uint8_t* length);
     int  read(byte* data,uint8_t* pipe,uint8_t* length,int numP);
@@ -133,7 +133,7 @@ class Nrfp
     int  transmitting(bool ack);
 
     //void powerOn(uint8_t channel);
-    void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif);
+    void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte*cbAddr);
     void powerOff();
     void powerUp();
     void powerDown();
@@ -145,7 +145,8 @@ class Nrfp
 
     bool    powerD=true;      // etat power (true=down)
     uint8_t lastSta=0;
-    byte*   locAddr;          // local Addr        
+    byte*   locAddr;          // local Addr
+    byte*   cbAddr;        
 
 #if MACHINE_DET328
     byte*   ccAddr; 
