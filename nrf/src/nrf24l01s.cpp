@@ -438,14 +438,14 @@ void Nrfp::readStop()
 
 #if MACHINE_DET328
 int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registration to get pipeAddr
-{                      // ER_MAXRT ; AV_errors codes ; >=0 numP ok
+{                                                      // ER_MAXRT ; AV_errors codes ; >=0 numP ok
     /*      message doit être chargé avec adresseMac et version au minimum pour que le concentrateur renvoie le bon format
     memset(message,0x00,NRF_MAX_PAYLOAD_LENGTH+1);
     memcpy(message,locAddr,NRF_ADDR_LENGTH);
     message[NRF_ADDR_LENGTH]='0';
     write(message,NO_ACK,NRF_ADDR_LENGTH+1,0);     // send macAddr + numP=0 to ccAddr ; no ACK
     */
-    write(message,NO_ACK,*pldLength,0);     // send macAddr + numP=0 to ccAddr ; no ACK
+    write(message,NO_ACK,*pldLength,0);            // send macAddr + numP=0 to ccAddr + version ; no ACK
  
 #ifndef DETS
     int trst=1;
@@ -545,14 +545,14 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
     int numP=AV_EMPTY;    
     while(numP==AV_EMPTY && (readTo>=0)){     // waiting for concentrator answer
         readTo=TO_REGISTER-millis()+time_beg;
-        numP=read(message,&pipe,pldLength,nbPerif);}
+        numP=read(message,&pipe,pldLength,nbPerif);}    // retour 0 ok
 
     //Serial.print("\n___3___");
 
     PP4_HIGH
     CE_LOW
     if(numP>=0 && (readTo>=0)){               // no TO && pld ok
-        numP=message[NRF_ADDR_LENGTH]-'0';        // numP
+        numP=message[NRF_ADDR_LENGTH]-'0';    // numP
         PP4
         return numP;}                         // PRX mode still true
 
@@ -561,7 +561,8 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
     
     return numP;                              // or AV error 
 }
-#endif // MACHINE == 'P'
+#endif // MACHINE_DET328
+
 
 void Nrfp::printAddr(char* addr,char n)
 {
