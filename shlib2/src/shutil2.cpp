@@ -637,7 +637,8 @@ void blink(uint8_t nb)
 {
   for(nb=nb;nb>0;nb--){
     digitalWrite(pinLed,onLed);delay(5);
-    digitalWrite(pinLed,offLed);delay(100);
+    digitalWrite(pinLed,offLed);
+    if(nb>1){delay(100);}
   }
 }
 
@@ -648,13 +649,13 @@ void initLed(uint32_t led,bool ledoff,bool ledon)
   pinLed=led;
   pinMode(pinLed,OUTPUT);
   //wdEnable=true;                  // start trigwd ; trigwd() est dans yield() et ne doit pas être
-                                  // activé avant que PINLED soit mis en OUTPUT
+                                // activé avant que PINLED soit mis en OUTPUT
   //trigwd(10000);
 
   nbreBlink=0;
   cntBlink=0;
   blinktime=millis();
-  wdEnable=true;    // autorise le fonctionnement du trigwd() (bloqué pendant les blink)
+  wdEnable=true;                // autorise le fonctionnement du trigwd() (bloqué pendant les blink)
 }
 
 /*

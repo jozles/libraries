@@ -71,7 +71,7 @@
  *
  */
 
-#define POWONDLY 100+50   // millis()  - 100 -
+#define POWONDLY 100+10   // millis()  - 100 -
 #define POWUPDLY 5+1      // millis()
 
 #define ACK     true
