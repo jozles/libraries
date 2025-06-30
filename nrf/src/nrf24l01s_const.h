@@ -7,7 +7,7 @@
   #define ARD_VALUE  0          // ((0-15)+1) x 250uS delay before repeat
   #define ARC_VALUE  4          // (0-15) repetitions
 
-#if MACHINE_CONCENTRATEUR
+#if MACHINE_CONCENTRATEUR || MACHINE_FRONTAL
          
   #define CE_PIN     9          // pin pour CE du nrf
   #define CSN_PIN    8          // pin pour CS du SPI-nrf

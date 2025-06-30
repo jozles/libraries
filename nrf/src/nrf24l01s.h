@@ -81,14 +81,13 @@
 #define NRF_MAX_PAYLOAD_LENGTH 32
 #define NRF_ADDR_LENGTH 5
 
-/*
-#define CHANNEL0    120         // def radio channel
-#define CHANNEL1    110        
-#define CHANNEL2    100        
-#define CHANNEL3    90         
+#define CHANNEL0    120   // radio channel conc0
+#define CHANNEL1    110   // radio channel conc1
+#define CHANNEL2    100   // radio channel conc2
+#define CHANNEL3    90    // radio channel conc3
 
-#define CC_SPEED    0           // RF_SPEED_1Mb (voir nrf24l01s.h)
-*/
+#define CC_ADDRX   "SHCO0\0SHCO1\0SHCO2\0SHCO3\0" // adresses mac par défaut des concentrateurs                                                 
+#define CC_SPEED    RF_SPD_1MB           
 
 #define TO_AVAILABLE 20   // millis()
 #define TO_REGISTER  20   // millis()
@@ -96,7 +95,6 @@
 #define RF_SPD_2MB RF_DR_HIGH_BIT
 #define RF_SPD_1MB 0
 #define RF_SPD_250K RF_DR_LOW_BIT
-
 
 
 /*** logic analyzer debug pulse ***/
