@@ -97,21 +97,6 @@
 #define RF_SPD_250K RF_DR_LOW_BIT
 
 
-/*** logic analyzer debug pulse ***/
-
-#ifdef  DETS        
-  #define PP4       bitClear(PORT_PP,BIT_PP);bitSet(PORT_PP,BIT_PP);
-  #define PP4_INIT  bitSet(PORT_PP,BIT_PP);bitSet(DDR_PP,BIT_PP);
-  #define PP4_OFF   bitClear(DDR_PP,BIT_PP);
-  #define PP4_HIGH  bitSet(DDR_PP,BIT_PP);bitSet(PORT_PP,BIT_PP);
-  #define PP4_LOW   bitSet(DDR_PP,BIT_PP);bitClear(PORT_PP,BIT_PP);  
-#endif // DETS
-#ifndef DETS
-  #define PP4       digitalWrite(PORT_PP,LOW);digitalWrite(PORT_PP,HIGH);
-  #define PP4_INIT  pinMode(PORT_PP,OUTPUT);
-#endif // ndef DETS
-
-
 #if MACHINE_CONCENTRATEUR
 
 #endif // MACHINE == 'C'

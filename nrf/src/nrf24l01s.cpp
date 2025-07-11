@@ -3,6 +3,13 @@
 #include "nrf24l01s.h"
 
 #include "nrf24l01s_const.h"
+
+/*
+#if MACHINE_DET328
+#include "radio_util.h"
+#endif
+*/
+
 //#include "radio_const.h"
 //#include "radio_user_conc.h"
 
@@ -175,10 +182,16 @@ void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 
   allPinsLow();                   // in order to minimize power during POWONDLY
       
-  digitalWrite(RPOW_PIN,LOW);     // power on
+  digitalWrite(RPOW_PIN,LOW);     // power on nrf
   pinMode(RPOW_PIN,OUTPUT);
 
-  delay(POWONDLY);                // powerOn delay ******************** mettre en sleep *********************
+#if MACHINE_DET328
+  //delay(sleepDly(POWONDLY));    // powerOn delay à mettre en sleep mais c'est compliqué de faire les includes nécessaires
+    delay(POWONDLY);
+#endif
+#if MACHINE_CONCENTRATEUR
+    delay(POWONDLY);
+#endif
 
   bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
 
@@ -295,7 +308,6 @@ void Nrfp::letsPrx()      // goto PRX mode
       prxMode=true;
     }
     CE_HIGH
-//    PP4_LOW
 }
 
 void Nrfp::rxError()
@@ -482,11 +494,9 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
         readTo=TO_REGISTER-millis()+time_beg;
         numP=read(message,&pipe,pldLength,nbPerif);}
 
-    PP4_HIGH
     CE_LOW
     if(numP>=0 && (readTo>=0)){             // no TO && pld ok
         numP=message[NRF_ADDR_LENGTH]-'0';  // numP
-        PP4
         return numP;}                       // PRX mode still true
 
     if(numP>=0){
@@ -549,11 +559,9 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
 
     //Serial.print("\n___3___");
 
-    PP4_HIGH
     CE_LOW
     if(numP>=0 && (readTo>=0)){               // no TO && pld ok
         numP=message[NRF_ADDR_LENGTH]-'0';    // numP
-        PP4
         return numP;}                         // PRX mode still true
 
     if(numP>=0){
