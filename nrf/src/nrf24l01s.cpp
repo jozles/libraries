@@ -177,7 +177,7 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
 }
 #endif // MACHINE_DET328 
 
-void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 {
 #if MACHINE_DET328
 #if PER_PO == 'P'
@@ -187,13 +187,9 @@ void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
   digitalWrite(RPOW_PIN,LOW);     // power on nrf
   pinMode(RPOW_PIN,OUTPUT);
 
-#if MACHINE_DET328
+
   //delay(sleepDly(POWONDLY));    // powerOn delay à mettre en sleep mais c'est compliqué de faire les includes nécessaires
-    delay(POWONDLY);
-#endif
-#if MACHINE_CONCENTRATEUR
-    delay(POWONDLY);
-#endif
+  delay(POWONDLY);
 
   bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
 
@@ -219,6 +215,7 @@ void Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 
   powerUp();
   setup(channel,speed,nbperif,cbAddr);                        // registry inits 
+  return 1; // toujours ok en nrf
 }
 
 /*void Nrfp::powerOn(uint8_t channel)

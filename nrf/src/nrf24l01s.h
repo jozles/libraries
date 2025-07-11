@@ -116,7 +116,7 @@ class Nrfp
     int  transmitting(bool ack);
 
     //void powerOn(uint8_t channel);
-    void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte*cbAddr);
+    int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte*cbAddr);
     void powerOff();
     void powerUp();
     void powerDown();

@@ -94,6 +94,8 @@
 #define CSN_OFF   pinMode(CSN_PIN,INPUT);
 #endif // CSN_HIGH
 
+uint16_t loraSpeed[]={433,915};
+
 LoRaClass::LoRaClass() :
   _spiSettings(LORA_DEFAULT_SPI_FREQUENCY, MSBFIRST, SPI_MODE0),
   _spi(&LORA_DEFAULT_SPI),
@@ -129,55 +131,21 @@ void LoRaClass::powerDown()
 
 }
 
-void LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddrbid)
+int LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddrbid)
 {
-#if MACHINE_DET328
-#if PER_PO == 'P'
 
   allPinsLow();                   // in order to minimize power during POWONDLY
-      
+  
   digitalWrite(RPOW_PIN,LOW);     // power on
   pinMode(RPOW_PIN,OUTPUT);
-
   delay(POWONDLY);                // powerOn delay ******************** mettre en sleep *********************
 
-  bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
-
-#endif // PER_PO
-#endif // MACHINE_DET328
-#if ((MACHINE_CONCENTRATEUR) || (PER_PO == 'N'))
-
-  digitalWrite(CSN_PIN,HIGH);
-  pinMode(CSN_PIN,OUTPUT);
-
-  digitalWrite(CE_PIN,LOW);
-  pinMode(CE_PIN,OUTPUT);
-
-_spi->begin();
-  
-#endif // (MACHINE_CONCENTRATEUR)
-
-  powerUp();
+  flushRx();
+  flushTx();
   
   nbPerif=nbperif;
 
-  begin((long)speed*1E6);
-
-}
-
-void LoRaClass::powerUp()
-{   
-/*#ifdef SPI_MODE
-    SPI_INIT;
-    SPI_START;
-#endif // SPI_MODE*/
-
-    flushRx();
-    flushTx();
-
-    idle();
-
-    delay(POWUPDLY);       // powerUp delay
+  return begin((long)loraSpeed[speed]*1E6);
 }
 
 void LoRaClass::write(byte* data,bool ack,uint8_t len,byte* destAddr) // write data,len to destAddr
@@ -1081,10 +1049,9 @@ ISR_PREFIX void LoRaClass::onDio0Rise()
 
 LoRaClass LoRa;
 
-
-#if MACHINE_DET328
 void LoRaClass::allPinsLow()                     /* all radio/SPI pins low */
 {
+  /*
   bitClear(PORT_CE,BIT_CE);       //digitalWrite(CE_PIN,LOW);
   bitSet(DDR_CE,BIT_CE);          //pinMode(CE_PIN,OUTPUT);
   
@@ -1095,6 +1062,7 @@ void LoRaClass::allPinsLow()                     /* all radio/SPI pins low */
   bitSet(DDR_CSN,BIT_CSN);        //pinMode(CSN_PIN,OUTPUT);
   
   bitClear(PORT_MOSI,BIT_MOSI);   //digitalWrite(MOSI_PIN,LOW);
-  bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);  
+  bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);
+  */  
 }
-#endif // MACHINE='P'  
+ 

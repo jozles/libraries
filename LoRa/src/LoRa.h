@@ -102,9 +102,8 @@ public:
 
   /* ajout pour Radio */
   void allPinsLow();
-  void powerUp();
   void powerDown();
-  void powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddrbid);
+  int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddrbid);
   void powerOff();
   void write(byte* data,bool ack,uint8_t len,byte* macTableAddr);
   int  read(byte* data,uint8_t* pipe,uint8_t* pldLength,int numP);
