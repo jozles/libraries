@@ -4,6 +4,8 @@
 
 #include "nrf24l01s_const.h"
 
+#include <radio_const.h>
+
 /*
 #if MACHINE_DET328
 #include "radio_util.h"
@@ -101,7 +103,7 @@ void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
     regWrite(DYNPD,&regw);          // dynamic payload length
 
     addrWrite(RX_ADDR_P1,locAddr);  // RXP1 = macAddr du circuit pour réception messages dans pipe 1
-    addrWrite(RX_ADDR_P2,cbAddr);  // RXP2 = pipe 2 pour recevoir les demandes d'adresse de concentrateur
+    addrWrite(RX_ADDR_P2,cbAddr);   // RXP2 = pipe 2 pour recevoir les demandes d'adresse de concentrateur
                                     // (conc only ; chargée en EEPROM sur périf)
     regw=channel;
     regWrite(RF_CH,&regw);

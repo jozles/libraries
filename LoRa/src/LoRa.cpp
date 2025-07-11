@@ -4,6 +4,8 @@
 #include <LoRa.h>
 #include <Lora_const.h>
 
+#include <radio_const.h>
+
 // registers
 #define REG_FIFO                 0x00
 #define REG_OP_MODE              0x01
@@ -123,12 +125,11 @@ void LoRaClass::powerDown()
 {
   idle();
 
-#ifdef SPI_MODE
-        SPI_OFF
-#endif // SPI_MODE              
+// SPI_OFF
+
 }
 
-void LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
+void LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddrbid)
 {
 #if MACHINE_DET328
 #if PER_PO == 'P'
@@ -152,13 +153,7 @@ void LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
   digitalWrite(CE_PIN,LOW);
   pinMode(CE_PIN,OUTPUT);
 
-#ifdef SPI_MODE  
-  digitalWrite(CLK_PIN,LOW);
-  pinMode(CLK_PIN,OUTPUT);
-  digitalWrite(MOSI_PIN,LOW);
-  pinMode(MOSI_PIN,OUTPUT);
-  digitalWrite(MOSI_PIN,HIGH);  
-#endif //
+_spi->begin();
   
 #endif // (MACHINE_CONCENTRATEUR)
 
@@ -172,10 +167,10 @@ void LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif)
 
 void LoRaClass::powerUp()
 {   
-#ifdef SPI_MODE
+/*#ifdef SPI_MODE
     SPI_INIT;
     SPI_START;
-#endif // SPI_MODE
+#endif // SPI_MODE*/
 
     flushRx();
     flushTx();
@@ -254,11 +249,7 @@ int LoRaClass::packetRead(byte* payload,int nbBytes)
 int LoRaClass::pRegister(byte* message,uint8_t* pldLength)  // peripheral registration to get numP
 {                                                           // ER_MAXRT ; AV_errors codes ; >=0 numP ok
 
-    memset(message,0x00,PERI_PAYLOAD_LENGTH+1);                  // numP is 0
-    memcopy(message+LORA_ADDR_LENGTH,ccAddr,LORA_ADDR_LENGTH);   // dest addr
-    memcopy(dataBuffer,locAddr,LORA_ADDR_LENGTH);                // srce addr
-    
-    write(message,NO_ACK,LORA_ADDR_LENGTH+1,0);                  // send macAddr + numP=0 to ccAddr ; (no ACK)
+    write(message,NO_ACK,*pldLength,0);                  // send macAddr + numP=0 to ccAddr ; (no ACK)
 
     // format message peri : 16 bits conc addr ; 16 bits mac addr ; 8 bits num per (from conc table)
     
@@ -269,9 +260,9 @@ int LoRaClass::pRegister(byte* message,uint8_t* pldLength)  // peripheral regist
                         <0  empty, pipe err or length error
     */
  
-    byte data[CONC_PLOAD_LENGTH];
-    pldLength=CONC_PLOAD_LENGTH;
-    uint8_t nump=0;
+    byte data[LORA_MAX_PAYLOAD_LENGTH];
+    *pldLength=LORA_MAX_PAYLOAD_LENGTH;
+    //uint8_t nump=0;
     
     unsigned long time_beg = millis();
     long readTo=0;
@@ -281,7 +272,7 @@ int LoRaClass::pRegister(byte* message,uint8_t* pldLength)  // peripheral regist
         readTo=TO_REGISTER-millis()+time_beg;
         numP=read(data,&pipe,pldLength,nbPerif);}   
 
-    if(readTo<0){nump=ER_RDYTO;}            // TO
+    if(readTo<0){numP=ER_RDYTO;}            // TO
       
     if(numP>=0){             
         numP=data[LORA_ADDR_LENGTH*2]-'0';  // numP ok (0 if table full)
@@ -1092,7 +1083,7 @@ LoRaClass LoRa;
 
 
 #if MACHINE_DET328
-void LoraClass::allPinsLow()                     /* all radio/SPI pins low */
+void LoRaClass::allPinsLow()                     /* all radio/SPI pins low */
 {
   bitClear(PORT_CE,BIT_CE);       //digitalWrite(CE_PIN,LOW);
   bitSet(DDR_CE,BIT_CE);          //pinMode(CE_PIN,OUTPUT);
