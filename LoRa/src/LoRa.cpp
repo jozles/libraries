@@ -140,8 +140,8 @@ int LoRaClass::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAdd
   pinMode(RPOW_PIN,OUTPUT);
   delay(POWONDLY);                // powerOn delay ******************** mettre en sleep *********************
 
-  flushRx();
-  flushTx();
+  //flushRx();
+  //flushTx();
   
   nbPerif=nbperif;
 

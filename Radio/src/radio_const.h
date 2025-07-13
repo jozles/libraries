@@ -135,6 +135,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
   #define MARKER    A11
   #define MARKER2   A10
 
+  #define W5500_RESET A8
 
   #define MISO_PIN   12
   #define MOSI_PIN   11
