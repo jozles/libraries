@@ -21,7 +21,7 @@
 #if MACHINE_DET328             /* voltage and temp acquisition params */
    // param carte DETS (sinon ?) dans platformo.ini
   #define ATMEGA328                 // option ATMEGA8 ... manque de memoire programme (8K dispo et nécessite 17K)
-  #define PER_PO    'P'           // 'N' no powoff 'P' powoff
+  //#define PER_PO    'P'           // 'N' no powoff 'P' powoff
   #define SPI_MODE                // SPI initialisé par la lib (ifndef -> lib externe) 
   #define DEF_ADDR  "peri_"
   

@@ -162,7 +162,7 @@ void Nrfp::addrWrite(uint8_t reg,byte* data)
 
 #if MACHINE_DET328
 void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
-{
+{///*
   bitClear(PORT_CE,BIT_CE);       //digitalWrite(CE_PIN,LOW);
   bitSet(DDR_CE,BIT_CE);          //pinMode(CE_PIN,OUTPUT);
   
@@ -173,27 +173,35 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
   bitSet(DDR_CSN,BIT_CSN);        //pinMode(CSN_PIN,OUTPUT);
   
   bitClear(PORT_MOSI,BIT_MOSI);   //digitalWrite(MOSI_PIN,LOW);
-  bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);  
+  bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);
+//  */
+ /*
+  bitClear(PORTB,0);bitClear(PORTB,1);bitClear(PORTB,2);bitClear(PORTB,3);bitClear(PORTB,4);bitClear(PORTB,5);bitClear(PORTB,6);bitClear(PORTB,7);
+  bitClear(DDRB,0);bitClear(DDRB,1);bitSet(DDRB,2);bitSet(DDRB,3);bitClear(DDRB,4);bitClear(DDRB,5);bitClear(DDRB,6);bitClear(DDRB,7);
+  bitClear(PORTC,0);bitClear(PORTC,1);bitClear(PORTC,2);bitClear(PORTC,3);bitClear(PORTC,4);bitClear(PORTC,5);bitClear(PORTC,6);bitClear(PORTC,7);
+  bitClear(DDRC,0);bitClear(DDRC,1);bitSet(DDRC,2);bitSet(DDRC,3);bitClear(DDRC,4);bitClear(DDRC,5);bitClear(DDRC,6);bitClear(DDRC,7);
+  bitClear(PORTD,0);bitClear(PORTD,1);bitClear(PORTD,2);bitClear(PORTD,3);bitClear(PORTD,5);bitClear(PORTD,6);bitClear(PORTD,7);
+  bitClear(DDRD,0);bitClear(DDRD,1);bitSet(DDRD,2);bitSet(DDRD,3);bitSet(DDRD,4);bitClear(DDRD,5);bitClear(DDRD,6);bitClear(DDRD,7);
+*/
 }
 #endif // MACHINE_DET328 
 
 int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 {
 #if MACHINE_DET328
-#if PER_PO == 'P'
+//#if PER_PO == 'P'
 
   allPinsLow();                   // in order to minimize power during POWONDLY
       
-  digitalWrite(RPOW_PIN,LOW);     // power on nrf
   pinMode(RPOW_PIN,OUTPUT);
-
+  digitalWrite(RPOW_PIN,LOW);     // power on nrf
 
   //delay(sleepDly(POWONDLY));    // powerOn delay à mettre en sleep mais c'est compliqué de faire les includes nécessaires
   delay(POWONDLY);
 
   bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
 
-#endif // PER_PO
+//#endif // PER_PO
 #endif // MACHINE_DET328
 #if ((MACHINE_CONCENTRATEUR) || (PER_PO == 'N'))
 
@@ -229,8 +237,9 @@ void Nrfp::powerOff()
   
   allPinsLow();
 
-  digitalWrite(RPOW_PIN,HIGH);    // power off
-  pinMode(RPOW_PIN,OUTPUT);
+  pinMode(RPOW_PIN,INPUT);
+  digitalWrite(RPOW_PIN,HIGH);    // power off     // INPUT PULLUP
+  // pinMode(RPOW_PIN,OUTPUT);
 
 #endif // MACHINE='P'  
 }
@@ -456,8 +465,9 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
     message[NRF_ADDR_LENGTH]='0';
     write(message,NO_ACK,NRF_ADDR_LENGTH+1,0);     // send macAddr + numP=0 to ccAddr ; no ACK
     */
+    
     write(message,NO_ACK,*pldLength,0);            // send macAddr + numP=0 to ccAddr + version ; no ACK
- 
+
 #ifndef DETS
     int trst=1;
     while(trst==1){trst=transmitting(NO_ACK);}
@@ -468,9 +478,11 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
 #ifdef DETS
 // version accélérée pour minimiser le délai entre TX_DS et setRx() 
 // (jusqu'à 40uS en compil release ; moins de 20uS accéléré)
+
     GET_STA
+
     conf=(CONFREG) | (PRIM_RX_BIT);           // ready pour setRx()
-    while((statu & (TX_DS_BIT | MAX_RT_BIT))==0){GET_STA}
+    while((statu & (TX_DS_BIT | MAX_RT_BIT))==0){GET_STA}    
 
     if(statu & MAX_RT_BIT){
       Serial.print("\nsyst err maxrt without ack ");Serial.println(statu,HEX);delay(2);
