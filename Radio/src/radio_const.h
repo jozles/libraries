@@ -130,7 +130,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
   #define NBPERIF NBCELLS+2               // dim table ; first perif on entry 2 -> see waitCell / radioInit / broadcast
   #define BUF_SERVER_LENGTH LBUFSERVER    // to/from server buffer length
 
-#if MACHINE_CONCENTRATEUR
+#ifdef MACHINE_CONCENTRATEUR
 
   #define MARKER    A11
   #define MARKER2   A10
@@ -149,7 +149,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
 
 #endif // MACHINE_CONCENTRATEUR
 
-#if MACHINE_DET328             /* voltage and temp acquisition params */
+#ifdef MACHINE_DET328             /* voltage and temp acquisition params */
    // param carte DETS (sinon ?) dans platformo.ini
   #define ATMEGA328               // option ATMEGA8 ... manque de memoire programme (8K dispo et nécessite 17K)
 
@@ -168,7 +168,11 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
 
 #ifdef DETS
 // led
-  #define PLED         PINLED
+  #define PORT_LED    PORTD
+  #define DDR_LED     DDRD
+  #define BIT_LED     PINLED
+  //#define LED 4
+  //#define PLED         PINLED
 // NRF
   #define PORT_CSN    PORTB
   #define DDR_CSN     DDRB
@@ -221,6 +225,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
 
   #define ISREDGE    RISING
 
+  #define INADMUXVAL 0 | (1<<REFS1) | (1<<REFS0) | 0x08         // internal 1,1V ref + ADC input for internal temp
   #define VCHECKADC 7             // VOLTS ADC pin Nb
   #define VCHECKHL HIGH           // command pin level for reading
   #define VADMUXVAL  0 | (1<<REFS1) | (1<<REFS0) | VCHECKADC     // internal 1,1V ref + ADC input for volts
@@ -283,7 +288,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
 
 #endif // MACHINE_DET328  
 
-#if MACHINE_CONCENTRATEUR
+#ifdef MACHINE_CONCENTRATEUR
   //#define DUE                   // DUE OU STM32... provient de platformio.ini  
 
   #define MODEL "REDV2_"
