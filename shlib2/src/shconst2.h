@@ -293,7 +293,7 @@
 #define BCODELENVAL       7   // LENVAL trop petit
 #define BCODECONFIGRECLEN 9   // CONFIGRECLEN ou MLMSET/LENMESS faux -> blocage
 #define BCODEPERICACHEKO 11   // periSave et cache invalide
-#define BCODESYSERR      13   // system error (fdatasave>99 ; STEPDATASAVE!=talkStep ; MDSLEN invalide)
+#define BCODESYSERR      13   // system error (fdatasave>99 ; STEPDATASAVE!=talkStep ; MDSLEN invalide ; decap capa messages radio)
 #define BCODENUMPER      15   // tentative de periLoad d'un perif invalide
 #define BCODESHOWLINE    17   // buffer showline overflow / ordreExt overflow
 
