@@ -5,6 +5,8 @@
 
 #include "nRF24L01.h"       // mnemonics
 #include "nrf24l01s_const.h"
+#include "lpavr_util.h"
+#include "lpavr_powerSleep.h"
 
 /* AP NFR24L01+ node single */
 
@@ -71,7 +73,7 @@
  *
  */
 
-#define POWONDLY 100+10   // millis()  - 100 -
+#define POWONDLY (RT125/100)      // optimisation sleep //100+10   // millis()  - 100 -
 #define POWUPDLY 5+1      // millis()
 
 #define ACK     true
@@ -91,6 +93,7 @@
 
 #define TO_AVAILABLE 20   // millis()
 #define TO_REGISTER  20   // millis()
+#define TO_WAITTX    10   // millis()
 
 #define RF_SPD_2MB RF_DR_HIGH_BIT
 #define RF_SPD_1MB 0
@@ -116,7 +119,8 @@ class Nrfp
     int  transmitting(bool ack);
 
     //void powerOn(uint8_t channel);
-    int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte*cbAddr);
+    int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr);
+    int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt);
     void powerOff();
     void powerUp();
     void powerDown();

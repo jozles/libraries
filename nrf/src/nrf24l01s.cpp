@@ -186,7 +186,7 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
 }
 #endif // MACHINE_DET328 
 
-int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt)
 {
 #if MACHINE_DET328
 //#if PER_PO == 'P'
@@ -196,8 +196,7 @@ int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
   pinMode(RPOW_PIN,OUTPUT);
   digitalWrite(RPOW_PIN,LOW);     // power on nrf
 
-  //delay(sleepDly(POWONDLY));    // powerOn delay à mettre en sleep mais c'est compliqué de faire les includes nécessaires
-  delay(POWONDLY);
+  delay(sleepPwrDownV(POWONDLY,slpt)); 
 
   bitSet(PORT_CSN,BIT_CSN);       //digitalWrite(CSN_PIN,HIGH);
 
@@ -224,6 +223,12 @@ int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
   powerUp();
   setup(channel,speed,nbperif,cbAddr);                        // registry inits 
   return 1; // toujours ok en nrf
+}
+
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
+{
+    int32_t* slpt=0;
+    return powerOn(channel,speed,nbperif,cbAddr,slpt);
 }
 
 /*void Nrfp::powerOn(uint8_t channel)
@@ -479,11 +484,21 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
 // version accélérée pour minimiser le délai entre TX_DS et setRx() 
 // (jusqu'à 40uS en compil release ; moins de 20uS accéléré)
 
+    unsigned long time_beg = millis();
+    long readTo=0;
+
     GET_STA
 
     conf=(CONFREG) | (PRIM_RX_BIT);           // ready pour setRx()
-    while((statu & (TX_DS_BIT | MAX_RT_BIT))==0){GET_STA}    
+    while(((statu & (TX_DS_BIT | MAX_RT_BIT))==0) && (readTo>=0)){
+        GET_STA
+        readTo=TO_WAITTX-millis()+time_beg;
+    }    
 
+    if(readTo<0){
+       Serial.print("\nhardware issue no TX_DS_BIT ");Serial.println(statu,HEX);delay(2);
+      return ER_MAXRT; 
+    }
     if(statu & MAX_RT_BIT){
       Serial.print("\nsyst err maxrt without ack ");Serial.println(statu,HEX);delay(2);
       return ER_MAXRT;} 
@@ -496,8 +511,8 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
 // fin version accélérée
 #endif // def DETS
 
-    unsigned long time_beg = millis();
-    long readTo=0;
+    time_beg = millis();
+    readTo=0;
     uint8_t pipe=99;
     *pldLength=NRF_MAX_PAYLOAD_LENGTH;
     int numP=AV_EMPTY;    
