@@ -18,7 +18,11 @@ extern LoRaClass radio;
 
 extern bool diags;
 
-void marker(uint8_t markerPin)
+extern int16_t sleepTimings[];
+extern int32_t realSleepTimings[];
+extern int32_t loopSleepTimings[];
+
+void marker(uint8_t markerPin)      // 100uS
 {
   #ifndef MACHINE_DET328
   pinMode(markerPin,OUTPUT);digitalWrite(markerPin,HIGH);delayMicroseconds(250);digitalWrite(markerPin,LOW);
@@ -28,17 +32,7 @@ void marker(uint8_t markerPin)
   #endif
 }
 
-void markerLow(uint8_t markerPin)
-{
-  #ifndef MACHINE_DET328
-  pinMode(markerPin,OUTPUT);digitalWrite(markerPin,HIGH);delayMicroseconds(250);digitalWrite(markerPin,LOW);
-  #endif
-  #if MACHINE_DET328
-  bitSet(DDR_DIG1,markerPin);bitClear(PORT_DIG1,markerPin);delayMicroseconds(100);bitSet(PORT_DIG1,markerPin);
-  #endif
-}
-
-void marker2(uint8_t markerPin)
+void markerL(uint8_t markerPin)     // 500uS
 {
   #ifndef MACHINE_DET328
   //pinMode(markerPin,OUTPUT);digitalWrite(markerPin,HIGH);delayMicroseconds(500);digitalWrite(markerPin,LOW);
@@ -93,6 +87,44 @@ void hardwarePwrUp()
   //pinMode(REED,INPUT_PULLUP);
 }
 
+uint8_t sleepDly(int32_t dly,int32_t* slpt)                  
+{
+  //#define DLYVAL 3500                     // !!!!!! need computed param // loop dly value
+  //#define SLEEPT 3505                     // !!!!!! need computed param // loop sleep value (micros()/millis() loss)
+  // !!!!!!!!!!!!!!!!!!!!! anomalie : le temps de sleep devrait être < temps boucle ?????????????????? 
+
+  //unsigned long tmicros=micros();
+
+  dly*=100;
+  if(dly>=realSleepTimings[NB_PRESCALER_VALUES-2]){
+
+    int32_t slpt0=0;
+    uint8_t k=0;
+    while(k<NB_PRESCALER_VALUES-1){
+      while(dly>realSleepTimings[k]){
+        sleepPwrDown(sleepTimings[k]);        // pas de gestion du matériel qui doit être effectuée en amont/aval
+                                              // permet de ne pas éteindre ce qui doit rester en fonctionnement (radio pendant POWONDLY par ex)  
+        //sleepNoPwr(sleepTimings[k]);                      
+        dly-=realSleepTimings[k];
+        slpt0+=loopSleepTimings[k];      
+      }
+      k++;
+    }
+    *slpt+=slpt0/100;
+  }  
+  return (uint8_t)(dly/100);
+}
+
+uint8_t sleepDly(int32_t dly) 
+{
+  int32_t slpt;
+  return sleepDly(dly,&slpt);
+}
+
+void medSleepDly(int32_t dly)
+{
+  delay(sleepDly(dly));
+}
 
 #endif // MACHINE_DET328
 

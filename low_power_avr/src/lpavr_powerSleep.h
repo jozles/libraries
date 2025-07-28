@@ -25,6 +25,30 @@
 #define T4000 0b00100000
 #define T8000 0b00100001
 
+// effective Time
+#define RT16    1900
+#define RT32    3500
+#define RT64    6700
+#define RT125   12800
+#define RT250   25300
+#define RT500   50300
+#define RT1000  100300
+#define RT2000  200300
+#define RT4000  400300
+#define RT8000  800300
+
+// effective time without counter
+#define LT16    1900
+#define LT32    3500
+#define LT64    6700
+#define LT125   12800
+#define LT250   25300
+#define LT500   50300
+#define LT1000  100300
+#define LT2000  200300
+#define LT4000  400300
+#define LT8000  800300
+
 /* --------------- @ env 2sec / sleep -------------------- */
 #define  AWAKE_OK_VALUE       2     // nbre réveils entre chaque test de temp 
 #define  AWAKE_MIN_VALUE      10    // nbre réveils maxi pour message minimum de présence
@@ -32,6 +56,7 @@
 #define  AWAKE_RETRY_VALUE    3     // nbre de retry avant KO
 
 void sleepPwrDown(uint8_t durat);
+uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt);
 void lethalSleep();
 void checkOn();
 void checkOff();

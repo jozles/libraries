@@ -33,6 +33,8 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 
+#include "lpavr_powerSleep.h"
+
 #ifdef NRF
 #include "nRF24L01.h"
 #include "nrf24l01s.h"
@@ -52,6 +54,10 @@ extern float  temp;
 uint8_t       cntTest=0;                         // test watchdog
 
 extern uint32_t nbS;
+
+int16_t sleepTimings[]={T8000,T4000,T2000,T1000,T500,T250,T125,T64,T32,T16};
+int32_t realSleepTimings[]={RT8000,RT4000,RT2000,RT1000,RT500,RT250,RT125,RT64,RT32,RT16};
+int32_t loopSleepTimings[]={LT8000,LT4000,LT2000,LT1000,LT500,LT250,LT125,LT64,LT32,LT16};
 
 void diagT2(char* texte,int duree)
 {
@@ -243,9 +249,15 @@ void getVolts()                     // get unregulated voltage and reset watchdo
 
 void disable_pins()
 {
-  DDRB = B00000000;PORTB = B00000000;
+  //port C all input
   DDRC = B00000000;PORTC = B00000000;
-  DDRD = B01110000;PORTD = PORTD & B00010000; // devrait être 1<<PINLED et 1<<MARKER et 1<<MARKER2
+  //D1=TXD input
+  //bitClear(PORTD,1);
+  //port B don't touch
+  //DDRB = B00000000;PORTB = B00000000;
+  
+
+  //DDRD = B01110000;PORTD = PORTD & B00010000; // devrait être 1<<PINLED et 1<<MARKER et 1<<MARKER2
   /*bitClear(PORTB,0);bitClear(PORTB,1);bitClear(PORTB,2);bitClear(PORTB,3);bitClear(PORTB,4);bitClear(PORTB,5);bitClear(PORTB,6);bitClear(PORTB,7);
   bitClear(DDRB,0);bitClear(DDRB,1);bitSet(DDRB,2);bitSet(DDRB,3);bitClear(DDRB,4);bitClear(DDRB,5);bitClear(DDRB,6);bitClear(DDRB,7);
   bitClear(PORTC,0);bitClear(PORTC,1);bitClear(PORTC,2);bitClear(PORTC,3);bitClear(PORTC,4);bitClear(PORTC,5);bitClear(PORTC,6);bitClear(PORTC,7);
@@ -296,6 +308,56 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
 
     if(durat==0){wd();}                     // watchdog
+//marker(MARKER2);
+}
+
+uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable durat
+                            /* *** WARNING *** no hardware PowerUp()/down included    */
+{                           /*       durat=0 to enable external timer (INT0)          */
+//marker(MARKER2);
+//Serial.print(durat);Serial.print(' ');delay(1);
+//disable_pins();
+  if(durat!=0){
+    //sleepPwrDown(T32);return 1;}
+    
+    durat*=100;
+    *slpt*=100;
+
+    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
+    
+    power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
+    
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    //noInterrupts();                         // cli();
+
+    for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){
+      while(durat>=realSleepTimings[k]){
+        
+        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake  
+        noInterrupts();                         // cli(); 
+        sleep_enable();                       
+#ifdef ATMEGA328
+        sleep_bod_disable();                    // BOD halted if followed by sleep_cpu 
+#endif //
+        interrupts();                           // sei();
+        sleep_cpu();
+        sleep_disable();
+        wdtDisable();
+        durat-=realSleepTimings[k];
+        *slpt+=loopSleepTimings[k];
+      }
+    }
+
+    //interrupts();                           // sei();
+    power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
+    *slpt/=100;
+    durat/=100;
+  }
+  else {
+    sleepPwrDown(0);
+  }
+  //Serial.println(durat);delay(1); 
+  return durat;                             // remaining time unsleepable 
 //marker(MARKER2);
 }
 
