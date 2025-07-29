@@ -503,7 +503,7 @@ int Nrfp::pRegister(byte* message,uint8_t* pldLength)  // peripheral registratio
       Serial.print("\nsyst err maxrt without ack ");Serial.println(statu,HEX);delay(2);
       return ER_MAXRT;} 
 
-    CE_LOW              // to change from TX to RX
+    CE_LOW                                    // change from TX to RX
     regWrite(CONFIG,&conf);                   // setRx()
     CE_HIGH
     prxMode=true;
@@ -555,27 +555,36 @@ int Nrfp::txRx(byte* message,uint8_t* pldLength)
 #ifdef DETS
 // version accélérée pour minimiser le délai entre TX_DS et setRx()
 // (jusqu'à 40uS en compil release ; moins de 20uS accéléré)
-    GET_STA
-    conf=(CONFREG) | (PRIM_RX_BIT);           // ready pour setRx()
-    while((statu & (TX_DS_BIT | MAX_RT_BIT))==0){GET_STA}
-
     
+    unsigned long time_beg = millis();
+    long readTo=0;
 
-    //Serial.print("\n___2___");
+    GET_STA
+
+    conf=(CONFREG) | (PRIM_RX_BIT);           // ready pour setRx()
+    while(((statu & (TX_DS_BIT | MAX_RT_BIT))==0) && (readTo>=0)){
+        GET_STA
+        readTo=TO_WAITTX-millis()+time_beg;
+    }    
+
+    if(readTo<0){
+       Serial.print("\nhardware issue no TX_DS_BIT ");Serial.println(statu,HEX);delay(2);
+      return ER_MAXRT; 
+    }
 
     if(statu & MAX_RT_BIT){
       Serial.print("\nsyst err maxrt without ack ");Serial.println(statu,HEX);delay(2);
       return ER_MAXRT;} 
 
-    CE_LOW              // to change from TX to RX
+    CE_LOW                                    // change from TX to RX
     regWrite(CONFIG,&conf);                   // setRx()
     CE_HIGH
     prxMode=true;
 // fin version accélérée
 #endif // def DETS
 
-    unsigned long time_beg = millis();
-    long readTo=0;
+    time_beg = millis();
+    readTo=0;
     uint8_t pipe=99;
     *pldLength=NRF_MAX_PAYLOAD_LENGTH;
     int numP=AV_EMPTY;    
