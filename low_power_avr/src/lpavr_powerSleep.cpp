@@ -317,22 +317,19 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
 //marker(MARKER2);
 //Serial.print(durat);Serial.print(' ');delay(1);
 //disable_pins();
-  if(durat!=0){
-    //sleepPwrDown(T32);return 1;}
-    
+  if(durat!=0){  
+
     durat*=100;
     *slpt*=100;
 
-    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
-    
-    power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
-    
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    //noInterrupts();                         // cli();
+    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown  
+    power_all_disable();                    // all bits set in PRR register (I/O modules clock halted) 
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
 
     for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){
+
       while(durat>=realSleepTimings[k]){
-        
+
         wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake  
         noInterrupts();                         // cli(); 
         sleep_enable();                       
@@ -348,15 +345,11 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
       }
     }
 
-    //interrupts();                           // sei();
     power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
     *slpt/=100;
     durat/=100;
   }
-  else {
-    sleepPwrDown(0);
-  }
-  //Serial.println(durat);delay(1); 
+
   return durat;                             // remaining time unsleepable 
 //marker(MARKER2);
 }
