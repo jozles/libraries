@@ -57,7 +57,7 @@ extern uint32_t nbS;
 
 int16_t sleepTimings[]={T8000,T4000,T2000,T1000,T500,T250,T125,T64,T32,T16};
 int32_t realSleepTimings[]={RT8000,RT4000,RT2000,RT1000,RT500,RT250,RT125,RT64,RT32,RT16};
-int32_t loopSleepTimings[]={LT8000,LT4000,LT2000,LT1000,LT500,LT250,LT125,LT64,LT32,LT16};
+int32_t cntSleepTimings[]={LT8000,LT4000,LT2000,LT1000,LT500,LT250,LT125,LT64,LT32,LT16};
 
 void diagT2(char* texte,int duree)
 {
@@ -269,7 +269,6 @@ void disable_pins()
 
 void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down included    */
 {                                 /*       durat=0 to enable external timer (INT0)          */
-//marker(MARKER2);
 
     //disable_pins();
 
@@ -308,15 +307,12 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
 
     if(durat==0){wd();}                     // watchdog
-//marker(MARKER2);
 }
 
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable durat
                             /* *** WARNING *** no hardware PowerUp()/down included    */
 {                           /*       durat=0 to enable external timer (INT0)          */
-//marker(MARKER2);
-//Serial.print(durat);Serial.print(' ');delay(1);
-//disable_pins();
+
   if(durat!=0){  
 
     durat*=100;
@@ -337,11 +333,13 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
         sleep_bod_disable();                    // BOD halted if followed by sleep_cpu 
 #endif //
         interrupts();                           // sei();
+//bitSet(PORT_DIG2,MARKER2);
         sleep_cpu();
+//bitClear(PORT_DIG2,MARKER2);        
         sleep_disable();
         wdtDisable();
         durat-=realSleepTimings[k];
-        *slpt+=loopSleepTimings[k];
+        *slpt+=cntSleepTimings[k];
       }
     }
 
@@ -351,7 +349,6 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
   }
 
   return durat;                             // remaining time unsleepable 
-//marker(MARKER2);
 }
 
 //#endif // MACHINE_DET328
