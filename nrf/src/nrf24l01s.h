@@ -76,7 +76,7 @@
  *
  */
 
-#define POWONDLY (RT125/100)      // optimisation sleep //100+10   // millis()  - 100 -
+#define POWONDLY 125      // optimisation sleep //100+10   // millis()  - 100 -
 #define POWUPDLY 5+1      // millis()
 
 #define ACK     true
