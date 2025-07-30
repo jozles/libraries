@@ -5,8 +5,11 @@
 
 #include "nRF24L01.h"       // mnemonics
 #include "nrf24l01s_const.h"
-#include "lpavr_util.h"
+
+#ifdef MACHINE_DET328
+//#include "lpavr_util.h"
 #include "lpavr_powerSleep.h"
+#endif
 
 /* AP NFR24L01+ node single */
 
