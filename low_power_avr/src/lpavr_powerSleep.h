@@ -58,6 +58,7 @@
 
 void sleepPwrDown(uint8_t durat);
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt);
+void sleepStdby(int32_t durat);
 void lethalSleep();
 void checkOn();
 void checkOff();

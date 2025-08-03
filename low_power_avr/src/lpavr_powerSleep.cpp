@@ -68,8 +68,13 @@ ISR(WDT_vect)                     // ISR interrupt service for MPU INT WDT vecto
 {
 }
 
+ISR(TIMER2_COMPA_vect)            // ISR for Timer2 compare int
+{
+  bitSet(PORT_DIG1,MARKER);
+}
 
-void int1_ISR()                    // reed ISR
+
+void int1_ISR()                   // reed ISR
 {
   sleep_disable();
   detachInterrupt(0);
@@ -139,7 +144,7 @@ void wdtSetup(uint8_t durat)  // (0-9) durat>9 for external wdt on INT0 (à trai
     WDTCSR = (1<<WDCE) | (1<<WDE);    // WDCE ET WDE must be 1
                                       // to write WDP[0-3] and WDE in the following 4 cycles
     WDTCSR = (1<<WDIE) | durat;       // WDCE must be 0 ; WDE=0, WDIE=1 interrupt mode, TXXX 
-                                      // durat=0x00 ne produit pas 16mS mais environ 1.6 sec....
+                                      
 #endif //     
 
     interrupts();
@@ -313,7 +318,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
                             /* *** WARNING *** no hardware PowerUp()/down included    */
 {                           /*       durat=0 to enable external timer (INT0)          */
 
-  if(durat!=0){  
+  if(durat!=0){ 
 
     durat*=100;
     *slpt*=100;
@@ -326,7 +331,10 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
 
       while(durat>=realSleepTimings[k]){
 
-        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake  
+        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake 
+        
+        byte old_PRR = PRR;
+        PRR = 0xFF;
         noInterrupts();                         // cli(); 
         sleep_enable();                       
 #ifdef ATMEGA328
@@ -338,17 +346,64 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
 //bitClear(PORT_DIG2,MARKER2);        
         sleep_disable();
         wdtDisable();
+        PRR = old_PRR;
         durat-=realSleepTimings[k];
         *slpt+=cntSleepTimings[k];
       }
     }
 
-    power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
+    power_all_enable();                         // all bits clr in PRR register (I/O modules clock running)
     *slpt/=100;
     durat/=100;
   }
+  
+    if(durat!=0){sleepStdby(durat);durat=0;}
 
-  return durat;                             // remaining time unsleepable 
+  return durat;                                 // remaining time unsleepable 
+}
+
+void sleepStdby(int32_t durat)                  // extended standby mode with Timer2 - 32mS mùaxi
+{                                               // 128uS resolution
+    uint8_t old_PRR=PRR;
+        if(durat>32){durat=32;}
+
+        ADCSRA &= ~(1<<ADEN);                   // ADC shutdown  
+        //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
+        PRR &= ~(1<<PRTIM0);
+        PRR &= ~(1<<PRTIM1);
+        PRR &= ~(1<<PRSPI);
+        PRR &= ~(1<<PRUSART0);
+        PRR &= ~(1<<PRADC);
+
+        set_sleep_mode(SLEEP_MODE_EXT_STANDBY); 
+
+        noInterrupts();                         // cli(); 
+          
+        TCCR2A = 0;
+        TCCR2B = 0;
+        OCR2A  = (durat*1000)/128;              // set compare match register increments 1024/8000000
+        TCCR2A |= (1 << WGM21);                 // turn on CTC mode
+  // Set 1024 prescaler
+        TCCR2B |= (1 << CS20);
+        TCCR2B |= (1 << CS21);
+        TCCR2B |= (1 << CS22);   
+        TCNT2  = 0;
+        TIFR2  |= (1 << OCF2A);
+        TIMSK2 |= (1 << OCIE2A);                // enable timer compare interrupt
+
+bitSet(PORT_DIG2,MARKER2);
+
+        sleep_enable();                       
+#ifdef ATMEGA328
+        sleep_bod_disable();                    // BOD halted if followed by sleep_cpu 
+#endif 
+        interrupts();                           // sei();
+
+        sleep_cpu();
+bitClear(PORT_DIG2,MARKER2);        
+        sleep_disable();
+        //power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
+        PRR=old_PRR;
 }
 
 //#endif // MACHINE_DET328
