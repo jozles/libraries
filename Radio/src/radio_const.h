@@ -170,6 +170,15 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
   #define MCP9700                 //#define TMP36 //#define LM335 //#define DS18X20 // modèle thermomètre
 
 #ifdef DETS
+// Serial
+  #define PORT_RX     PORTD
+  #define DDR_RX      DDRD
+  #define BIT_RX      0
+  #define BITMSK_RX   1
+  #define PORT_TX     PORTD
+  #define DDR_TX      DDRD
+  #define BIT_TX      1
+  #define BITMSK_TX   2
 // led
   #define PORT_LED    PORTD
   #define DDR_LED     DDRD
