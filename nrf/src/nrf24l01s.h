@@ -77,7 +77,7 @@
  */
 
 #define POWONDLY 125      // optimisation sleep //100+10   // millis()  - 100 -
-#define POWUPDLY 5+1      // millis()
+#define POWUPDLY 5        // millis()
 
 #define ACK     true
 #define NO_ACK  false
@@ -125,7 +125,7 @@ class Nrfp
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr);
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt);
     void powerOff();
-    void powerUp();
+    void powerUp(int32_t* slpt);
     void powerDown();
     void regRead(uint8_t reg,byte* data);
     void addrWrite(uint8_t reg,byte* data);
