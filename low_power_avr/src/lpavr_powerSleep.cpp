@@ -55,6 +55,8 @@ uint8_t       cntTest=0;                         // test watchdog
 
 extern uint32_t nbS;
 
+#define TT_STEP 6
+const char* textTimings=" T16:\0 T32:\0 T64:\0T128:\0T256:\0T512:\0 T1K:\0 T2K:\0 T4K:\0 T8K:\0";
 int16_t sleepTimings[]={T8000,T4000,T2000,T1000,T500,T250,T125,T64,T32,T16};
 int32_t realSleepTimings[]={RT8000,RT4000,RT2000,RT1000,RT500,RT250,RT125,RT64,RT32,RT16};
 int32_t cntSleepTimings[]={LT8000,LT4000,LT2000,LT1000,LT500,LT250,LT125,LT64,LT32,LT16};
@@ -295,7 +297,7 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
      same issue for reed on INT1 which is a rare event (reed to greedy, no more detected by int)
      */
      
-      attachInterrupt(0,int0_ISR,ISREDGE);   // external timer interrupt enable
+      attachInterrupt(0,int0_ISR,ISREDGE);  // external timer interrupt enable
       EIFR=bit(INTF0);                      // clr flag
     }
     //attachInterrupt(1,int1_ISR,CHANGE);   // reed interrupt enable
@@ -314,7 +316,7 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     if(durat==0){wd();}                     // watchdog
 }
 
-uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable durat
+uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with variable durat
                             /* *** WARNING *** no hardware PowerUp()/down included    */
 {                           /*       durat=0 to enable external timer (INT0)          */
 
@@ -336,13 +338,15 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
         byte old_PRR = PRR;
         PRR = 0xFF;
         noInterrupts();                         // cli(); 
-        sleep_enable();                       
+        sleep_enable();
+        if(sleep){                       
 #ifdef ATMEGA328
-        sleep_bod_disable();                    // BOD halted if followed by sleep_cpu 
+          sleep_bod_disable();                    // BOD halted if followed by sleep_cpu 
 #endif //
-        interrupts();                           // sei();
+          interrupts();                           // sei();
 //bitSet(PORT_DIG2,MARKER2);
-        sleep_cpu();
+          sleep_cpu();
+        }
 //bitClear(PORT_DIG2,MARKER2);        
         sleep_disable();
         wdtDisable();
@@ -357,9 +361,20 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)  // versatile with variable d
     durat/=100;
   }
   
-    if(durat!=0){sleepStdby(durat);durat=0;}
+  if(durat!=0){sleepStdby(durat);durat=0;}
 
   return durat;                                 // remaining time unsleepable 
+}
+
+uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)
+{
+  return sleepPwrDownV(durat,slpt,true);
+}
+
+uint8_t sleepPwrDownV(int32_t durat)            // calibration
+{
+  int32_t slpt=0;
+  return sleepPwrDownV(durat,&slpt,false);
 }
 
 void sleepStdby(int32_t durat)                  // extended standby mode with Timer2 - 32mS mùaxi
@@ -367,21 +382,27 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
     uint8_t old_PRR=PRR;
         if(durat>32){durat=32;}
 
-        ADCSRA &= ~(1<<ADEN);                   // ADC shutdown  
+        uint16_t d=(durat*1000)/128;
+        //OCR2A  = (uint8_t)d;
+        //Serial.print("\n dur:");Serial.print(durat,HEX);Serial.print(" idle:");Serial.print((uint8_t)d,HEX);Serial.print('/');Serial.println(OCR2A,HEX);delay(5);
+
+        ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
+
         //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
         PRR &= ~(1<<PRTIM0);
-        PRR &= ~(1<<PRTIM1);
+        //PRR &= ~(1<<PRTIM1);
         PRR &= ~(1<<PRSPI);
         PRR &= ~(1<<PRUSART0);
         PRR &= ~(1<<PRADC);
 
         set_sleep_mode(SLEEP_MODE_EXT_STANDBY); 
+        //set_sleep_mode(SLEEP_MODE_IDLE); 
 
         noInterrupts();                         // cli(); 
           
         TCCR2A = 0;
         TCCR2B = 0;
-        OCR2A  = (durat*1000)/128;              // set compare match register increments 1024/8000000
+        OCR2A  = (uint8_t)d;                    // set compare match register increments 1024/8000000
         TCCR2A |= (1 << WGM21);                 // turn on CTC mode
   // Set 1024 prescaler
         TCCR2B |= (1 << CS20);
@@ -391,7 +412,7 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         TIFR2  |= (1 << OCF2A);
         TIMSK2 |= (1 << OCIE2A);                // enable timer compare interrupt
 
-bitSet(PORT_DIG2,MARKER2);
+        bitSet(PORT_DIG1,MARKER);
 
         sleep_enable();                       
 #ifdef ATMEGA328
@@ -400,10 +421,43 @@ bitSet(PORT_DIG2,MARKER2);
         interrupts();                           // sei();
 
         sleep_cpu();
-bitClear(PORT_DIG2,MARKER2);        
+bitClear(PORT_DIG1,MARKER);        
         sleep_disable();
         //power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
         PRR=old_PRR;
+}
+
+
+void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
+{
+  for(uint8_t i=NB_PRESCALER_VALUES-1;i>4;i--){   // 16->512
+    unsigned long t0=millis(),t=t0,t1=0;
+    while(t==t0){t=millis();}
+    Serial.print(i);Serial.print(' ');delay(1);
+    sleepPwrDownV(realSleepTimings[i]/100);
+    t1=millis();
+    Serial.print(realSleepTimings[i]);Serial.print(' ');delay(1);
+    realSleepTimings[i]=(t1-t)*100;
+
+    Serial.print(realSleepTimings[i]);Serial.print(' ');delay(1);
+    Serial.print(t);Serial.print(' ');delay(1);
+    Serial.print(t1);Serial.print(' ');delay(1);
+    Serial.println();
+  }
+}
+
+void showTimings()
+{
+  delay(10);Serial.println("---");
+  for(int8_t i=NB_PRESCALER_VALUES-1;i>2;i--){   // 16->512
+    Serial.print(i);Serial.print(' ');
+  }
+  /*
+    Serial.print((char*)&textTimings[i*TT_STEP]);Serial.print(' ');
+    Serial.print(realSleepTimings[i]);
+    if(i==4){Serial.print("\n            ");}
+  }*/
+  Serial.println();delay(5);
 }
 
 //#endif // MACHINE_DET328

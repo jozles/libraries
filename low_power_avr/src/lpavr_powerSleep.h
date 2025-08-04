@@ -57,7 +57,11 @@
 #define  AWAKE_RETRY_VALUE    3     // nbre de retry avant KO
 
 void sleepPwrDown(uint8_t durat);
+uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep);
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt);
+uint8_t sleepPwrDownV(int32_t durat);
+void showTimings();
+void calibratePwrDown();
 void sleepStdby(int32_t durat);
 void lethalSleep();
 void checkOn();
