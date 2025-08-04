@@ -52,6 +52,8 @@ extern bool   lowPower;
 extern float  lowPowerValue;                      
 extern float  temp;
 uint8_t       cntTest=0;                         // test watchdog
+bool          wdIntFlag=false;
+
 
 extern uint32_t nbS;
 
@@ -68,6 +70,7 @@ void diagT2(char* texte,int duree)
 
 ISR(WDT_vect)                     // ISR interrupt service for MPU INT WDT vector
 {
+  wdIntFlag=true;
 }
 
 ISR(TIMER2_COMPA_vect)            // ISR for Timer2 compare int
@@ -322,38 +325,55 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 
   if(durat!=0){ 
 
+    Serial.print(durat);Serial.print(',');delay(5);
+
     durat*=100;
     *slpt*=100;
 
     ADCSRA &= ~(1<<ADEN);                   // ADC shutdown  
     power_all_disable();                    // all bits set in PRR register (I/O modules clock halted) 
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);      
 
     for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){
 
-      while(durat>=realSleepTimings[k]){
+bitSet(PORT_DIG1,MARKER); *slpt=durat*10/k;      
 
-        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake 
-        
+      while(durat>=realSleepTimings[k]){       
+
+bitSet(PORT_DIG2,MARKER2);
+
+        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake        
+        wdIntFlag=false;
         byte old_PRR = PRR;
         PRR = 0xFF;
-        noInterrupts();                         // cli(); 
-        sleep_enable();
-        if(sleep){                       
+        if(sleep){ 
+          noInterrupts();                         // cli(); 
+          sleep_enable();
+//bitClear(PORT_DIG2,MARKER2);         
+                      
 #ifdef ATMEGA328
-          sleep_bod_disable();                    // BOD halted if followed by sleep_cpu 
+          sleep_bod_disable();                  // BOD halted if followed by sleep_cpu 
 #endif //
-          interrupts();                           // sei();
-//bitSet(PORT_DIG2,MARKER2);
+          interrupts();                         // sei();
           sleep_cpu();
+          sleep_disable();
         }
-//bitClear(PORT_DIG2,MARKER2);        
-        sleep_disable();
+        else{                                   // wait for wd interrupt 
+bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;
+bitClear(PORT_DIG2,MARKER2);*slpt=durat*10/k;          
+
+            while (!wdIntFlag){}
+            wdIntFlag=false;
+bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;            
+        }
+        
         wdtDisable();
         PRR = old_PRR;
         durat-=realSleepTimings[k];
         *slpt+=cntSleepTimings[k];
       }
+bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
+
     }
 
     power_all_enable();                         // all bits clr in PRR register (I/O modules clock running)
@@ -361,7 +381,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat/=100;
   }
   
-  if(durat!=0){sleepStdby(durat);durat=0;}
+  if(durat!=0 && sleep){sleepStdby(durat);durat=0;}
 
   return durat;                                 // remaining time unsleepable 
 }
@@ -371,8 +391,9 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)
   return sleepPwrDownV(durat,slpt,true);
 }
 
-uint8_t sleepPwrDownV(int32_t durat)            // calibration
+uint8_t sleepPwrDownC(int32_t durat)            // calibration
 {
+  Serial.print(durat);Serial.print('-');delay(5);
   int32_t slpt=0;
   return sleepPwrDownV(durat,&slpt,false);
 }
@@ -434,12 +455,12 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
     unsigned long t0=millis(),t=t0,t1=0;
     while(t==t0){t=millis();}
     Serial.print(i);Serial.print(' ');delay(1);
-    sleepPwrDownV(realSleepTimings[i]/100);
+    sleepPwrDownC(realSleepTimings[i]/100);
     t1=millis();
-    Serial.print(realSleepTimings[i]);Serial.print(' ');delay(1);
+    Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);
     realSleepTimings[i]=(t1-t)*100;
 
-    Serial.print(realSleepTimings[i]);Serial.print(' ');delay(1);
+    Serial.print(realSleepTimings[i]);Serial.print('*');delay(1);
     Serial.print(t);Serial.print(' ');delay(1);
     Serial.print(t1);Serial.print(' ');delay(1);
     Serial.println();
