@@ -447,7 +447,7 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
 
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
-  uint32_t sl=0;
+  int32_t sl=0;
   for(uint8_t i=NB_PRESCALER_VALUES-1;i>0;i--){   // 16->512
     unsigned long t0=millis(),t=t0,t1=0,t2=0;
     while(t==t0){t=millis();}
