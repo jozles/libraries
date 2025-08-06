@@ -325,7 +325,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 
   if(durat!=0){ 
 
-    Serial.print(durat);Serial.print(',');delay(5);
+    //Serial.print(durat);Serial.print(',');delay(5);
 
     durat*=100;
     *slpt*=100;
@@ -336,11 +336,11 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 
     for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){
 
-bitSet(PORT_DIG1,MARKER); *slpt=durat*10/k;      
+//bitSet(PORT_DIG1,MARKER); *slpt=durat*10/k;      
 
       while(durat>=realSleepTimings[k]){       
 
-bitSet(PORT_DIG2,MARKER2);
+//bitSet(PORT_DIG2,MARKER2);
 
         wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake        
         wdIntFlag=false;
@@ -359,12 +359,12 @@ bitSet(PORT_DIG2,MARKER2);
           sleep_disable();
         }
         else{                                   // wait for wd interrupt 
-bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;
-bitClear(PORT_DIG2,MARKER2);*slpt=durat*10/k;          
+//bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;
+//bitClear(PORT_DIG2,MARKER2);*slpt=durat*10/k;          
 
             while (!wdIntFlag){}
             wdIntFlag=false;
-bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;            
+//bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;            
         }
         
         wdtDisable();
@@ -372,7 +372,7 @@ bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;
         durat-=realSleepTimings[k];
         *slpt+=cntSleepTimings[k];
       }
-bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
+//bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
 
     }
 
@@ -393,7 +393,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)
 
 uint8_t sleepPwrDownC(int32_t durat)            // calibration
 {
-  Serial.print(durat);Serial.print('-');delay(5);
+  //Serial.print(durat);Serial.print('-');delay(5);
   int32_t slpt=0;
   return sleepPwrDownV(durat,&slpt,false);
 }
