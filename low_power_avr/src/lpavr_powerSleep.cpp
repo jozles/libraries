@@ -322,57 +322,52 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with variable durat
                             /* *** WARNING *** no hardware PowerUp()/down included    */
 {                           /*       durat=0 to enable external timer (INT0)          */
-
+  //Serial.println(durat);
   if(durat!=0){ 
-
-    Serial.print(durat);Serial.print(',');delay(5);
 
     durat*=100;
     *slpt*=100;
 
-    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown  
-    power_all_disable();                    // all bits set in PRR register (I/O modules clock halted) 
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);      
+    ADCSRA &= ~(1<<ADEN);                       // ADC shutdown  
+    if(sleep){
+      power_all_disable();             // all bits set in PRR register (I/O modules clock halted) 
+      set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    }     
 
-    for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){
-
-bitSet(PORT_DIG1,MARKER); *slpt=durat*10/k;      
+    for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){     
+//bitSet(PORT_DIG2,MARKER2);
 
       while(durat>=realSleepTimings[k]){       
-
-bitSet(PORT_DIG2,MARKER2);
-
-        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake        
-        wdIntFlag=false;
-        byte old_PRR = PRR;
-        PRR = 0xFF;
+//bitSet(PORT_DIG2,MARKER2);        
+                 
         if(sleep){ 
-          noInterrupts();                         // cli(); 
-          sleep_enable();
-//bitClear(PORT_DIG2,MARKER2);         
-                      
+//bitClear(PORT_DIG2,MARKER2);
+          wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake 
+          noInterrupts();
+          wdIntFlag=false;                     
+          sleep_enable();            
 #ifdef ATMEGA328
           sleep_bod_disable();                  // BOD halted if followed by sleep_cpu 
 #endif //
           interrupts();                         // sei();
           sleep_cpu();
           sleep_disable();
+          wdtDisable();
+          *slpt+=cntSleepTimings[k];
         }
         else{                                   // wait for wd interrupt 
-bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;
-bitClear(PORT_DIG2,MARKER2);*slpt=durat*10/k;          
-
-            while (!wdIntFlag){}
-            wdIntFlag=false;
-bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;            
+//bitClear(PORT_DIG2,MARKER2);
+          wdtSetup(sleepTimings[k]);           
+          wdIntFlag=false;
+          sleep_enable();                       
+          while (wdIntFlag==false){delayMicroseconds(12);}
+          sleep_disable();
+          wdtDisable();
+//bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;             
         }
-        
-        wdtDisable();
-        PRR = old_PRR;
         durat-=realSleepTimings[k];
-        *slpt+=cntSleepTimings[k];
       }
-bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
+//bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
 
     }
 
@@ -410,8 +405,10 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
 
         //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
+        PRR &= ~(1<<PRTWI);
         PRR &= ~(1<<PRTIM0);
         //PRR &= ~(1<<PRTIM1);
+        //PRR &= ~(1<<PRTIM2);
         PRR &= ~(1<<PRSPI);
         PRR &= ~(1<<PRUSART0);
         PRR &= ~(1<<PRADC);
@@ -425,15 +422,14 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         TCCR2B = 0;
         OCR2A  = (uint8_t)d;                    // set compare match register increments 1024/8000000
         TCCR2A |= (1 << WGM21);                 // turn on CTC mode
-  // Set 1024 prescaler
-        TCCR2B |= (1 << CS20);
-        TCCR2B |= (1 << CS21);
-        TCCR2B |= (1 << CS22);   
+        TCCR2B |= (1 << CS20);                  // Set 1024 prescaler
+        TCCR2B |= (1 << CS21);                  // Set 1024 prescaler
+        TCCR2B |= (1 << CS22);                  // Set 1024 prescaler
         TCNT2  = 0;
-        TIFR2  |= (1 << OCF2A);
+        TIFR2  |= (1 << OCF2A);                 // reset flag
         TIMSK2 |= (1 << OCIE2A);                // enable timer compare interrupt
 
-        bitSet(PORT_DIG1,MARKER);
+//bitSet(PORT_DIG1,MARKER);
 
         sleep_enable();                       
 #ifdef ATMEGA328
@@ -442,7 +438,7 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         interrupts();                           // sei();
 
         sleep_cpu();
-bitClear(PORT_DIG1,MARKER);        
+//bitClear(PORT_DIG1,MARKER);        
         sleep_disable();
         //power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
         PRR=old_PRR;
@@ -451,19 +447,37 @@ bitClear(PORT_DIG1,MARKER);
 
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
-  for(uint8_t i=NB_PRESCALER_VALUES-1;i>4;i--){   // 16->512
-    unsigned long t0=millis(),t=t0,t1=0;
+  uint32_t sl=0;
+  for(uint8_t i=NB_PRESCALER_VALUES-1;i>0;i--){   // 16->512
+    unsigned long t0=millis(),t=t0,t1=0,t2=0;
     while(t==t0){t=millis();}
-    Serial.print(i);Serial.print(' ');delay(1);
-    sleepPwrDownC(realSleepTimings[i]/100);
-    t1=millis();
-    Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);
+    /*bitSet(PORT_DIG2,MARKER2);
+    wdIntFlag=false;
+    wdtSetup(sleepTimings[i]);
+    sleep_enable();
+    while(wdIntFlag==false){t1=millis();}
+    sleep_disable();
+    wdtDisable();*/
+    
+    sleepPwrDownC(realSleepTimings[i]/100);t1=millis();
+    sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();
+   
+    //Serial.print(i);Serial.print(' ');delay(1);
+    //Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);
     realSleepTimings[i]=(t1-t)*100;
 
-    Serial.print(realSleepTimings[i]);Serial.print('*');delay(1);
-    Serial.print(t);Serial.print(' ');delay(1);
-    Serial.print(t1);Serial.print(' ');delay(1);
-    Serial.println();
+    //Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
+    //Serial.print(t1);Serial.print('-');delay(1);
+    //Serial.print(t);Serial.print(") ");delay(1);
+
+    //Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
+    cntSleepTimings[i]=realSleepTimings[i]-(t2-t1)*100;
+
+    //Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
+    //Serial.print(t2);Serial.print('-');delay(1);
+    //Serial.print(t1);Serial.print(") ");delay(1);
+
+    Serial.println("done");
   }
 }
 

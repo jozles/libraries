@@ -27,16 +27,16 @@
 
 // effective Time @8MHz (*10uS)
 #define EMPTY_LOOP 18
-#define RT16    2300
-#define RT32    4300
-#define RT64    8200
-#define RT125   16100
-#define RT250   31900
-#define RT500   63400
-#define RT1000  123500
-#define RT2000  253000
-#define RT4000  507200
-#define RT8000  1010000
+#define RT16    2000
+#define RT32    3700
+#define RT64    6700
+#define RT125   13100
+#define RT250   25800
+#define RT500   51200
+#define RT1000  101800
+#define RT2000  203200
+#define RT4000  406100
+#define RT8000  819500
 
 // effective time without counter @8MHz (*10uS)
 #define LT16    2315
