@@ -451,19 +451,37 @@ bitClear(PORT_DIG1,MARKER);
 
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
-  for(uint8_t i=NB_PRESCALER_VALUES-1;i>4;i--){   // 16->512
-    unsigned long t0=millis(),t=t0,t1=0;
+  int32_t sl=0;
+  for(uint8_t i=NB_PRESCALER_VALUES-1;i>0;i--){   // 16->512
+    unsigned long t0=millis(),t=t0,t1=0,t2=0;
     while(t==t0){t=millis();}
-    Serial.print(i);Serial.print(' ');delay(1);
-    sleepPwrDownC(realSleepTimings[i]/100);
-    t1=millis();
-    Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);
+    /*bitSet(PORT_DIG2,MARKER2);
+    wdIntFlag=false;
+    wdtSetup(sleepTimings[i]);
+    sleep_enable();
+    while(wdIntFlag==false){t1=millis();}
+    sleep_disable();
+    wdtDisable();*/
+    
+    sleepPwrDownC(realSleepTimings[i]/100);t1=millis();
+    sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();
+   
+    //Serial.print(i);Serial.print(' ');delay(1);
+    //Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);
     realSleepTimings[i]=(t1-t)*100;
 
-    Serial.print(realSleepTimings[i]);Serial.print('*');delay(1);
-    Serial.print(t);Serial.print(' ');delay(1);
-    Serial.print(t1);Serial.print(' ');delay(1);
-    Serial.println();
+    //Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
+    //Serial.print(t1);Serial.print('-');delay(1);
+    //Serial.print(t);Serial.print(") ");delay(1);
+
+    //Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
+    cntSleepTimings[i]=realSleepTimings[i]-(t2-t1)*100;
+
+    //Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
+    //Serial.print(t2);Serial.print('-');delay(1);
+    //Serial.print(t1);Serial.print(") ");delay(1);
+
+    Serial.println("done");
   }
 }
 
