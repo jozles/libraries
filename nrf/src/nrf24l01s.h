@@ -94,8 +94,8 @@
 #define CC_ADDRX   "SHCO0\0SHCO1\0SHCO2\0SHCO3\0" // adresses mac par défaut des concentrateurs                                                 
 #define CC_SPEED    RF_SPD_1MB           
 
-#define TO_AVAILABLE 20   // millis()
-#define TO_REGISTER  15   // millis()       
+//#define TO_AVAILABLE 20   // millis()
+#define TO_REGISTER  5    // 15   // millis()       
 #define TO_WAITTX    5    // millis()
 
 #define RF_SPD_2MB RF_DR_HIGH_BIT
