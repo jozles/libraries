@@ -47,6 +47,7 @@ extern Nrfp radio;
 extern LoRaClass radio;
 #endif
 
+extern bool   diags;
 float         volts=0;                           // tension alim (VCC)
 extern bool   lowPower;                          
 extern float  lowPowerValue;                      
@@ -330,9 +331,14 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat*=100;
     *slpt*=100;
 
-    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown  
-    power_all_disable();                    // all bits set in PRR register (I/O modules clock halted) 
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);      
+    ADCSRA &= ~(1<<ADEN);                       // ADC shutdown  
+    
+    if(sleep){
+      //byte old_PRR = PRR;
+      //PRR = 0xFF;
+      power_all_disable();                        // all bits set in PRR register (I/O modules clock halted ; no millis())     
+      set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    }
 
     for(uint8_t k=0;k<NB_PRESCALER_VALUES;k++){
 
@@ -342,12 +348,9 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 
 //bitSet(PORT_DIG2,MARKER2);
 
-        wdtSetup(sleepTimings[k]);              // WDTCSR register setup for sleep with WDT int awake        
-        wdIntFlag=false;
-        byte old_PRR = PRR;
-        PRR = 0xFF;
-        if(sleep){ 
-          noInterrupts();                         // cli(); 
+        if(sleep){
+          wdtSetup(sleepTimings[k]);            // WDTCSR register setup for sleep with WDT int awake        
+          noInterrupts();                       // cli(); 
           sleep_enable();
 //bitClear(PORT_DIG2,MARKER2);         
                       
@@ -357,26 +360,30 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
           interrupts();                         // sei();
           sleep_cpu();
           sleep_disable();
+          wdtDisable();
+          *slpt+=cntSleepTimings[k];
         }
         else{                                   // wait for wd interrupt 
 //bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;
-//bitClear(PORT_DIG2,MARKER2);*slpt=durat*10/k;          
-
-            while (!wdIntFlag){}
-            wdIntFlag=false;
+//bitClear(PORT_DIG2,MARKER2);*slpt=durat*10/k; 
+          wdtSetup(sleepTimings[k]);            // WDTCSR register setup for sleep with WDT int awake 
+          //noInterrupts();
+          wdIntFlag=false;     
+          sleep_enable();
+          //interrupts();
+          while (wdIntFlag==false){delayMicroseconds(12);}
+          sleep_disable();
+          wdtDisable();
 //bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;            
         }
         
-        wdtDisable();
-        PRR = old_PRR;
         durat-=realSleepTimings[k];
-        *slpt+=cntSleepTimings[k];
       }
 //bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
 
     }
-
-    power_all_enable();                         // all bits clr in PRR register (I/O modules clock running)
+    power_all_enable();
+    //PRR = old_PRR;
     *slpt/=100;
     durat/=100;
   }
@@ -389,13 +396,6 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)
 {
   return sleepPwrDownV(durat,slpt,true);
-}
-
-uint8_t sleepPwrDownC(int32_t durat)            // calibration
-{
-  //Serial.print(durat);Serial.print('-');delay(5);
-  int32_t slpt=0;
-  return sleepPwrDownV(durat,&slpt,false);
 }
 
 void sleepStdby(int32_t durat)                  // extended standby mode with Timer2 - 32mS mùaxi
@@ -451,7 +451,10 @@ bitClear(PORT_DIG1,MARKER);
 
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
+  Serial.println("calibration ");
   int32_t sl=0;
+  int32_t saveRST[NB_PRESCALER_VALUES];
+
   for(uint8_t i=NB_PRESCALER_VALUES-1;i>0;i--){   // 16->512
     unsigned long t0=millis(),t=t0,t1=0,t2=0;
     while(t==t0){t=millis();}
@@ -462,41 +465,36 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
     while(wdIntFlag==false){t1=millis();}
     sleep_disable();
     wdtDisable();*/
+
+    saveRST[i]=realSleepTimings[i];
     
-    sleepPwrDownC(realSleepTimings[i]/100);t1=millis();
-    sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();
+    sleepPwrDownV(realSleepTimings[i]/100,&sl,false);t1=millis();   // no sleep
+    sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();    // sleep
    
-    //Serial.print(i);Serial.print(' ');delay(1);
-    //Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);
+    if(diags){
+      Serial.print(i);Serial.print(' ');delay(1);
+      Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);}
+
     realSleepTimings[i]=(t1-t)*100;
+    if(realSleepTimings[i]==0){realSleepTimings[i]=saveRST[i];}
 
-    //Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
-    //Serial.print(t1);Serial.print('-');delay(1);
-    //Serial.print(t);Serial.print(") ");delay(1);
+    if(diags){
+      Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
+      Serial.print(t1);Serial.print('-');delay(1);
+      Serial.print(t);Serial.print(") ");delay(1);
+      Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
+     }
 
-    //Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
     cntSleepTimings[i]=realSleepTimings[i]-(t2-t1)*100;
 
-    //Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
-    //Serial.print(t2);Serial.print('-');delay(1);
-    //Serial.print(t1);Serial.print(") ");delay(1);
+    if(diags){
+      Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
+      Serial.print(t2);Serial.print('-');delay(1);
+      Serial.print(t1);Serial.println(") ");delay(1);
+    }
 
-    Serial.println("done");
   }
-}
-
-void showTimings()
-{
-  delay(10);Serial.println("---");
-  for(int8_t i=NB_PRESCALER_VALUES-1;i>2;i--){   // 16->512
-    Serial.print(i);Serial.print(' ');
-  }
-  /*
-    Serial.print((char*)&textTimings[i*TT_STEP]);Serial.print(' ');
-    Serial.print(realSleepTimings[i]);
-    if(i==4){Serial.print("\n            ");}
-  }*/
-  Serial.println();delay(5);
+  Serial.println("done");
 }
 
 //#endif // MACHINE_DET328
