@@ -243,7 +243,7 @@ void Nrfp::powerOff()
   allPinsLow();
 
   pinMode(RPOW_PIN,INPUT);
-  digitalWrite(RPOW_PIN,HIGH);    // power off     // INPUT PULLUP
+  //digitalWrite(RPOW_PIN,HIGH);    // power off     // INPUT PULLUP inutile : PULLUP sur la carte
   // pinMode(RPOW_PIN,OUTPUT);
 
 #endif // MACHINE='P'  
