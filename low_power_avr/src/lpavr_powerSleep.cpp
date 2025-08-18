@@ -76,7 +76,7 @@ ISR(WDT_vect)                     // ISR interrupt service for MPU INT WDT vecto
 
 ISR(TIMER2_COMPA_vect)            // ISR for Timer2 compare int
 {
-  bitSet(PORT_DIG1,MARKER);
+  //bitSet(PORT_DIG1,MARKER);
 }
 
 
@@ -287,20 +287,21 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     
     power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
     
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
-
-    if(durat!=0){wdtSetup(durat);}          // WDTCSR register setup for sleep with WDT int awake
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     
     noInterrupts();                         // cli();
 
-    if(durat==0){                           // external timer interrupt awaking
+    if(durat!=0){wdtSetup(durat);}          // WDTCSR register setup for sleep with WDT int awake
+
+    else{                                   // external timer interrupt awaking
   /* it would have to wait here for low state on INT0 to avoid       
      possibility of falling transition between interrupts() and sleep_cpu()
      (in that case BOD is not disable ; that cause little more power wasting)
      it should not happen because no operation should take more than 1 sec 
      same issue for reed on INT1 which is a rare event (reed to greedy, no more detected by int)
      */
-     
+      //noInterrupts();
+      wdt_disable();
       attachInterrupt(0,int0_ISR,ISREDGE);  // external timer interrupt enable
       EIFR=bit(INTF0);                      // clr flag
     }
@@ -433,7 +434,7 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         TIFR2  |= (1 << OCF2A);
         TIMSK2 |= (1 << OCIE2A);                // enable timer compare interrupt
 
-        bitSet(PORT_DIG1,MARKER);
+//bitSet(PORT_DIG1,MARKER);
 
         sleep_enable();                       
 #ifdef ATMEGA328
@@ -442,7 +443,7 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         interrupts();                           // sei();
 
         sleep_cpu();
-bitClear(PORT_DIG1,MARKER);        
+//bitClear(PORT_DIG1,MARKER);        
         sleep_disable();
         //power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
         PRR=old_PRR;
@@ -451,7 +452,7 @@ bitClear(PORT_DIG1,MARKER);
 
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
-  Serial.println("calibration ");
+  Serial.print("calibration ");
   int32_t sl=0;
   int32_t saveRST[NB_PRESCALER_VALUES];
 
@@ -472,6 +473,7 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
     sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();    // sleep
    
     if(diags){
+      Serial.println();
       Serial.print(i);Serial.print(' ');delay(1);
       Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);}
 
