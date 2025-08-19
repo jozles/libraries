@@ -39,28 +39,28 @@
 
 // effective Time @8MHz (*10uS)
 #define EMPTY_LOOP 18
-#define RT16    2300
-#define RT32    4300
-#define RT64    8200
-#define RT125   16100
-#define RT250   31900
-#define RT500   63400
-#define RT1000  123500
-#define RT2000  253000
-#define RT4000  507200
-#define RT8000  1010000
+#define RT16    1600
+#define RT32    3200
+#define RT64    6400
+#define RT125   12500
+#define RT250   25000
+#define RT500   50000
+#define RT1000  100000
+#define RT2000  200000
+#define RT4000  500000
+#define RT8000  800000
 
 // effective time without counter @8MHz (*10uS)
-#define LT16    2315
-#define LT32    4284
-#define LT64    8222
-#define LT125   16110
-#define LT250   31902
-#define LT500   63400
-#define LT1000  123474
-#define LT2000  252974
-#define LT4000  507174
-#define LT8000  1009974
+#define LT16    1600
+#define LT32    3200
+#define LT64    6400
+#define LT125   12500
+#define LT250   25000
+#define LT500   50000
+#define LT1000  100000
+#define LT2000  200000
+#define LT4000  400000
+#define LT8000  800000
 
 /* --------------- @ env 2sec / sleep -------------------- */
 #define  AWAKE_OK_VALUE       2     // nbre réveils entre chaque test de temp 

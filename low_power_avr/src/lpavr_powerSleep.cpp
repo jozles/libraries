@@ -452,7 +452,7 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
 
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
-  Serial.print("calibration ");
+  Serial.print("calibration ");if(diags){Serial.println();}
   int32_t sl=0;
   int32_t saveRST[NB_PRESCALER_VALUES];
 
@@ -473,7 +473,6 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
     sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();    // sleep
    
     if(diags){
-      Serial.println();
       Serial.print(i);Serial.print(' ');delay(1);
       Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);}
 
