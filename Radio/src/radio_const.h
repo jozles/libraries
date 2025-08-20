@@ -136,6 +136,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
 
 #ifdef MACHINE_CONCENTRATEUR
 
+  //#define MARKERS
   #define MARKER    A11
   #define MARKER2   A10
 
