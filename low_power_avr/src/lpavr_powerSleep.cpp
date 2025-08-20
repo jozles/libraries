@@ -171,7 +171,9 @@ void wdtDisable()
 void lethalSleep()
 {
 
-    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown    
+    //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown 
+    ADCSRA=0;
+
     power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
     set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
     noInterrupts();                         // cli();
@@ -222,7 +224,8 @@ void wd()
 uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
 {
     uint16_t a=0;
-    
+
+    PRR &= (1<<PRADC);
     ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
     ADMUX   = admuxval;
     ADCSRA  = 0 | (1<<ADEN) | (1<<ADSC) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
@@ -231,6 +234,9 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
 
     a=ADCL;
     a+=ADCH*256;
+
+    ADCSRA=0;
+    PRR &= ~(1<<PRADC);
 
     return a;
 }
@@ -255,7 +261,7 @@ void getVolts()                     // get unregulated voltage and reset watchdo
 
   checkOff();
 
-  ADCSRA &= ~(1<<ADEN);                   // ADC shutdown for clean next voltage measurement
+  //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown for clean next voltage measurement
 }
 
 void disable_pins()
@@ -281,10 +287,11 @@ void disable_pins()
 void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down included    */
 {                                 /*       durat=0 to enable external timer (INT0)          */
 
-    //disable_pins();
-
-    ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
+    //ADCSRA &= ~(1<<ADEN);                 // ADC shutdown
+    ADCSRA=0;PRR &= ~(1<<PRADC);            // always off
+    PRR &= ~(1<<PRTIM0);                    // always off
     
+    byte old_prr=PRR;
     power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
     
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -316,9 +323,10 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     sleep_cpu();
     sleep_disable();
     if(durat!=0){wdtDisable();}                         
-    power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
+    //power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
+    PRR=old_prr;
 
-    if(durat==0){wd();}                     // watchdog
+    //if(durat==0){wd();}                     // watchdog
 }
 
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with variable durat
@@ -332,11 +340,12 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat*=100;
     *slpt*=100;
 
-    ADCSRA &= ~(1<<ADEN);                       // ADC shutdown  
+    //ADCSRA &= ~(1<<ADEN);                       // ADC shutdown  
+    ADCSRA=0;PRR &= ~(1<<PRADC);                  // always off
+    PRR &= ~(1<<PRTIM0);                          // always off
+    byte old_prr=PRR;
     
     if(sleep){
-      //byte old_PRR = PRR;
-      //PRR = 0xFF;
       power_all_disable();                        // all bits set in PRR register (I/O modules clock halted ; no millis())     
       set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     }
@@ -383,8 +392,10 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 //bitClear(PORT_DIG1,MARKER);*slpt=durat*10/k;  
 
     }
-    power_all_enable();
-    //PRR = old_PRR;
+    if(sleep){
+      //power_all_enable();
+      PRR = old_prr;
+    }
     *slpt/=100;
     durat/=100;
   }
@@ -402,17 +413,20 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt)
 void sleepStdby(int32_t durat)                  // extended standby mode with Timer2 - 32mS mùaxi
 {                                               // 128uS resolution
     uint8_t old_PRR=PRR;
+
         if(durat>32){durat=32;}
 
         uint16_t d=(durat*1000)/128;
         //OCR2A  = (uint8_t)d;
         //Serial.print("\n dur:");Serial.print(durat,HEX);Serial.print(" idle:");Serial.print((uint8_t)d,HEX);Serial.print('/');Serial.println(OCR2A,HEX);delay(5);
 
-        ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
+        //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
+        ADCSRA=0;
 
         //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
         PRR &= ~(1<<PRTIM0);
-        //PRR &= ~(1<<PRTIM1);
+        //PRR &= ~(1<<PRTIM1);                      // millis()
+        //PRR &= ~(1<<PRTIM2);                      // wake interrupt
         PRR &= ~(1<<PRSPI);
         PRR &= ~(1<<PRUSART0);
         PRR &= ~(1<<PRADC);
@@ -456,7 +470,7 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
   int32_t sl=0;
   int32_t saveRST[NB_PRESCALER_VALUES];
 
-  for(uint8_t i=NB_PRESCALER_VALUES-1;i>0;i--){   // 16->512
+  for(uint8_t i=NB_PRESCALER_VALUES-5;i>0;i--){   // 16->512
     unsigned long t0=millis(),t=t0,t1=0,t2=0;
     while(t==t0){t=millis();}
     /*bitSet(PORT_DIG2,MARKER2);
