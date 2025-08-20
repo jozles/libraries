@@ -71,7 +71,7 @@
 
 #define CONFREG (0x00 & (~MASK_RX_DR_BIT) & (~MASK_TX_DS_BIT) & (~MASK_MAX_RT_BIT)) | ((EN_CRC_BIT) & (~CRCO_BIT)) | (PWR_UP_BIT) | (PRIM_RX_BIT)
 
-#define RFREG   RF_PWR_BITS
+#define RFREG   0x04 // RF_PWR_BITS  // 0x00 -16db ; 0x02 -12db ; 0x04 -6db ; 0x06 0db 
 
 /***** config *****/
 
@@ -244,7 +244,7 @@ void Nrfp::powerOff()
 
   pinMode(RPOW_PIN,INPUT);
   //digitalWrite(RPOW_PIN,HIGH);    // power off     // INPUT PULLUP inutile : PULLUP sur la carte
-  // pinMode(RPOW_PIN,OUTPUT);
+  //pinMode(RPOW_PIN,OUTPUT);
 
 #endif // MACHINE='P'  
 }

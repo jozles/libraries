@@ -76,7 +76,7 @@
  *
  */
 
-#define POWONDLY 94 //100      // optimisation sleep //100+10   // millis()  - 100 -
+#define POWONDLY 100      // optimisation sleep //100+10   // millis()  - 100 -
 #define POWUPDLY 5        // millis()
 
 #define ACK     true
@@ -95,7 +95,7 @@
 #define CC_SPEED    RF_SPD_1MB           
 
 //#define TO_AVAILABLE 20   // millis()
-#define TO_REGISTER  5    // 15   // millis()       
+#define TO_REGISTER  2    // 15   // millis()       
 #define TO_WAITTX    5    // millis()
 
 #define RF_SPD_2MB RF_DR_HIGH_BIT
