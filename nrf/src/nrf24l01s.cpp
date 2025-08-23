@@ -266,10 +266,10 @@ void Nrfp::powerUp(int32_t* slpt)
 
     powerD=false;
 
-#ifdef MACHINE_DETS328
+#ifdef MACHINE_DET328
     sleepStdby(POWUPDLY);
 #endif
-#ifndef MACHINE_DETS328
+#ifndef MACHINE_DET328
     delay(POWUPDLY);
 #endif
 }
