@@ -109,7 +109,8 @@
 #define ARD         4
 #define ARC         0
 #define PLL_LOCK    4
-#define RF_DR       3
+#define RF_DRH      3
+#define RF_DRL      5
 #define RF_PWR      1
 #define LNA_HCURR   0
 #define RX_DR       6
@@ -169,5 +170,15 @@
 #define REUSE_TX_PL   0xE3
 #define NOP           0xFF
 
+/* power values */
+#define N_PWR_LEVEL 4
+#define RF_POWER_0_VALUE  0X03        // 0db
+#define RF_POWER_6_VALUE  0X02        // -6db
+#define RF_POWER_12_VALUE 0X01        // -12db
+#define RF_POWER_18_VALUE 0X00        // -18db
+#define RF_POWER_0  0
+#define RF_POWER_6  1
+#define RF_POWER_12 2
+#define RF_POWER_18 3
 
 #endif // nrfwords

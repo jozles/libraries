@@ -113,7 +113,7 @@ class Nrfp
   public:
     Nrfp();
 
-    void setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr);
+    void setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,uint8_t powerLevel);
 
     int  available(uint8_t* pipe,uint8_t* length);
     int  read(byte* data,uint8_t* pipe,uint8_t* length,int numP);
@@ -121,13 +121,14 @@ class Nrfp
     void write(byte* data,bool ack,uint8_t len,byte* macTableAddr);
     int  transmitting(bool ack);
 
-    //void powerOn(uint8_t channel);
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr);
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt);
+    int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel);
     void powerOff();
     void powerUp(int32_t* slpt);
     void powerDown();
     void regRead(uint8_t reg,byte* data);
+    void rfSetupWrite(uint8_t pwrl,uint8_t speed);
     void addrWrite(uint8_t reg,byte* data);
     void rxError();
 
@@ -164,7 +165,9 @@ class Nrfp
 
     uint8_t nbPerif=0;
 
-    uint8_t regw,statu,fstatu,conf;
+    uint8_t regw,regr,statu,fstatu,conf,powerLev,nrfSpeed;
+
+    uint8_t powerL[N_PWR_LEVEL]={RF_POWER_0_VALUE,RF_POWER_6_VALUE,RF_POWER_12_VALUE,RF_POWER_18_VALUE};
 
 #if MACHINE_DET328
     void allPinsLow();

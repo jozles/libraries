@@ -71,7 +71,7 @@
 
 #define CONFREG (0x00 & (~MASK_RX_DR_BIT) & (~MASK_TX_DS_BIT) & (~MASK_MAX_RT_BIT)) | ((EN_CRC_BIT) & (~CRCO_BIT)) | (PWR_UP_BIT) | (PRIM_RX_BIT)
 
-#define RFREG   0x04 // RF_PWR_BITS  // 0x00 -16db ; 0x02 -12db ; 0x04 -6db ; 0x06 0db 
+#define RFREG   0x04 // RF_PWR_BITS  // 0x00 -16db ; 0x02 -12db ; 0x04 -6db ; 0x06 0db
 
 /***** config *****/
 
@@ -79,7 +79,7 @@ Nrfp::Nrfp()    // constructeur
 {
 }
 
-void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
+void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,uint8_t powerLevel)
 { 
     /* registers */
 
@@ -108,9 +108,12 @@ void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
     regw=channel;
     regWrite(RF_CH,&regw);
 
-    regw=RFREG | speed;
-  
-    regWrite(RF_SETUP,&regw);
+    nrfSpeed=speed;
+    powerLev=powerLevel;
+    rfSetupWrite(powerLev,nrfSpeed);
+    
+    //regw=RFREG | speed;  
+    //regWrite(RF_SETUP,&regw);
 
     regw=(ARD_VALUE<<ARD)+(ARC_VALUE<<ARC);
     regWrite(SETUP_RETR,&regw);
@@ -160,6 +163,14 @@ void Nrfp::addrWrite(uint8_t reg,byte* data)
     CSN_HIGH
 }
 
+void Nrfp::rfSetupWrite(uint8_t pwrl,uint8_t speed)
+{
+    uint8_t spdl=(speed&0x02)<<(RF_DRL-1);  // speed = 00 1Mbps , 01 2Mbps , 10 250Kbps , 11 invalide
+    uint8_t spdh=(speed&0x01)<<RF_DRH;
+    regw=(powerL[pwrl])<<RF_PWR | spdl | spdh;
+    regWrite(RF_SETUP,&regw);
+}
+
 #if MACHINE_DET328
 void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
 {///*
@@ -186,7 +197,7 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
 }
 #endif // MACHINE_DET328 
 
-int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt)
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel)
 {
 #if MACHINE_DET328
 //#if PER_PO == 'P'
@@ -221,14 +232,21 @@ int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int
 #endif // (MACHINE_CONCENTRATEUR) || (PER_PO == 'N')
 
   powerUp(slpt);
-  setup(channel,speed,nbperif,cbAddr);                        // registry inits 
+  setup(channel,speed,nbperif,cbAddr,pwrLevel);                        // registry inits 
   return 1; // toujours ok en nrf
+}
+
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt)
+{
+    uint8_t powerLevel=0x06; // 0db
+    return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel);
 }
 
 int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 {
     int32_t* slpt=0;
-    return powerOn(channel,speed,nbperif,cbAddr,slpt);
+    uint8_t powerLevel=0x06; // 0db    
+    return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel);
 }
 
 /*void Nrfp::powerOn(uint8_t channel)
