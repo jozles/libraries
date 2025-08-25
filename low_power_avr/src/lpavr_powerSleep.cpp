@@ -254,7 +254,7 @@ void getVolts()                     // get unregulated voltage and reset watchdo
   checkOn();
 
   //sleepPwrDownV(realSleepTimings[NB_PRESCALER_VALUES-1]); !!! ADCSCRA disable !!!
-  delay(1);
+  //delay(1);
   
   volts=adcRead(VADMUXVAL,VFACTOR,0,0,1);
   if(volts<=lowPowerValue){lowPower=true;}
@@ -338,7 +338,7 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with variable durat
                             /* *** WARNING *** no hardware PowerUp()/down included    */
 {                           /*       durat=0 to enable external timer (INT0)          */
-
+bitSet(PORTD,5);
   if(durat!=0){ 
 
     //Serial.print(durat);Serial.print(',');delay(5);
@@ -360,7 +360,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
 
 //bitSet(PORT_DIG1,MARKER); *slpt=durat*10/k;      
 
-      while(durat>=realSleepTimings[k]){       
+      while(durat+100>=realSleepTimings[k]){       // !!!!!!!!!!!!!!!!!!!!!!!!!
 
 //bitSet(PORT_DIG2,MARKER2);
 
@@ -406,8 +406,9 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat/=100;
   }
   
-  if(durat!=0 && sleep){sleepStdby(durat);durat=0;}
-
+  //if(durat!=0 && sleep){sleepStdby(durat);durat=0;}
+  if(durat>1 && sleep){sleepStdby(durat);durat=0;}
+bitClear(PORTD,5);
   return durat;                                 // remaining time unsleepable 
 }
 
@@ -469,27 +470,25 @@ bitClear(PORT_DIG1,MARKER);
 }
 
 
-void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
+/*void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
   Serial.print("calibration ");if(diags){Serial.println();}
   int32_t sl=0;
   int32_t saveRST[NB_PRESCALER_VALUES];
 
-  for(uint8_t i=NB_PRESCALER_VALUES-5;i>0;i--){   // 16->512
+  for(uint8_t i=NB_PRESCALER_VALUES-1;i>3;i--){   // 16->512
+    saveRST[i]=realSleepTimings[i];
     unsigned long t0=millis(),t=t0,t1=0,t2=0;
     while(t==t0){t=millis();}
-    /*bitSet(PORT_DIG2,MARKER2);
-    wdIntFlag=false;
-    wdtSetup(sleepTimings[i]);
-    sleep_enable();
-    while(wdIntFlag==false){t1=millis();}
-    sleep_disable();
-    wdtDisable();*/
-
-    saveRST[i]=realSleepTimings[i];
     
+    bitSet(DDRD,5);bitSet(DDRD,6);
+    bitSet(PORTD,5);
     sleepPwrDownV(realSleepTimings[i]/100,&sl,false);t1=millis();   // no sleep
+    bitClear(PORTD,5);
+    bitSet(PORTD,6);
     sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();    // sleep
+    bitClear(PORTD,5);
+    bitClear(PORTD,6);
    
     if(diags){
       Serial.print(i);Serial.print(' ');delay(1);
@@ -513,6 +512,57 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
       Serial.print(t1);Serial.println(") ");delay(1);
     }
 
+  }
+  Serial.println("done");
+}*/
+
+void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
+{
+  Serial.print("calibration ");if(diags){Serial.println();}
+  int32_t sl=0;
+  int32_t saveRST[NB_PRESCALER_VALUES];
+
+  for(uint8_t i=NB_PRESCALER_VALUES-1;i>3;i--){   // 16->512
+    saveRST[i]=realSleepTimings[i];
+    unsigned long t1=0,t2=0;
+    unsigned long t0=micros()/100,t=t0;
+    while(t == t0){t=micros()/100;}
+    
+    bitSet(DDRD,5);bitSet(DDRD,6);
+    bitSet(PORTD,5);
+    sleepPwrDownV(realSleepTimings[i]/100,&sl,false);t1=micros()/100;   // no sleep
+    bitClear(PORTD,5);
+    bitSet(PORTD,6);
+    sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=micros()/100;    // sleep
+    bitClear(PORTD,5);
+    bitClear(PORTD,6);
+   
+    if(diags){
+      Serial.print(i);Serial.print(' ');delay(1);
+      Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);}
+
+    realSleepTimings[i]=(t1-t)*10;
+    if(realSleepTimings[i]==0){realSleepTimings[i]=saveRST[i];}
+    else realSleepTimings[i]+=300;        // delay restart after sleep
+    
+    if(diags){
+      Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
+      Serial.print(t1);Serial.print('-');delay(1);
+      Serial.print(t);Serial.print(") ");delay(1);
+      Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
+     }
+/*
+    cntSleepTimings[i]=realSleepTimings[i]-(t2-t1)*10;
+
+    if(diags){
+      Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
+      Serial.print(t2);Serial.print('-');delay(1);
+      Serial.print(t1);Serial.print(") ");
+    }
+*/
+
+    cntSleepTimings[i]=realSleepTimings[i];
+    if(diags){Serial.println();}delay(1);
   }
   Serial.println("done");
 }
