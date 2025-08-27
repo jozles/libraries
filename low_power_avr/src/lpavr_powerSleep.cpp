@@ -294,7 +294,9 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
 {                                 /*       durat=0 to enable external timer (INT0)          */
 
     //ADCSRA &= ~(1<<ADEN);                 // ADC shutdown
-    ADCSRA=0;PRR &= ~(1<<PRADC);            // always off
+    ADCSRA=0;PRR &= ~(1<<PRADC);            // ADC shutdown
+    ACSR &= ~(1<<ACIE);
+    ACSR |= (1<<ACD);
     PRR &= ~(1<<PRTIM0);                    // always off
     
     byte old_prr=PRR;
@@ -347,8 +349,12 @@ bitSet(PORTD,5);
     *slpt*=100;
 
     //ADCSRA &= ~(1<<ADEN);                       // ADC shutdown  
-    ADCSRA=0;PRR &= ~(1<<PRADC);                  // always off
+    ADCSRA=0;PRR &= ~(1<<PRADC);                  // ADC shutdown
     PRR &= ~(1<<PRTIM0);                          // always off
+    ACSR &= ~(1<<ACIE);
+    ACSR |= (1<<ACD);
+
+    
     byte old_prr=PRR;
     
     if(sleep){
@@ -429,6 +435,9 @@ bitSet(PORT_DIG1,MARKER);
 
         //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
         ADCSRA=0;
+        wdtDisable();
+        ACSR &= ~(1<<ACIE);
+        ACSR |= (1<<ACD);
 
         //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
         PRR |= (1<<PRTIM0);
@@ -437,6 +446,7 @@ bitSet(PORT_DIG1,MARKER);
         PRR |= (1<<PRSPI);
         PRR |= (1<<PRUSART0);
         PRR |= (1<<PRADC);
+        PRR |= (1<<PRTWI);
 
         set_sleep_mode(SLEEP_MODE_EXT_STANDBY); 
         //set_sleep_mode(SLEEP_MODE_IDLE); 
