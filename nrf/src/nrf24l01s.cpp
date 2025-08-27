@@ -264,6 +264,7 @@ void Nrfp::powerOff()
   //digitalWrite(RPOW_PIN,HIGH);    // power off     // INPUT PULLUP inutile : PULLUP sur la carte
   //pinMode(RPOW_PIN,OUTPUT);
 
+  SPI.end();
 #endif // MACHINE='P'  
 }
 
