@@ -38,6 +38,8 @@
 #define ST8000 NB_PRESCALER_VALUES-10
 
 // effective Time @8MHz (*10uS)
+#define CKRSTDLY 27                // oscilator restart time
+
 #define EMPTY_LOOP 18
 #define RT16    1900
 #define RT32    3500

@@ -340,7 +340,6 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with variable durat
                             /* *** WARNING *** no hardware PowerUp()/down included    */
 {                           /*       durat=0 to enable external timer (INT0)          */
-bitSet(PORTD,5);
   if(durat!=0){ 
 
     //Serial.print(durat);Serial.print(',');delay(5);
@@ -380,7 +379,9 @@ bitSet(PORTD,5);
           sleep_bod_disable();                  // BOD halted if followed by sleep_cpu 
 #endif //
           interrupts();                         // sei();
+          bitSet(PORTD,5);
           sleep_cpu();
+          bitClear(PORTD,5);
           sleep_disable();
           wdtDisable();
           *slpt+=cntSleepTimings[k];
@@ -392,8 +393,10 @@ bitSet(PORTD,5);
           //noInterrupts();
           wdIntFlag=false;     
           sleep_enable();
+          bitSet(PORTD,5);
           //interrupts();
           while (wdIntFlag==false){delayMicroseconds(12);}
+          bitClear(PORTD,5);
           sleep_disable();
           wdtDisable();
 //bitSet(PORT_DIG1,MARKER);*slpt=durat*10/k;            
@@ -414,7 +417,7 @@ bitSet(PORTD,5);
   
   //if(durat!=0 && sleep){sleepStdby(durat);durat=0;}
   if(durat>1 && sleep){sleepStdby(durat);durat=0;}
-bitClear(PORTD,5);
+
   return durat;                                 // remaining time unsleepable 
 }
 
@@ -539,13 +542,13 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
     while(t == t0){t=micros()/100;}
     
     bitSet(DDRD,5);bitSet(DDRD,6);
-    bitSet(PORTD,5);
+    //bitSet(PORTD,5);
     sleepPwrDownV(realSleepTimings[i]/100,&sl,false);t1=micros()/100;   // no sleep
-    bitClear(PORTD,5);
-    bitSet(PORTD,6);
+    //bitClear(PORTD,5);
+    //bitSet(PORTD,6);
     sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=micros()/100;    // sleep
-    bitClear(PORTD,5);
-    bitClear(PORTD,6);
+    //bitClear(PORTD,5);
+    //bitClear(PORTD,6);
    
     if(diags){
       Serial.print(i);Serial.print(' ');delay(1);
@@ -553,7 +556,7 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
 
     realSleepTimings[i]=(t1-t)*10;
     if(realSleepTimings[i]==0){realSleepTimings[i]=saveRST[i];}
-    else realSleepTimings[i]+=300;        // delay restart after sleep
+    else realSleepTimings[i]+=CKRSTDLY*10;        // delay restart after sleep
     
     if(diags){
       Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
