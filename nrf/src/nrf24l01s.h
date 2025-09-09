@@ -124,6 +124,7 @@ class Nrfp
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr);
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt);
     int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel);
+    int  powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel,uint16_t powondly);
     void powerOff();
     void powerUp(int32_t* slpt);
     void powerDown();

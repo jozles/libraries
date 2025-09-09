@@ -197,7 +197,7 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
 }
 #endif // MACHINE_DET328 
 
-int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel)
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel,uint16_t powondly)
 {
 #if MACHINE_DET328
 //#if PER_PO == 'P'
@@ -207,7 +207,9 @@ int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int
   pinMode(RPOW_PIN,OUTPUT);
   digitalWrite(RPOW_PIN,LOW);     // power on radio
 
-  sleepPwrDownV(POWONDLY,slpt); 
+
+  if(powondly==0){powondly=POWONDLY;}
+  sleepPwrDownV(powondly,slpt); 
 
   bitSet(PORT_CSN,BIT_CSN);       // digitalWrite(CSN_PIN,HIGH);
 
@@ -236,17 +238,22 @@ int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int
   return 1; // toujours ok en nrf
 }
 
+int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt,uint8_t pwrLevel)
+{
+    return powerOn(channel,speed,nbperif,cbAddr,slpt,pwrLevel,0);
+}
+
 int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,int32_t* slpt)
 {
     uint8_t powerLevel=0x06; // 0db
-    return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel);
+    return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel,0);
 }
 
 int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
 {
     int32_t* slpt=0;
     uint8_t powerLevel=0x06; // 0db    
-    return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel);
+    return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel,0);
 }
 
 /*void Nrfp::powerOn(uint8_t channel)
