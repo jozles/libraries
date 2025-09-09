@@ -1,7 +1,7 @@
 #ifndef _RADIO_CONST_INCLUDED
 #define _RADIO_CONST_INCLUDED
 
-#define VERSION "2.d6"      // 4ème digit pour git
+#define VERSION "2.d7"      // 4ème digit pour git
 #define LENVERSION 4
 
 //#define LORA //NRF
@@ -96,6 +96,8 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
       .4 lpavr_util disparait remplacé par radio_util pour compat concentrateur 
       .5 calibration et <6uA @60s 3.7V -6db
       .6 ajout gestion paramétrée powerLevel ; correction adcread0 ; calibration pas ok <4.5uA
+      .7 extinction spi <3uA, correction calibration ; getPeriod() à chaque chute de 0.1v ; 
+         nrf : delai powerOn paramétré
 
 */
 
