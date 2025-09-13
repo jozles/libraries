@@ -11,6 +11,8 @@
 #define TIMSK1 TIMSK
 #endif //
 
+// TPL adust (10sec)
+#define PER_ADJUST -1
 
 // prescaler WDT
 #define NB_PRESCALER_VALUES 10
@@ -81,6 +83,7 @@ void checkOn();
 void checkOff();
 void wd();
 void getVolts();
+void getVolts(float thfactor);
 uint16_t adcRead0(uint8_t admuxval,uint8_t dly);
 float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_t dly);
 

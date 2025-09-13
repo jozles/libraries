@@ -225,11 +225,9 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
 {
     uint16_t a=0;
 
-    PRR &= (1<<PRADC);
+    PRR &= ~(1<<PRADC);
     ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
     ADMUX   = admuxval;
-
-    delayMicroseconds(200);                 // mosfet stabizliing
 
     ADCSRA  = 0 | (1<<ADEN) | (1<<ADSC) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
 
@@ -239,8 +237,8 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
     a+=ADCH*256;
 
     ADCSRA=0;
-    PRR &= ~(1<<PRADC);
-
+    PRR &= (1<<PRADC);
+Serial.println();Serial.println(a);
     return a;
 }
 
@@ -249,25 +247,30 @@ float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_
   return (float)((adcRead0(admuxval,dly)*factor-(offset))+ref);
 }
 
-void getVolts()                     // get unregulated voltage and reset watchdog for external timer period 
+void getVolts(float thfactor)                     // get unregulated voltage/temp and reset watchdog for external timer period 
 {
   checkOn();
-
-  //sleepPwrDownV(realSleepTimings[NB_PRESCALER_VALUES-1]); !!! ADCSCRA disable !!!
-  //delay(1);
   
   volts=adcRead(VADMUXVAL,VFACTOR,0,0,1);
   if(volts<=lowPowerValue){lowPower=true;}
 
 #ifndef DS18X20
-  delayMicroseconds(1000);                  // MCP9700 stabilize
-  temp=adcRead(TADMUXVAL,TFACTOR,TOFFSET,TREF,0);
+  Serial.print(thfactor*1000);
+  if(thfactor==0){thfactor=TFACTOR;}
+
+  delayMicroseconds(10);                  // MCP9700 stabilize
+  temp=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
   temp=(float)((int)(temp*10))/10;
 #endif 
 
   checkOff();
 
   //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown for clean next voltage measurement
+}
+
+void getVolts()
+{
+  getVolts(0);
 }
 
 void disable_pins()
