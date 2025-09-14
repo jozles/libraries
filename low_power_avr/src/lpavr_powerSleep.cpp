@@ -227,11 +227,12 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
 
     PRR &= ~(1<<PRADC);
     ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
+
     ADMUX   = admuxval;
 
     ADCSRA  = 0 | (1<<ADEN) | (1<<ADSC) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
 
-    delayMicroseconds(40+dly*48);           // ok with /16 prescaler @8MHz
+    delayMicroseconds(100+dly*500);           // ok with /16 prescaler @8MHz
 
     a=ADCL;
     a+=ADCH*256;
