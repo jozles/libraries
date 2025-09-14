@@ -180,5 +180,9 @@
 #define RF_POWER_6  1
 #define RF_POWER_12 2
 #define RF_POWER_18 3
+#define RF_POWER_L0 -18
+#define RF_POWER_L1 -12
+#define RF_POWER_L2 -6
+#define RF_POWER_L3 0
 
 #endif // nrfwords
