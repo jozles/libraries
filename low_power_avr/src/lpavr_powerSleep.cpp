@@ -225,21 +225,30 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
 {
     uint16_t a=0;
 
-    PRR &= ~(1<<PRADC);
-    ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
+    //ADCSRB = (1<<ACME);
+    
+    PRR &= ~(1<<PRADC);    
 
+    ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
     ADMUX   = admuxval;
 
-    ADCSRA  = 0 | (1<<ADEN) | (1<<ADSC) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
+    delayMicroseconds(10);
 
-    delayMicroseconds(100+dly*500);           // ok with /16 prescaler @8MHz
+    ADCSRA  = 0 | (1<<ADEN) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
+    ADCSRA  |= (1<<ADSC);
+
+    //delayMicroseconds(100+dly*50);         // ok with /16 prescaler @8MHz
+
+ unsigned long t=micros();
+   while((ADCSRA & (1<<ADSC))!=0 && (micros()-t)<2000){}
+   //Serial.println(micros()-t);
 
     a=ADCL;
     a+=ADCH*256;
 
-    ADCSRA=0;
-    PRR &= (1<<PRADC);
-Serial.println();Serial.println(a);
+    ADCSRA &= ~(1<<ADEN);
+    PRR |= (1<<PRADC);
+//Serial.println(ADCSRA,HEX);
     return a;
 }
 
@@ -256,17 +265,14 @@ void getVolts(float thfactor)                     // get unregulated voltage/tem
   if(volts<=lowPowerValue){lowPower=true;}
 
 #ifndef DS18X20
-  Serial.print(thfactor*1000);
+  //Serial.print(thfactor*1000);
   if(thfactor==0){thfactor=TFACTOR;}
-
-  delayMicroseconds(10);                  // MCP9700 stabilize
+  delayMicroseconds(1000);                  // wait adc available
   temp=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
   temp=(float)((int)(temp*10))/10;
 #endif 
 
   checkOff();
-
-  //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown for clean next voltage measurement
 }
 
 void getVolts()
@@ -297,8 +303,8 @@ void disable_pins()
 void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down included    */
 {                                 /*       durat=0 to enable external timer (INT0)          */
 
-    //ADCSRA &= ~(1<<ADEN);                 // ADC shutdown
-    ADCSRA=0;PRR &= ~(1<<PRADC);            // ADC shutdown
+    ADCSRA &= ~(1<<ADEN);                 // ADC shutdown
+    ADCSRA=0;PRR |= (1<<PRADC);             // ADC shutdown
     ACSR &= ~(1<<ACIE);
     ACSR |= (1<<ACD);
     PRR &= ~(1<<PRTIM0);                    // always off
@@ -351,7 +357,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat*=100;
     *slpt*=100;
 
-    //ADCSRA &= ~(1<<ADEN);                       // ADC shutdown  
+    ADCSRA &= ~(1<<ADEN);                         // ADC shutdown  
     ADCSRA=0;PRR &= ~(1<<PRADC);                  // ADC shutdown
     PRR &= ~(1<<PRTIM0);                          // always off
     ACSR &= ~(1<<ACIE);
