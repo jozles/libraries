@@ -200,8 +200,10 @@ void clearWd()
 
 void checkOn()                              // voltage and temperature reading + reset strobe
 {
-  bitSet(PORT_VCHK,BIT_VCHK);               //digitalWrite(VCHECK,VCHECKHL);
+
   bitSet(DDR_VCHK,BIT_VCHK);                //pinMode(VCHECK,OUTPUT);  
+  bitSet(PORT_VCHK,BIT_VCHK);               //digitalWrite(VCHECK,VCHECKHL);  
+  delayMicroseconds(12);                    // mosfet settling time
   /*
   digitalWrite(VCHECK,HIGH);
   pinMode(VCHECK,OUTPUT);  
@@ -232,7 +234,7 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
     ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
     ADMUX   = admuxval;
 
-    delayMicroseconds(10);
+    delayMicroseconds(10);                  
 
     ADCSRA  = 0 | (1<<ADEN) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
     ADCSRA  |= (1<<ADSC);
@@ -240,7 +242,7 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
     //delayMicroseconds(100+dly*50);         // ok with /16 prescaler @8MHz
 
  unsigned long t=micros();
-   while((ADCSRA & (1<<ADSC))!=0 && (micros()-t)<2000){}
+   while((ADCSRA & (1<<ADSC))!=0 && (micros()-t)<200){}
    //Serial.println(micros()-t);
 
     a=ADCL;
@@ -260,14 +262,14 @@ float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_
 void getVolts(float thfactor)                     // get unregulated voltage/temp and reset watchdog for external timer period 
 {
   checkOn();
-  
+
   volts=adcRead(VADMUXVAL,VFACTOR,0,0,1);
   if(volts<=lowPowerValue){lowPower=true;}
 
 #ifndef DS18X20
   //Serial.print(thfactor*1000);
   if(thfactor==0){thfactor=TFACTOR;}
-  delayMicroseconds(1000);                  // wait adc available
+  delayMicroseconds(1000);                        // mcp9700 1mS settling time
   temp=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
   temp=(float)((int)(temp*10))/10;
 #endif 
@@ -303,7 +305,7 @@ void disable_pins()
 void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down included    */
 {                                 /*       durat=0 to enable external timer (INT0)          */
 
-    ADCSRA &= ~(1<<ADEN);                 // ADC shutdown
+    //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
     ADCSRA=0;PRR |= (1<<PRADC);             // ADC shutdown
     ACSR &= ~(1<<ACIE);
     ACSR |= (1<<ACD);
@@ -357,7 +359,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat*=100;
     *slpt*=100;
 
-    ADCSRA &= ~(1<<ADEN);                         // ADC shutdown  
+    //ADCSRA &= ~(1<<ADEN);                         // ADC shutdown  
     ADCSRA=0;PRR &= ~(1<<PRADC);                  // ADC shutdown
     PRR &= ~(1<<PRTIM0);                          // always off
     ACSR &= ~(1<<ACIE);
