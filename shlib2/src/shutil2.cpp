@@ -733,10 +733,10 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
         //Serial.print("startto=");Serial.print(*time);Serial.print(" to=");Serial.print(*to);Serial.print(" valto=");Serial.println(valto);
 }
 
-bool diagSetup(unsigned long t_on){
-  Serial.print(" une touche pour diags ");
-  while((millis()-t_on)<4000){Serial.print(".");delay(500);if(Serial.available()){Serial.read();Serial.println();return true;}}
-  Serial.println();return false;
+bool diagSetup(unsigned long t_on,uint16_t waiting,char* message){
+  Serial.print(message);
+  while((millis()-t_on)<waiting){Serial.print(".");delay(500);if(Serial.available()){Serial.read();return true;}}
+  return false;
 }
 
 /*

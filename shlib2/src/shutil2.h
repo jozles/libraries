@@ -48,7 +48,7 @@ void dumpstr(char* data,uint16_t len,bool cr);
 void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
 uint16_t ato64(char* srce,char* dest,uint32_t len);
-bool diagSetup(unsigned long t_on);
+bool diagSetup(unsigned long t_on,uint16_t waiting,char* message);
 
 //bool ctlpass(char* data,char* model);
 //int  searchusr(char* usrname);
