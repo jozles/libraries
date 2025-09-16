@@ -186,14 +186,6 @@ void Nrfp::allPinsLow()                     /* all radio/SPI pins low */
   bitClear(PORT_MOSI,BIT_MOSI);   //digitalWrite(MOSI_PIN,LOW);
   bitSet(DDR_MOSI,BIT_MOSI);      //pinMode(MOSI_PIN,OUTPUT);
 //  */
- /*
-  bitClear(PORTB,0);bitClear(PORTB,1);bitClear(PORTB,2);bitClear(PORTB,3);bitClear(PORTB,4);bitClear(PORTB,5);bitClear(PORTB,6);bitClear(PORTB,7);
-  bitClear(DDRB,0);bitClear(DDRB,1);bitSet(DDRB,2);bitSet(DDRB,3);bitClear(DDRB,4);bitClear(DDRB,5);bitClear(DDRB,6);bitClear(DDRB,7);
-  bitClear(PORTC,0);bitClear(PORTC,1);bitClear(PORTC,2);bitClear(PORTC,3);bitClear(PORTC,4);bitClear(PORTC,5);bitClear(PORTC,6);bitClear(PORTC,7);
-  bitClear(DDRC,0);bitClear(DDRC,1);bitSet(DDRC,2);bitSet(DDRC,3);bitClear(DDRC,4);bitClear(DDRC,5);bitClear(DDRC,6);bitClear(DDRC,7);
-  bitClear(PORTD,0);bitClear(PORTD,1);bitClear(PORTD,2);bitClear(PORTD,3);bitClear(PORTD,5);bitClear(PORTD,6);bitClear(PORTD,7);
-  bitClear(DDRD,0);bitClear(DDRD,1);bitSet(DDRD,2);bitSet(DDRD,3);bitSet(DDRD,4);bitClear(DDRD,5);bitClear(DDRD,6);bitClear(DDRD,7);
-*/
 }
 #endif // MACHINE_DET328 
 
@@ -255,11 +247,6 @@ int Nrfp::powerOn(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr)
     uint8_t powerLevel=0x06; // 0db    
     return powerOn(channel,speed,nbperif,cbAddr,slpt,powerLevel,0);
 }
-
-/*void Nrfp::powerOn(uint8_t channel)
-{
-  return powerOn(channel,RF_SPD_1MB);
-}*/
 
 void Nrfp::powerOff()
 {
