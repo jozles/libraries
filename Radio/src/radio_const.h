@@ -140,7 +140,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
 
 #ifdef MACHINE_CONCENTRATEUR
 
-  //#define MARKERS
+  #define MARKERS
   #define MARKER    A11
   #define MARKER2   A10
 
@@ -162,6 +162,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
    // param carte DETS (sinon ?) dans platformo.ini
   #define ATMEGA328               // option ATMEGA8 ... manque de memoire programme (8K dispo et nécessite 17K)
 
+  #define MARKERS
   #define MARKER     BIT_DIG1 
   #define MARKER2    BIT_DIG2
   
