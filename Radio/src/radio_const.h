@@ -1,7 +1,7 @@
 #ifndef _RADIO_CONST_INCLUDED
 #define _RADIO_CONST_INCLUDED
 
-#define VERSION "2.d7"      // 4ème digit pour git
+#define VERSION "2.d8"      // 4ème digit pour git
 #define LENVERSION 4
 
 //#define LORA //NRF
@@ -97,7 +97,13 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
       .5 calibration et <6uA @60s 3.7V -6db
       .6 ajout gestion paramétrée powerLevel ; correction adcread0 ; calibration pas ok <4.5uA
       .7 extinction spi <3uA, correction calibration ; getPeriod() à chaque chute de 0.1v ; 
-         nrf : delai powerOn paramétré
+         nrf : delai powerOn paramétré ;
+         diagSetup pour détection serial (ajout waiting time et message) ; getVolts() ajout vfactor et correction délais; 
+         correction delay affichage message si diag ; 
+         <2.5uA !
+      .8 (avec led verte@47K) et 15/68/100K ~2uA sleepStdby() dans get vols() ; optim sleepStdby et sleepPwrDownV()
+         la version Eeprom devient '2d' (et non plus '03')
+         redémarrer le dets sans interface série pour bloquer les affichages (+15.5uA avec connexion)
 
 */
 
