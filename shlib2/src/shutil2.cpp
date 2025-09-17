@@ -735,7 +735,8 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
 
 bool diagSetup(unsigned long t_on,uint16_t waiting,char* message){
   Serial.print(message);
-  while((millis()-t_on)<waiting){Serial.print(".");delay(500);if(Serial.available()){Serial.read();return true;}}
+  while((millis()-t_on)<waiting){Serial.print(".");delay(500);
+    if(Serial.available()){Serial.read();Serial.print('!');return true;}}
   return false;
 }
 
