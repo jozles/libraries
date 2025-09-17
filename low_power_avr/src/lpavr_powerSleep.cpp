@@ -70,6 +70,8 @@ void diagT2(char* texte,int duree)
   Serial.println(texte);delay(duree*1000);
 }
 
+//void sleepStdby(int32_t durat);
+
 ISR(WDT_vect)                     // ISR interrupt service for MPU INT WDT vector
 {
   wdIntFlag=true;
@@ -202,8 +204,8 @@ void clearWd()
 void checkOn()                              // voltage and temperature reading + reset strobe
 {
 
-  bitSet(DDR_VCHK,BIT_VCHK);                //pinMode(VCHECK,OUTPUT);  
-  bitSet(PORT_VCHK,BIT_VCHK);               //digitalWrite(VCHECK,VCHECKHL);  
+  bitSet(DDR_VCHK,BIT_VCHK);                //pinMode(VCHECK,OUTPUT); 
+  bitSet(PORT_VCHK,BIT_VCHK);               //digitalWrite(VCHECK,VCHECKHL);     
   delayMicroseconds(12);                    // mosfet settling time
   /*
   digitalWrite(VCHECK,HIGH);
@@ -262,7 +264,8 @@ void getVolts(float vfactor,float thfactor)                     // get unregulat
 {
   checkOn();
 
-  delayMicroseconds(1000);              // mosfet & mcp9700 1mS settling time
+  //delayMicroseconds(1000);              // mosfet & mcp9700 1mS settling time
+  sleepStdby(1);
 
   if(vfactor==0){vfactor=VFACTOR;}
   volts=adcRead(VADMUXVAL,vfactor,0,0,1);
@@ -345,14 +348,18 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     durat*=100;
     *slpt*=100;
 
-    //ADCSRA &= ~(1<<ADEN);                         // ADC shutdown  
-    ADCSRA=0;PRR &= ~(1<<PRADC);                  // ADC shutdown
-    PRR &= ~(1<<PRTIM0);                          // always off
-    ACSR &= ~(1<<ACIE);
-    ACSR |= (1<<ACD);
+    uint8_t old_TWCR=TWCR;
+    uint8_t old_SPCR=SPCR;
 
+    //ADCSRA &= ~(1<<ADEN);                         // ADC shutdown  
+    ADCSRA=0;PRR &= ~(1<<PRADC);            // ADC shutdown
+    //PRR  |= (1<<PRTIM0);                          // always off
+    ACSR &= ~(1<<ACIE);                     // comparator disable
+    ACSR |= (1<<ACD);                       // comparator disable
+    TWCR &= ~(1<<TWEN);                     // twi disable
+    SPCR &= ~(1<<SPE);                      // spi disable
     
-    byte old_prr=PRR;
+    uint8_t old_prr=PRR;
     
     if(sleep){
       power_all_disable();                        // all bits set in PRR register (I/O modules clock halted ; no millis())     
@@ -397,6 +404,9 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     }
     *slpt/=100;
     durat/=100;
+
+    TWCR = old_TWCR;
+    SPCR = old_SPCR;
   }
   if(durat>1 && sleep){sleepStdby(durat);durat=0;}
 
@@ -412,6 +422,8 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
 {                                               // 128uS resolution
 
   uint8_t old_PRR=PRR;
+  uint8_t old_TWCR=TWCR;
+  uint8_t old_SPCR=SPCR;  
 
         if(durat>32){durat=32;}
 
@@ -420,13 +432,15 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
         ADCSRA=0;
         wdtDisable();
-        ACSR &= ~(1<<ACIE);
-        ACSR |= (1<<ACD);
+        ACSR &= ~(1<<ACIE);                     // comparator disable
+        ACSR |= (1<<ACD);                       // comparator disable
+        TWCR &= ~(1<<TWEN);                     // twi disable
+        SPCR &= ~(1<<SPE);                      // spi disable
 
-        //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
+        //power_all_disable();                  // all bits set in PRR register (I/O modules clock halted)
         PRR |= (1<<PRTIM0);
-        //PRR &= ~(1<<PRTIM1);                      // millis()
-        //PRR &= ~(1<<PRTIM2);                      // wake interrupt
+        //PRR &= ~(1<<PRTIM1);                    // millis()
+        //PRR &= ~(1<<PRTIM2);                    // wake interrupt
         PRR |= (1<<PRSPI);
         PRR |= (1<<PRUSART0);
         PRR |= (1<<PRADC);
@@ -458,7 +472,9 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
         sleep_cpu();        
         sleep_disable();
         //power_all_enable();                     // all bits clr in PRR register (I/O modules clock running)
-        PRR=old_PRR;       
+        PRR=old_PRR;
+        TWCR = old_TWCR;
+        SPCR = old_SPCR;
 }
 
 

@@ -76,6 +76,7 @@ void sleepPwrDown(uint8_t durat);
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep);
 uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt);
 uint8_t sleepPwrDownV(int32_t durat);
+void sleepStdby(int32_t durat);
 void calibratePwrDown();
 void sleepStdby(int32_t durat);
 void lethalSleep();
