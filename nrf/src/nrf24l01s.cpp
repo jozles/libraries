@@ -77,6 +77,10 @@
 
 Nrfp::Nrfp()    // constructeur
 {
+    channelTable[0]={CHANNEL0};
+    channelTable[1]={CHANNEL1};
+    channelTable[2]={CHANNEL2};
+    channelTable[3]={CHANNEL3};
 }
 
 void Nrfp::setup(uint8_t channel,uint8_t speed,uint8_t nbperif,byte* cbAddr,uint8_t powerLevel)

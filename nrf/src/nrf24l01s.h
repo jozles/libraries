@@ -91,6 +91,8 @@
 #define CHANNEL2    100   // radio channel conc2
 #define CHANNEL3    90    // radio channel conc3
 
+#define MAXCONC 4
+
 #define CC_ADDRX   "SHCO0\0SHCO1\0SHCO2\0SHCO3\0" // adresses mac par défaut des concentrateurs                                                 
 #define CC_SPEED    RF_SPD_1MB           
 
@@ -145,6 +147,8 @@ class Nrfp
     int     pRegister(byte* message,uint8_t* pldLength);
     int     txRx(byte* message,uint8_t* pldLength);
 #endif // MACHINE == 'P'
+
+    uint8_t channelTable[MAXCONC]={};   // canal vs N° conc
 
   private:
 
