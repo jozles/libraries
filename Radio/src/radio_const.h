@@ -1,7 +1,7 @@
 #ifndef _RADIO_CONST_INCLUDED
 #define _RADIO_CONST_INCLUDED
 
-#define VERSION "2.d8"      // 4ème digit pour git
+#define VERSION "2.d9"      // 4ème digit pour git
 #define LENVERSION 4
 
 //#define LORA //NRF
@@ -104,6 +104,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
       .8 (avec led verte@47K) et 15/68/100K ~2uA sleepStdby() dans get vols() ; optim sleepStdby et sleepPwrDownV()
          la version Eeprom devient '2d' (et non plus '03')
          redémarrer le dets sans interface série pour bloquer les affichages (+15.5uA avec connexion)
+      .9 integration utilitaire de config
 
 */
 
