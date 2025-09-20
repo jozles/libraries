@@ -49,11 +49,15 @@ void dumpstr(char* data,uint16_t len);
 void dumpfield(char* fd,uint8_t ll);
 uint16_t ato64(char* srce,char* dest,uint32_t len);
 bool diagSetup(unsigned long t_on,uint16_t waiting,char* message);
+char menuDly(const char* text,const char* chars,uint16_t dly);
 
 //bool ctlpass(char* data,char* model);
 //int  searchusr(char* usrname);
 bool ctlto(unsigned long time,uint16_t to);
 void startto(unsigned long* time,uint16_t* to,uint16_t valto);
+uint8_t getNumCh();
+uint8_t getNumCh(char min,char max);
+char getCh();
 
 #ifndef NOCONFSER
 uint16_t  serialRcv(char* rcv,uint16_t maxl,uint8_t serialNb);

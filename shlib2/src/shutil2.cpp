@@ -733,6 +733,57 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
         //Serial.print("startto=");Serial.print(*time);Serial.print(" to=");Serial.print(*to);Serial.print(" valto=");Serial.println(valto);
 }
 
+char getCh()
+{
+    char c='\0';
+    if(Serial.available()){
+      c=Serial.read();
+      Serial.println((char)c);delayMicroseconds(200);}
+    return c;
+}
+
+uint8_t getNumCh(char min,char max)
+{
+  char c='\0';
+  while(1){
+    if(Serial.available()){
+      c=Serial.read();
+      if(c<=max && c>=min){c-=48;return c;}
+    }
+  }
+}
+
+uint8_t getNumCh()
+{
+  return getNumCh('0','9');
+}
+
+char menuDly(const char* text,const char* chars,uint16_t dly)
+{
+  char c='\0';
+  Serial.print(text);
+    if(dly==0){
+      while(1){
+        if(Serial.available()){
+          c=Serial.read();
+          if(strchr(chars,c)!=NULL){Serial.println(c);return(c);}
+        }
+      }
+    }
+    else {
+      unsigned long t_beg=millis();
+      while((millis()-t_beg)<dly*1000){
+        Serial.print(".");delay(500);
+        if(Serial.available()){
+          c=Serial.read();
+          if(strchr(chars,c)!=NULL){Serial.println(c);return c;}
+          else {Serial.println();return '\0';}
+        }
+      }
+      Serial.println();return '\0';
+    }
+}
+
 bool diagSetup(unsigned long t_on,uint16_t waiting,char* message){
   Serial.print(message);
   while((millis()-t_on)<waiting){Serial.print(".");delay(500);
