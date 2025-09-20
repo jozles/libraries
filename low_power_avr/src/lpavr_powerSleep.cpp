@@ -70,8 +70,6 @@ void diagT2(char* texte,int duree)
   Serial.println(texte);delay(duree*1000);
 }
 
-//void sleepStdby(int32_t durat);
-
 ISR(WDT_vect)                     // ISR interrupt service for MPU INT WDT vector
 {
   wdIntFlag=true;
@@ -174,10 +172,13 @@ void wdtDisable()
 void lethalSleep()
 {
 
-    //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown 
-    ADCSRA=0;
+    ADCSRA=0;PRR |= (1<<PRADC);             // ADC shutdown
+    ACSR &= ~(1<<ACIE);                     // comparator disable 
+    ACSR |= (1<<ACD);                       // comparator disable
+    TWCR &= ~(1<<TWEN);                     // twi disable
+    SPCR &= ~(1<<SPE);                      // spi disable
+    PRR=0xff;                               // power_all_disable();
 
-    power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
     set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
     noInterrupts();                         // cli();
     sleep_enable();                       
@@ -207,10 +208,7 @@ void checkOn()                              // voltage and temperature reading +
   bitSet(DDR_VCHK,BIT_VCHK);                //pinMode(VCHECK,OUTPUT); 
   bitSet(PORT_VCHK,BIT_VCHK);               //digitalWrite(VCHECK,VCHECKHL);     
   delayMicroseconds(12);                    // mosfet settling time
-  /*
-  digitalWrite(VCHECK,HIGH);
-  pinMode(VCHECK,OUTPUT);  
-  */
+
 }
 
 void checkOff()
@@ -228,8 +226,6 @@ void wd()
 uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
 {
     uint16_t a=0;
-
-    //ADCSRB = (1<<ACME);
     
     PRR &= ~(1<<PRADC);    
 
@@ -242,9 +238,8 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
     ADCSRA  |= (1<<ADSC);
 
     //delayMicroseconds(100+dly*50);         // ok with /16 prescaler @8MHz
-
  unsigned long t=micros();
-   while((ADCSRA & (1<<ADSC))!=0 && (micros()-t)<200){}
+   while((ADCSRA & (1<<ADSC))!=0 && (micros()-t)<200){}   // wait end of conversion
 
     a=ADCL;
     a+=ADCH*256;
@@ -260,32 +255,36 @@ float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_
   return (float)((adcRead0(admuxval,dly)*factor-(offset))+ref);
 }
 
-void getVolts(float vfactor,float thfactor)                     // get unregulated voltage/temp and reset watchdog for external timer period 
+void getVolts(float vfactor,float thfactor,float* vt,float* th)         // get unregulated voltage/temp and reset watchdog for external timer period 
 {
   checkOn();
 
-  //delayMicroseconds(1000);              // mosfet & mcp9700 1mS settling time
-  sleepStdby(1);
+  sleepStdby(1);                                    // mosfet & mcp9700 1mS settling time
 
   if(vfactor==0){vfactor=VFACTOR;}
-  volts=adcRead(VADMUXVAL,vfactor,0,0,1);
-  if(volts<=lowPowerValue){lowPower=true;}
+  *vt=adcRead(VADMUXVAL,vfactor,0,0,1);
+  if(*vt<=lowPowerValue){lowPower=true;}
 
 #ifndef DS18X20
   //Serial.print(thfactor*1000);
   if(thfactor==0){thfactor=TFACTOR;}
   //delayMicroseconds(1000);                        // mcp9700 1mS settling time
-  temp=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
-  temp=(float)((int)(temp*10))/10;
+  *th=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
+  *th=(float)((int)(temp*10))/10;
 #endif 
 
   checkOff();
 }
 
-void getVolts()
+/*void getVolts(float vfactor,float thfactor)
+{
+  getVolts(vfactor,thfactor,&volts,&temp);
+}*/
+
+/*void getVolts()
 {
   getVolts(0,0);
-}
+}*/
 
 void disable_pins()
 {
@@ -296,8 +295,7 @@ void disable_pins()
 
 void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down included    */
 {                                 /*       durat=0 to enable external timer (INT0)          */
-    //SPI.end();
-    //ADCSRA &= ~(1<<ADEN);                   // ADC shutdown
+
     ADCSRA=0;PRR |= (1<<PRADC);             // ADC shutdown
     ACSR &= ~(1<<ACIE);                     // comparator disable 
     ACSR |= (1<<ACD);                       // comparator disable
@@ -306,7 +304,6 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     
     byte old_prr=PRR;
     PRR=0xff;                               // power_all_disable();
-    //power_all_disable();                    // all bits set in PRR register (I/O modules clock halted)
     
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     
@@ -333,7 +330,6 @@ void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down 
     if(durat!=0){wdtDisable();}                         
 
     PRR=old_prr;
-    //SPCR |= (1<<SPE);
 
     //if(durat==0){wd();}                     // watchdog
 }
@@ -351,9 +347,7 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
     uint8_t old_TWCR=TWCR;
     uint8_t old_SPCR=SPCR;
 
-    //ADCSRA &= ~(1<<ADEN);                         // ADC shutdown  
     ADCSRA=0;PRR &= ~(1<<PRADC);            // ADC shutdown
-    //PRR  |= (1<<PRTIM0);                          // always off
     ACSR &= ~(1<<ACIE);                     // comparator disable
     ACSR |= (1<<ACD);                       // comparator disable
     TWCR &= ~(1<<TWEN);                     // twi disable
@@ -399,7 +393,6 @@ uint8_t sleepPwrDownV(int32_t durat,int32_t* slpt,bool sleep)  // versatile with
       } 
     }
     if(sleep){
-      //power_all_enable();
       PRR = old_prr;
     }
     *slpt/=100;
@@ -478,52 +471,6 @@ void sleepStdby(int32_t durat)                  // extended standby mode with Ti
 }
 
 
-/*void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
-{
-  Serial.print("calibration ");if(diags){Serial.println();}
-  int32_t sl=0;
-  int32_t saveRST[NB_PRESCALER_VALUES];
-
-  for(uint8_t i=NB_PRESCALER_VALUES-1;i>3;i--){   // 16->512
-    saveRST[i]=realSleepTimings[i];
-    unsigned long t0=millis(),t=t0,t1=0,t2=0;
-    while(t==t0){t=millis();}
-    
-    bitSet(DDRD,5);bitSet(DDRD,6);
-    bitSet(PORTD,5);
-    sleepPwrDownV(realSleepTimings[i]/100,&sl,false);t1=millis();   // no sleep
-    bitClear(PORTD,5);
-    bitSet(PORTD,6);
-    sleepPwrDownV(realSleepTimings[i]/100,&sl,true);t2=millis();    // sleep
-    bitClear(PORTD,5);
-    bitClear(PORTD,6);
-   
-    if(diags){
-      Serial.print(i);Serial.print(' ');delay(1);
-      Serial.print(realSleepTimings[i]);Serial.print(';');delay(1);}
-
-    realSleepTimings[i]=(t1-t)*100;
-    if(realSleepTimings[i]==0){realSleepTimings[i]=saveRST[i];}
-
-    if(diags){
-      Serial.print(realSleepTimings[i]);Serial.print('(');delay(1);
-      Serial.print(t1);Serial.print('-');delay(1);
-      Serial.print(t);Serial.print(") ");delay(1);
-      Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
-     }
-
-    cntSleepTimings[i]=realSleepTimings[i]-(t2-t1)*100;
-
-    if(diags){
-      Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
-      Serial.print(t2);Serial.print('-');delay(1);
-      Serial.print(t1);Serial.println(") ");delay(1);
-    }
-
-  }
-  Serial.println("done");
-}*/
-
 void calibratePwrDown()                           // should be done for 3.9V, 3.7V, 3.5V and 30°,20°,10°,0°
 {
   Serial.print("calibration ");if(diags){Serial.println();}
@@ -554,20 +501,9 @@ void calibratePwrDown()                           // should be done for 3.9V, 3.
       Serial.print(t);Serial.print(") ");delay(1);
       Serial.print(cntSleepTimings[i]);Serial.print(';');delay(1);
      }
-/*
-    cntSleepTimings[i]=realSleepTimings[i]-(t2-t1)*10;
-
-    if(diags){
-      Serial.print(cntSleepTimings[i]);Serial.print('(');delay(1);
-      Serial.print(t2);Serial.print('-');delay(1);
-      Serial.print(t1);Serial.print(") ");
-    }
-*/
 
     cntSleepTimings[i]=realSleepTimings[i];
     if(diags){Serial.println();}delay(1);
   }
   Serial.println("done");
 }
-
-//#endif // MACHINE_DET328
