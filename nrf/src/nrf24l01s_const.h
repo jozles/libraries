@@ -108,7 +108,7 @@
   #define VCHECK  A3              // volts arduino check pin
 #endif // ndef DETS
 
-// thermomètres
+/*// thermomètres
 #ifdef LM335
   #define TADMUXVAL  0 | (0<<REFS1) | (1<<REFS0) | TCHECKADC     // ADVCC ref + ADC input for temp
   #define THERMO "LM335 "
@@ -129,7 +129,7 @@
   #define THN    'M'
   #define TFACTOR 0.1074          // temp conversion pour MCP9700
   //#define TFACTOR 0.135          // temp conversion pour MCP9700 proto
-  #define TOFFSET 75              // @25°
+  //#define TOFFSET 75              // @25°
 #endif // MCP9700
 #ifdef DS18X20
   #define THERMO "DS18X "
@@ -140,6 +140,7 @@
 #endif // DS18X20
 
 #define VOLTMIN 3.2             // minimal value to run
+*/
 
 #endif // MACHINE_DET328
 
