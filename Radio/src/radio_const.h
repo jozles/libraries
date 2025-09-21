@@ -104,7 +104,8 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
       .8 (avec led verte@47K) et 15/68/100K ~2uA sleepStdby() dans get vols() ; optim sleepStdby et sleepPwrDownV()
          la version Eeprom devient '2d' (et non plus '03')
          redémarrer le dets sans interface série pour bloquer les affichages (+15.5uA avec connexion)
-      .9 integration utilitaire de config
+      .9 integration utilitaire de config ; int16_t th et uint16_t volt ; getVolts modifié ;
+         include pgmspace.h
 
 */
 
@@ -300,7 +301,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
   #define THN    'M'
   #define TFACTOR 0.1074          // temp conversion pour MCP9700
   //#define TFACTOR 0.135          // temp conversion pour MCP9700 proto
-  #define TOFFSET 75              // @25°
+  #define TOFFSET 50              // @0°
 #endif // MCP9700
 #ifdef DS18X20
   #define THERMO "DS18X "
@@ -310,7 +311,7 @@ v2.d  sleepDly corrigé -> le délai est juste à 1% ; la variable globale sleep
   #define WPIN       5          // pin thermomètre
 #endif // DS18X20
 
-#define VOLTMIN 3.2             // minimal value to run
+#define VOLTMIN 320             // minimal value to run
 
 #endif // MACHINE_DET328  
 
