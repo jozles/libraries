@@ -55,7 +55,7 @@ char menuDly(const char* text,const char* chars,uint16_t dly);
 //int  searchusr(char* usrname);
 bool ctlto(unsigned long time,uint16_t to);
 void startto(unsigned long* time,uint16_t* to,uint16_t valto);
-uint8_t getNumCh();
+//uint8_t getNumCh();
 uint8_t getNumCh(char min,char max);
 char getCh();
 

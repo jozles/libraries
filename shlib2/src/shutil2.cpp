@@ -736,9 +736,9 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
 char getCh()
 {
     char c='\0';
-    if(Serial.available()){
-      c=Serial.read();
-      Serial.println((char)c);delayMicroseconds(200);}
+    while(!Serial.available()){}
+    c=Serial.read();
+    Serial.println((char)c);delayMicroseconds(200);
     return c;
 }
 
@@ -753,10 +753,10 @@ uint8_t getNumCh(char min,char max)
   }
 }
 
-uint8_t getNumCh()
+/*int8_t getNumCh()
 {
-  return getNumCh('0','9');
-}
+  return getNumCh('0','z');
+}*/
 
 char menuDly(const char* text,const char* chars,uint16_t dly)
 {
