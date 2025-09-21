@@ -85,7 +85,7 @@ void checkOff();
 void wd();
 //void getVolts();
 //void getVolts(float vfactor,float thfactor);
-void getVolts(float vfactor,float thfactor,float* vt,float* th) ;
+//void getVolts(float vfactor,float thfactor,float* vt,float* th) ;
 void getVolts(float vfactor,float thfactor,uint16_t* vt,int16_t* th);
 uint16_t adcRead0(uint8_t admuxval,uint8_t dly);
 float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_t dly);
