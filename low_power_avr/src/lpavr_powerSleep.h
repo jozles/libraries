@@ -12,7 +12,7 @@
 #endif //
 
 // TPL adust (10sec)
-#define PER_ADJUST -1
+#define PER_ADJUST 0
 
 // prescaler WDT
 #define NB_PRESCALER_VALUES 10
@@ -83,10 +83,7 @@ void lethalSleep();
 void checkOn();
 void checkOff();
 void wd();
-//void getVolts();
-//void getVolts(float vfactor,float thfactor);
-//void getVolts(float vfactor,float thfactor,float* vt,float* th) ;
-void getVolts(float vfactor,float thfactor,uint16_t* vt,int16_t* th);
+void getVT(float vfactor,float thfactor,uint16_t* vt,int16_t* th);
 uint16_t adcRead0(uint8_t admuxval,uint8_t dly);
 float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_t dly);
 

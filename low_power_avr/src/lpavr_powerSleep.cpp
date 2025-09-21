@@ -233,7 +233,7 @@ uint16_t adcRead0(uint8_t admuxval,uint8_t dly)      // dly=1 if ADC halted
     ADCSRA |= (1<<ADEN);                    // ADC enable to write ADMUX
     ADMUX   = admuxval;
 
-    delayMicroseconds(10);                  
+    delayMicroseconds(100);                  
 
     ADCSRA  = 0 | (1<<ADEN) | (1<<ADIF) | (1<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);   // ADC enable + start conversion + prescaler /16
     ADCSRA  |= (1<<ADSC);
@@ -256,28 +256,7 @@ float adcRead(uint8_t admuxval,float factor, uint16_t offset, uint8_t ref,uint8_
   return (float)((adcRead0(admuxval,dly)*factor-(offset))+ref);
 }
 
-/*void getVolts(float vfactor,float thfactor,float* vt,float* th)         // get unregulated voltage/temp and reset watchdog for external timer period 
-{
-  checkOn();
-
-  sleepStdby(1);                                    // mosfet & mcp9700 1mS settling time
-
-  if(vfactor==0){vfactor=VFACTOR;}
-  *vt=adcRead(VADMUXVAL,vfactor,0,0,1);
-  if(*vt<=lowPowerValue){lowPower=true;}
-
-#ifndef DS18X20
-  //Serial.print(thfactor*1000);
-  if(thfactor==0){thfactor=TFACTOR;}
-  //delayMicroseconds(1000);                        // mcp9700 1mS settling time
-  *th=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
-  *th=trunc(*th*10)/10;
-#endif 
-
-  checkOff();
-}*/
-
-void getVolts(float vfactor,float thfactor,uint16_t* vt,int16_t* th)         // get unregulated voltage/temp and reset watchdog for external timer period 
+void getVT(float vfactor,float thfactor,uint16_t* vt,int16_t* th)         // get unregulated voltage/temp and reset watchdog for external timer period 
 {
   checkOn();
 
@@ -301,22 +280,11 @@ void getVolts(float vfactor,float thfactor,uint16_t* vt,int16_t* th)         // 
 
   checkOff();
 }
-/*void getVolts(float vfactor,float thfactor)
-{
-  getVolts(vfactor,thfactor,&volts,&temp);
-}*/
-
-/*void getVolts()
-{
-  getVolts(0,0);
-}*/
 
 void disable_pins()
 {
-
   DDRC = B00000000;PORTC = B00000000;
-
-  }
+}
 
 void sleepPwrDown(uint8_t durat)  /* *** WARNING *** no hardware PowerUp()/down included    */
 {                                 /*       durat=0 to enable external timer (INT0)          */
