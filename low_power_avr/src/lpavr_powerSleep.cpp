@@ -49,7 +49,8 @@ extern LoRaClass radio;
 #endif
 
 extern bool   diags;
-float         volts=0;                           // tension alim (VCC)
+//float         volts=0;                           // tension alim (VCC)
+//uint16_t      volt=0;
 extern bool   lowPower;                          
 extern float  lowPowerValue;                      
 extern float  temp;
@@ -270,12 +271,32 @@ void getVolts(float vfactor,float thfactor,float* vt,float* th)         // get u
   if(thfactor==0){thfactor=TFACTOR;}
   //delayMicroseconds(1000);                        // mcp9700 1mS settling time
   *th=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
-  *th=(float)((int)(temp*10))/10;
+  *th=trunc(*th*10)/10;
 #endif 
 
   checkOff();
 }
 
+void getVolts(float vfactor,float thfactor,uint16_t* vt,int16_t* th)         // get unregulated voltage/temp and reset watchdog for external timer period 
+{
+  checkOn();
+
+  sleepStdby(1);                                    // mosfet & mcp9700 1mS settling time
+
+  if(vfactor==0){vfactor=VFACTOR;}
+  *vt=adcRead(VADMUXVAL,vfactor,0,0,1);
+  if(*vt<=lowPowerValue){lowPower=true;}
+
+#ifndef DS18X20
+  //Serial.print(thfactor*1000);
+  if(thfactor==0){thfactor=TFACTOR;}
+  //delayMicroseconds(1000);                        // mcp9700 1mS settling time
+  *th=adcRead(TADMUXVAL,thfactor,TOFFSET,TREF,1);
+  //*th=trunc(*th*10)/10;
+#endif 
+
+  checkOff();
+}
 /*void getVolts(float vfactor,float thfactor)
 {
   getVolts(vfactor,thfactor,&volts,&temp);
