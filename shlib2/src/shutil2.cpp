@@ -760,6 +760,8 @@ uint8_t getNumCh(char min,char max)
 
 char menuDly(const char* text,const char* chars,uint16_t dly)
 {
+  pinMode(0,INPUT_PULLUP);  // pullup stabilize RX
+
   char c='\0';
   Serial.print(text);
     if(dly==0){
