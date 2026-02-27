@@ -33,6 +33,7 @@ class TFT_Touch
   void setRotation(byte rotation);
 
   int16_t ReadCal(byte param);
+  void _OutputData(byte Data);
 
   uint16_t _hmin, _hmax, _vmin, _vmax, _hres, _vres;
   boolean _axis, _xyswap, _xflip, _yflip;
@@ -51,7 +52,7 @@ class TFT_Touch
   
   void _PulseClock(void);
   uint16_t _ReadData(void);
-  void _OutputData(byte Data);
+  //void _OutputData(byte Data);
   };
 
 #endif
