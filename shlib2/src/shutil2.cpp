@@ -567,6 +567,11 @@ void trigwd(uint32_t durWd)
   }
 }
 
+void trigrst()
+{
+  digitalWrite(pinLed,offLed);
+}
+
 void trigwd()
 {
   trigwd(2);
@@ -733,13 +738,17 @@ void startto(unsigned long* time,uint16_t* to,uint16_t valto)
         //Serial.print("startto=");Serial.print(*time);Serial.print(" to=");Serial.print(*to);Serial.print(" valto=");Serial.println(valto);
 }
 
-char getCh()
+char getCh(bool p)
 {
     char c='\0';
-    while(!Serial.available()){}
+    while(!Serial.available()){trigwd();delay(100);}
     c=Serial.read();
-    Serial.println((char)c);delayMicroseconds(200);
+    if(p){Serial.println((char)c);delayMicroseconds(200);}
     return c;
+}
+
+char getCh(){
+  return getCh(true);
 }
 
 uint8_t getNumCh(char min,char max)
@@ -788,7 +797,7 @@ char menuDly(const char* text,const char* chars,uint16_t dly)
 
 bool diagSetup(unsigned long t_on,uint16_t waiting,char* message){
   Serial.print(message);
-  while((millis()-t_on)<waiting){Serial.print(".");delay(500);
+  while((millis()-t_on)<waiting){Serial.print(".");delay(500);trigwd();
     if(Serial.available()){Serial.read();Serial.print('!');return true;}}
   return false;
 }

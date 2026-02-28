@@ -41,6 +41,7 @@ void forceWd();
 void trigwd();
 void trigwd(uint32_t dur);
 void trigDly(uint32_t dur);
+void trigrst();
 void ledblink(int nbBlink,uint8_t pulseBlink);
 void blink(uint8_t nb);
 void initLed(uint32_t led,bool ledlow,bool ledhigh);
@@ -57,6 +58,7 @@ bool ctlto(unsigned long time,uint16_t to);
 void startto(unsigned long* time,uint16_t* to,uint16_t valto);
 //uint8_t getNumCh();
 uint8_t getNumCh(char min,char max);
+char getCh(bool p);
 char getCh();
 
 #ifndef NOCONFSER
