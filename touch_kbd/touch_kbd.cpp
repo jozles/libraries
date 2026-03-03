@@ -6,6 +6,9 @@
 
 extern TFT_eSPI my_lcd;
 
+char* kbd=nullptr;
+char kbd1[]={"0123456789AZERTYUIOPQSDFGHJKLM_WXCVBN?___ !_"};
+
 TKbd::TKbd(){
     keyNb=0;
     kXPos=nullptr;
@@ -47,6 +50,8 @@ void TKbd::showKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear){
         uint16_t bkh=hk/keyLines;
         uint16_t ox=xk;
         uint16_t oy=yk;
+        uint8_t kptr=0;
+        uint8_t dx=10,dy=4;
 
         for(uint8_t l=0;l<keyLines;l++){
             uint8_t cx=keyCol;
@@ -54,29 +59,48 @@ void TKbd::showKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear){
                 case 0:
                 case 1: 
                 case 2: ox=xk;
-                        for(uint8_t c=0;c<keyCol;c++){my_lcd.drawRoundRect(ox+c*bkw,oy,bkw,bkh,2, WHITE);}
+                        for(uint8_t c=0;c<keyCol;c++){
+                            my_lcd.drawRoundRect(ox+c*bkw,oy,bkw,bkh,2, WHITE);
+                            my_lcd.drawChar(kbd1[kptr],ox+c*bkw+dx,oy+dy,2);
+                            kptr++;
+                        }
                         oy+=bkh;        
                         break;
                 case 3: ox=xk;
                         my_lcd.drawRoundRect(ox,oy,bkw*1.5,bkh,2,WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);
+                        kptr++;                        
                         ox+=bkw*1.5;
                         for(uint8_t c=0;c<keyCol-3;c++){
                             my_lcd.drawRoundRect(ox,oy,bkw,bkh,2, WHITE);
+                            my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);
+                            kptr++;                            
                             ox+=bkw;
                         }
                         my_lcd.drawRoundRect(ox,oy,bkw*1.5,bkh,2,WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);
+                        kptr++;                        
                         oy+=bkh;        
                         break;
                 case 4: ox=xk;
                         my_lcd.drawRoundRect(ox,oy,bkw*1.5,bkh,2,WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);
+                        kptr++;                        
                         ox+=bkw*1.5;
                         my_lcd.drawRoundRect(ox,oy,bkw,bkh,2, WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+1,2);
+                        kptr++;                        
                         ox+=bkw;
                         my_lcd.drawRoundRect(ox,oy,bkw*5,bkh,2, WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);
+                        kptr++;                        
                         ox+=bkw*5;
                         my_lcd.drawRoundRect(ox,oy,bkw,bkh,2, WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);
+                        kptr++;                        
                         ox+=bkw;
                         my_lcd.drawRoundRect(ox,oy,bkw*1.5,bkh,2,WHITE);
+                        my_lcd.drawChar(kbd1[kptr],ox+dx,oy+dy,2);                        
                 default: break;                        
             }
             
