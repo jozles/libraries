@@ -15,6 +15,9 @@
 #define KEY_SPACE   0x03
 #define KEY_123     0x04
 #define KEY_abc     0x05
+#define KEY_Valid   0x00
+#define KEY_Modif   0x01
+#define KEY_Aband   0x02
 #define KEY_TIMOUT  0x1f
 
 #define SPACE 0x20
@@ -23,20 +26,15 @@ class TKbd
 {
     public:
         TKbd();
-        uint16_t* kXPos;
-        uint16_t* kYPos;
-        uint16_t* kWidth;
-        uint16_t* kHeight;
-        uint8_t*  kTxt;
-        uint8_t*  kCTxt;
-        uint8_t   kCTl;
 
         uint8_t keyNb;
-        char* kbd;
+        char* currkbd;
         
-        void init(uint8_t kn,uint16_t* kxp,uint16_t* kyp,uint16_t* kw,uint16_t* kh,uint8_t* kt,uint8_t* kct,uint8_t kctl);
-        void showKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool clear);
+        void init(uint8_t keyNb);
+        void showKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool clear,char* kbd,uint8_t keyLines,uint8_t keyCol,char* ksc,uint8_t skl);
         char getKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear);
+        char getKbd0(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear,char* kbd,uint8_t lines,uint8_t cols,char* ksc,uint8_t skl);
+        char getVma();
 
 };
 
