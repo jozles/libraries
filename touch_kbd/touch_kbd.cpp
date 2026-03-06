@@ -26,6 +26,10 @@ char kbdV[MAX_KEY_NB];
 char kbdVma[]={KEY_Valid,KEY_Modif,KEY_Aband};
 char* kSvma={"   Valider\0  Modifier\0Abandonner\0"};
 
+#define ON_KEY_LEN 11
+char kbdON[]={KEY_OUI,KEY_NON};
+char* kSON={"       OUI\0       NON\0"};
+
 uint16_t xp[MAX_KEY_NB];
 uint16_t yp[MAX_KEY_NB];
 uint16_t wp[MAX_KEY_NB];
@@ -179,6 +183,17 @@ void TKbd::showKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear,c
         }
         keyNb=kptr;
 
+}
+
+char TKbd::getOuiNon(){
+
+    char c=getKbd0(20,150,240,30,NEW_KBD,kbdON,1,2,kSON,ON_KEY_LEN);
+    printf("c:%d\n",c);
+    switch(c){
+        case KEY_OUI:return 'O';
+        case KEY_NON:return 'N';
+        default:return 'N';
+    }
 }
 
 char TKbd::getVma(){

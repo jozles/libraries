@@ -18,6 +18,8 @@
 #define KEY_Valid   0x00
 #define KEY_Modif   0x01
 #define KEY_Aband   0x02
+#define KEY_OUI     0x00
+#define KEY_NON     0x01
 #define KEY_TIMOUT  0x1f
 
 #define SPACE 0x20
@@ -35,6 +37,7 @@ class TKbd
         char getKbd(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear);
         char getKbd0(uint16_t xk,uint16_t yk,uint16_t wk,uint16_t hk,bool kclear,char* kbd,uint8_t lines,uint8_t cols,char* ksc,uint8_t skl);
         char getVma();
+        char getOuiNon();     
 
 };
 
